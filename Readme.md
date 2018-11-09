@@ -37,7 +37,7 @@ The hard-and software setup was inspired by [ModMyPi](https://www.modmypi.com/bl
 ## Hardware setup<a name="hardware"></a>
 ### Material
 
-![parts](doc/parts overview.png)
+![parts](doc/parts overview.jpg)
 
 * Raspberrypi 2 or 3 Model B
 * SD card with at least 2GB capacity
@@ -53,7 +53,7 @@ The hard-and software setup was inspired by [ModMyPi](https://www.modmypi.com/bl
 ### Assembly
 All soldering points should be insulated with individual shrink-on tubings. Then
 add one large shrink-on tubing around to protect and keep the wires together.
-1. Connect one of the 3-pin plugs to the raspi (see [picture connect][]):
+1. Connect one of the 3-pin plugs to the raspi (see [picture connect](#connect-to-raspi):
   1. wire 1 (black) to ground (PIN9 on the [Raspi GPIO pins](https://pinout.xyz))
   * wire 2 (brown) to BCM4/GPIO4 (PIN 7)
   * wire 3 (red) to 3.3V Power (PIN 1)
@@ -71,7 +71,7 @@ add one large shrink-on tubing around to protect and keep the wires together.
   * brown to pin 2
   * red to pin 3 
 
-[picture connect]: ![connect to raspi](doc/connect to raspi.jpg)
+#### Connect to Raspi ![connect to raspi](doc/connect to raspi.jpg)
 [picture sensor pinout]: ![sensor pinout](doc/sensor pinout.png)
 [picture assembled sensor]: ![assembled sensor](doc/assembled sensor.jpg)
 
