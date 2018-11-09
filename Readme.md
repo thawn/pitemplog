@@ -173,14 +173,14 @@ In this case we deploy from a separate machine. That way, we don't need to insta
 1. The following steps can be skipped if you don't want to create an image:
    1. Make sure the filesystem is resized to fill the entire sd card at next reboot: `sudo /usr/local/share/templog/_sbin/resize_root.sh`
    1. Overwrite free space with zeros to reduce the image file size later:
-```bash
-sudo -s
-dd if=/dev/zero of=zero.small.file bs=1024 count=102400
-cat /dev/zero > zero.file
-sync
-rm zero.small.file
-rm zero.file
-```
+   ```bash
+   sudo -s
+   dd if=/dev/zero of=zero.small.file bs=1024 count=102400
+   cat /dev/zero > zero.file
+   sync
+   rm zero.small.file
+   rm zero.file
+   ```
    1. Disable ssh: `sudo update-rc.d ssh disable`.
    1. Shutdown the raspi: `sudo halt`.
    1. Connect the sd card to your development machine.
