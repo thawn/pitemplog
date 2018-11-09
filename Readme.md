@@ -22,6 +22,9 @@ Jump directly to:
 * Flexible and easy setup of data sharing between several raspi sensor hubs so that all data can be visualized via one web frontend and data is backed up between several raspberry pi systems.
 * Backup of data and configuration via rsync to centralized server possible with minimal configuration effort via backup scripts.
 
+## ToDo
+ - [ ] Add support for vibration sensors
+
 ### Screen shots
 
 #### Overview Page for Multiple Sensors
