@@ -133,7 +133,7 @@ Jump directly to:
 dtoverlay=w1-gpio,gpiopin=4,pullup=on
 max_usb_current=1
 ```
-1. Configure at the following settings using `sudo raspi-config`:
+7. Configure at the following settings using `sudo raspi-config`:
    * password (`Change User Passowrd`; !!!this is important!!!)
    * hostname (`Network Options`)
    * locale and timezone (`Localisation Options`)
