@@ -58,7 +58,7 @@ add one large shrink-on tubing around to protect and keep the wires together.
   * wire 2 (brown) to BCM4/GPIO4 (PIN 7)
   * wire 3 (red) to 3.3V Power (PIN 1)
 * Add the 4.7K Ohm resistor between 3.3V and BCM4/GPIO4 (PIN1 and PIN7) ![connect to raspi](doc/connect to raspi.jpg)
-* Solder the wires of the cable to the thermometer. In this example, the cable has white green and red wires. For example: ![sensor pinout](sensor pinout.png)
+* Solder the wires of the cable to the thermometer. In this example, the cable has white green and red wires. For example: ![sensor pinout](doc/sensor pinout.png)
   1. white to pin 1: GND
   * green to pin 2: DQ
   * red to pin 3: V<sub>DD</sub>
