@@ -81,6 +81,16 @@ add one large shrink-on tubing around to protect and keep the wires together.
    2. brown to pin 2
    2. red to pin 3 
 
+Now you can connect many thermometers to the raspi as each thermometer will add
+its own plug such that all thermometers are connected in parallel.
+Theoretically, you can add as many thermometers as you like (at least several
+tens of thermometers should work) and the cables can be tens or even more than a
+hundred meters long. In my setup I successfully tested up to 5 thermometers with
+a total of 50 meters of cable. However, at some point too much cable will
+deteriorate the signal so much that thermometers are not found any more or
+randomly disappear. See [here for recommendations on setting up large sensor networks](https://www.maximintegrated.com/en/app-notes/index.mvp/id/148).
+Check out the [picture of the final assembly](#final-assembly).
+
 #### Connect to Raspi
 ![connect to raspi](doc/connect to raspi.jpg)
 
@@ -89,16 +99,6 @@ add one large shrink-on tubing around to protect and keep the wires together.
 
 #### Assembled Sensor
 ![assembled sensor](doc/assembled sensor.jpg)
-
-Now you can connect many thermometers to the raspi as each thermometer will add
-its own plug such that all thermometers are connected in parallel.
-Theoretically, you can add as many thermometers as you like (at least several
-tens of thermometers should work) and the cables can be tens or even more than a
-hundred meters long. In my setup I successfully tested up to 5 thermometers with
-a total of 50 meters of cable. However, at some point too much cable will
-deteriorate the signal so much that thermometers are not found any more or
-randomly disappear. See [here for recommendations on setting up large sensor
-networks](https://www.maximintegrated.com/en/app-notes/index.mvp/id/148).
 
 #### Final Assembly
 ![final assembly](doc/final assembly.jpg)
