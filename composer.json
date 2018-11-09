@@ -1,0 +1,11 @@
+{
+	"autoload" : {
+		"psr-4" : {
+			"Diezlab\\Temperatures\\" : "src"
+		}
+	},
+	"name" : "Diezlab/temperatures",
+	"require" : {
+		"php" : ">=7.1"
+	}
+}

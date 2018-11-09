@@ -1,0 +1,3 @@
+[mysqld]
+datadir = /mnt/usb1/mysql
+tmpdir = /mnt/usb1/tmp

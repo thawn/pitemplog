@@ -1,0 +1,6 @@
+AuthUserFile /usr/local/share/templog/_safe/.htpasswd
+AuthGroupFile /dev/null
+AuthName EnterPassword
+AuthType Basic
+
+require user diezlab

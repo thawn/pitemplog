@@ -1,0 +1,256 @@
+/* GLOBAL STYLES
+-------------------------------------------------- */
+/* Padding below the footer and lighter body text */
+
+body {
+  padding-bottom: 40px;
+  color: #5a5a5a;
+}
+
+/* CUSTOMIZE THE DATEPICKER
+-------------------------------------------------- */
+
+/* The datepicker should always be on top. */
+.datepicker {
+  position: relative;
+  z-index: 999;
+}
+
+/* Adjust the margin of elements within the input-daterange because we cannot use form-groups inside. */
+
+.input-daterange.datepicker > input,
+.input-daterange.datepicker > select {
+  margin-bottom: 15px;
+}
+
+/* fix text-something and bg-something helper classes not working for form-control items */
+
+.text-muted.form-control {
+  color: #777;
+}
+.text-primary.form-control {
+  color: #337ab7;
+}
+.text-success.form-control {
+  color: #3c763d;
+}
+.text-info.form-control {
+  color: #31708f;
+}
+.text-warning.form-control {
+  color: #8a6d3b;
+}
+.text-danger.form-control {
+  color: #a94442;
+}
+
+.bg-primary.form-control {
+  color: #fff;
+  background-color: #337ab7;
+}
+.bg-success.form-control {
+  background-color: #dff0d8;
+}
+.bg-info.form-control {
+  background-color: #d9edf7;
+}
+.bg-warning.form-control {
+  background-color: #fcf8e3;
+}
+.bg-danger.form-control {
+  background-color: #f2dede;
+}
+
+/* make it possible to have an individual form control displayed inline */
+.form-control-inline {
+  width: auto;
+  display: inline-block;
+}
+
+/* to make sure the button texts fit for medium devices, we can add text-md-small to the class to make the text shrink for medium devices. Below the columns become rows and we have enough space again. */
+@media (min-width: 992px) {
+  .text-md-small {
+    font-size: 85%;
+  }
+}
+
+@media (min-width: 1200px) {
+  .text-md-small {
+    font-size: inherit;
+  }
+}
+
+/* CUSTOMIZE THE NAVBAR
+-------------------------------------------------- */
+
+/* Special class on .container surrounding .navbar, used for positioning it into place. */
+.navbar-wrapper {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 20;
+}
+
+/* Flip around the padding for proper display in narrow viewports */
+.navbar-wrapper > .container {
+  padding-right: 0;
+  padding-left: 0;
+}
+.navbar-wrapper .navbar {
+  padding-right: 15px;
+  padding-left: 15px;
+}
+.navbar-wrapper .navbar .container {
+  width: auto;
+}
+
+/* CUSTOMIZE THE side Navigation
+-------------------------------------------------- */
+
+ul#menu>li>a {
+  padding: 5px 15px;
+}
+/*nav.sidebar ul.level1 ul.level2 {
+  display: none;
+}
+nav.sidebar ul.level1 > li:focus > ul.level2, nav.sidebar ul.level1 > li.active > ul.level2 {
+  display: block;
+}*/
+ul#menu > li > ul {
+  display: none;
+}
+ul#menu ul>li>a {
+  padding: 1px 15px;
+}
+
+/* CUSTOMIZE THE CAROUSEL
+-------------------------------------------------- */
+
+/* Carousel base class */
+.carousel {
+  height: 530px;
+  margin-bottom: 60px;
+}
+/* Since positioning the image, we need to help out the caption */
+.carousel-caption {
+  /*z-index: 10;*/
+}
+
+/* Declare heights because of positioning of img element */
+.carousel .item {
+  height: 530px;
+  background-color: #777;
+}
+.carousel-inner > .item > img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: 100%;
+  height: 530px;
+}
+
+
+/* AMCHART CHARTS
+-------------------------------------------------- */
+
+/* formatting the div for the charts */
+.chartdiv {
+  width: 100%;
+  height: 400px;
+  margin: 10px 0px;
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px #dddddd;
+  position: relative;
+  /*z-index:11;*/
+}
+/* charts in the carousel should appear different*/
+.carouselchart {
+  background: #3f3f4f;
+  color: #ffffff;
+  top: 90px;
+  margin-top: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 70%;
+  position: relative;
+  height: 300px;
+}
+
+.error {
+   color: #FF0000;
+}
+.bottom-buffer {
+  padding-bottom: 15px;
+}
+/* MARKETING CONTENT
+-------------------------------------------------- */
+
+/* Center align the text within the three columns below the carousel */
+.marketing .col-lg-4 {
+  margin-bottom: 20px;
+  text-align: center;
+}
+.marketing h2 {
+  font-weight: normal;
+}
+.marketing .col-lg-4 p {
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+
+/* Featurettes
+------------------------- */
+
+.featurette-divider {
+  margin: 80px 0; /* Space out the Bootstrap <hr> more */
+}
+
+/* Thin out the marketing headings */
+.featurette-heading {
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+
+/* RESPONSIVE CSS
+-------------------------------------------------- */
+
+@media (min-width: 768px) {
+  /* Navbar positioning foo */
+  .navbar-wrapper {
+    margin-top: 20px;
+  }
+  .navbar-wrapper .container {
+    padding-right: 15px;
+    padding-left: 15px;
+  }
+  .navbar-wrapper .navbar {
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  /* The navbar becomes detached from the top, so we round the corners */
+  .navbar-wrapper .navbar {
+    border-radius: 4px;
+  }
+
+  /* Bump up size of carousel content */
+  .carousel-caption p {
+    margin-bottom: 20px;
+    font-size: 21px;
+    line-height: 1.4;
+  }
+
+  .featurette-heading {
+    font-size: 50px;
+  }
+}
+
+@media (min-width: 992px) {
+  .featurette-heading {
+    margin-top: 120px;
+  }
+}

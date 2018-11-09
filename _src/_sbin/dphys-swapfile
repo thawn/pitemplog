@@ -1,0 +1,2 @@
+CONF_SWAPSIZE=100
+CONF_SWAPFILE=/mnt/usb1/swap

@@ -1,0 +1,33 @@
+    <div class="navbar-wrapper">
+      <div class="container">
+        <nav class="navbar navbar-inverse navbar-static-top" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" href="#">Microscope temperatures</a>
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+              <ul class="nav navbar-nav">
+                <li{% capture index %}{{ site.baseurl }}/index.html{% endcapture %}{% if page.url == index %} class="active"{% endif %}><a href="{{ site.baseurl }}/index.html"><span class="glyphicon glyphicon-home"></span> Home</a></li>
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Select Microscope <span class="caret"></span></a>
+                  <ul class="dropdown-menu" role="menu">{% for category in site.categories %}{% unless category[0] == 'archive' or category[0] == "jekyll" or category[0] == "update" or category[0] contains "year" %}
+                    <li class="dropdown-header">{{ category[0] }}</li>{% for post in category[1] %}{% unless post.categories contains "archive" %}
+                      <li{% if post.title == page.title %} class="active"{% endif %}><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></li>{% endunless %}{% endfor %}{% unless forloop.last %}
+                    <li class="divider"></li>{% endunless %}{% endunless %}{% endfor %}
+                  </ul>
+                </li>
+              </ul>
+              <ul class="nav navbar-nav navbar-right">
+                <li{% capture conf %}{{ site.baseurl }}/conf/conf.php{% endcapture %}{% if page.url == conf %} class="active"{% endif %}><a href="{{ site.baseurl }}/conf/conf.php"><span class="glyphicon glyphicon-cog"></span> Configuration</a></li>
+              </ul>
+            </div>
+          </div>
+        </nav>
+      </div>
+    </div>

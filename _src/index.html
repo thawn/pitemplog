@@ -1,0 +1,96 @@
+---
+layout: default
+title: Temperature overview
+---
+{% unless site.data.config contains "database" %}<script>window.location = "{{ site.baseurl }}/conf/conf.php";</script>{% endunless %}
+    <!-- Carousel
+    ================================================== -->
+    <div id="myCarousel" class="carousel slide" data-ride="carousel">
+      <!-- Indicators -->
+      <ol class="carousel-indicators">{% for sensor in site.data.config %}{% if sensor[0] != "database" %}{% unless sensor[1].enabled == "false" %}
+        <li data-target="#myCarousel" data-slide-to="{{ forloop.index | minus: 2}}"{% if forloop.index == 2 %} class="active"{% endif %}></li>{% endunless %}{% endif %}{% endfor %}
+      </ol>
+      <div class="carousel-inner" role="listbox">{% for sensor in site.data.config %}{% if sensor[0] != "database" %}{% unless sensor[1].enabled == "false" %}
+        <div class="item{% if forloop.index == 2 %} active{% endif %}">
+          <div class="container">
+            <div id="dark{{ sensor[0] }}" class="chartdiv carouselchart"></div>
+            <div class="carousel-caption">
+              <h1>{{ sensor[1].name }} <a class="btn btn-lg btn-info" href="{% for post in site.posts %}{% unless post.categories contains "archive" %}{% if post.table == sensor[1].table %}{{site.baseurl}}{{post.url}}{% endif %}{% endunless %}{% endfor %}" role="button">More data...</a></h1>
+            </div>
+          </div>
+        </div>{% endunless %}{% endif %}{% endfor %}
+      </div>
+      <a class="left carousel-control" href="#myCarousel" role="button" data-slide="prev">
+        <span class="glyphicon glyphicon-chevron-left"></span>
+        <span class="sr-only">Previous</span>
+      </a>
+      <a class="right carousel-control" href="#myCarousel" role="button" data-slide="next">
+        <span class="glyphicon glyphicon-chevron-right"></span>
+        <span class="sr-only">Next</span>
+      </a>
+    </div><!-- /.carousel -->
+
+<!--<span class="post-meta">{{ sensor[1].firsttime | date: "%b %-d, %Y; %T" }}</span>
+-->
+    <div class="container marketing">
+      <div class="container center-block">
+        <h1>Today's temperatures</h1>
+        {% include chart-instructions.html %}
+      </div>{% for sensor in site.data.config %}{% if sensor[0] != "database" %}{% unless sensor[1].enabled == "false" %}    
+      {% cycle 'twocolumnStart': '<div class="row bottom-buffer" style="border-bottom: 1px solid #ddd">', '' %}
+        <!-- chart container -->
+        <div class="col-md-6">
+          <h2>{{ sensor[1].name }} today</h2>
+          <div id="{{ sensor[0] }}" class="chartdiv"></div>
+          <button class="btn btn-primary text-md-small"
+                  onclick="exportToCsv('{{ sensor[1].table }}.csv',
+                                       chartData{{ sensor[1].table }}.slice(chart{{ sensor[1].table }}.start, chart{{ sensor[1].table }}.end))"
+                  data-toggle="tooltip" data-placement="top" title="Save the data shown in the graph above as CSV"
+                  >Save visible data as CSV</button>
+          
+          <a class="btn btn-info pull-right text-md-small"
+             href="{% for post in site.posts %}{% unless post.categories contains "archive" %}{% if post.table == sensor[1].table %}{{site.baseurl}}{{post.url}}{% endif %}{% endunless %}{% endfor %}"
+             role="button"
+             >More data for {{ sensor[1].name }}...</a>
+        </div><!-- /.col-md-6 -->
+      {% cycle 'twocolumnEnd': '', '</div><!-- /.row -->' %}{% endunless %}{% endif %}{% endfor %}
+    </div>
+    
+    {% include js.html %}
+    <!-- the chart code -->
+    <script>
+      // load the data
+      var end=new Date();
+      var pathToImg = "{{ site.baseurl }}/assets/img/amcharts/";
+      var start = new Date(end.getTime()-(3600000*3)); //show data for the last three hours in the carousel graphs
+      {% for sensor in site.data.config %}{% if sensor[0] != "database" %}{% unless sensor[1].enabled == "false" %}
+      var chartData{{ sensor[1].table }} = AmCharts.loadJSON('{{ site.baseurl }}/data.php?table={{ sensor[1].table }}');
+      var chart{{ sensor[1].table }} = AmCharts.makeChart("{{ sensor[0] }}", makeChart("none", chartData{{ sensor[1].table }}, true, pathToImg));
+      chart{{ sensor[1].table }}.addListener("dataUpdated", function(e){zoomChart(0,0,e.chart);});
+      // when we apply theme, the dataUpdated event is fired even before we add listener, so
+      // we need to call zoomChart here
+      zoomChart(0,0,chart{{ sensor[1].table }});
+      // this method is called when chart is first inited as we listen for "dataUpdated" event
+      var chartDark{{ sensor[1].table }} = AmCharts.makeChart("dark{{ sensor[0] }}", makeChart("dark", chartData{{ sensor[1].table }}, false, pathToImg));
+      chartDark{{ sensor[1].table }}.addListener("dataUpdated", function(e){zoomChart(start, end, e.chart);});
+      // when we apply theme, the dataUpdated event is fired even before we add listener, so
+      // we need to call zoomChart here
+      zoomChart(start, end, chartDark{{ sensor[1].table }});
+      {% endunless %}{% endif %}{% endfor %}
+      // this method is called when chart is first inited as we listen for "dataUpdated" event
+      function zoomChart(start, end, chartObj) {
+        // different zoom methods can be used - zoomToIndexes, zoomToDates, zoomToCategoryValues
+        //console.log(chartObj);
+        if (start) {
+          chartObj.zoomToDates(start, end);
+        }
+      }
+
+      $('#myCarousel').on('slid.bs.carousel', function(e){
+        //console.log($($(e.relatedTarget).find('.chartdiv'))[0].id);
+        {% for sensor in site.data.config %}{% if sensor[0] != "database" %}
+        chartDark{{ sensor[1].table }}.handleResize();
+        {% endif %}{% endfor %} 
+      });
+
+    </script>

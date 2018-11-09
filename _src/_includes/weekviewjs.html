@@ -1,0 +1,216 @@
+    <!-- Carousel
+    ================================================== -->
+    <div id="myCarousel" class="carousel slide" data-ride="carousel">
+    </div><!-- /.carousel -->
+
+    <div class="container">
+      <div class="row">
+        <div class="col-md-9">
+          <h1>{{ page.title }}: weekly overview</h1>
+          <!-- chart container -->
+          <div id="chart{{ page.table }}" class="chartdiv" style="height:500;"></div>
+          <button class="btn btn-primary"
+                  onclick="exportToCsv('{{ page.table }}.csv',
+                                       chart{{ page.table }}.dataProvider.slice(chart{{ page.table }}.start, chart{{ page.table }}.end))"
+                  data-toggle="tooltip" data-placement="top" title="Save the data shown in the graph above as CSV"
+                  >Save visible data as CSV</button>
+          {% include chart-instructions.html %}
+        </div><!-- /.col-md-9 -->
+        <div class="col-md-3">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">Choose dates to view:</h3>
+            </div>
+            <div class="panel-body">
+              <div class="form" role="form">
+                <div class="form-group datepicker input-daterange">
+                  <label for="startDate" class="control-label">From:</label>
+                  <input type="text" class="form-control" id="startDate" name="start">
+                  <label for="endDate" class="control-label">to:</label>
+                  <input type="text" class="form-control" id="endDate" name="end">
+                  <label for="aggregate" class="control-label">Time resolution:</label>
+                  <select class="form-control" name="aggregate" id="aggregate" onchange="this.className=this.options[this.selectedIndex].className">
+                    <option value="_1min" class="text-danger form-control">1min (slow!)</option>
+                    <option value="_5min" class="form-control">5min</option>
+                    <option value="_15min" class="form-control" selected="selected">15min</option>
+                    <option value="_60min" class="form-control">60min</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <button type="button" class="btn btn-warning form-control text-md-small" id="updateChart"
+                          data-loading-text="Loading..." autocomplete="off"
+                          data-toggle="tooltip" data-placement="top" title="Update Graph with the selected parameters"
+                          >Update Graph</button>
+                </div>
+                <div class="form-group">
+                  <button class="btn btn-primary form-control text-md-small" id="exportToCsv"
+                          data-loading-text="Loading..." autocomplete="off"
+                          data-toggle="tooltip" data-placement="top" title="Save selected data as CSV"
+                          >Save selected data as CSV</button>
+                  <div class="hidden safari-only">Once the data is displayed, press '&#8984;+s'</div>
+                </div>  
+                <div class="form-group">
+                  <label for="exportAllToCsv" class="control-label small">Ignore the dates and save all data with the selected time resolution (may take a while):</label>
+                  <button class="btn btn-danger form-control text-md-small" id="exportAllToCsv"
+                          data-loading-text="Loading..." autocomplete="off"
+                          data-toggle="tooltip" data-placement="top" title="Ignore the dates and save all data for {{ page.table | upcase }} with the selected time resolution as CSV (may take a while)"
+                          >Save all data for {{ page.table | upcase }} as CSV</button>
+                  <div class="hidden safari-only">Once the data is displayed, press '&#8984;+s'</div>
+                </div>  
+              </div>
+            </div>
+          </div><!-- /.well -->
+        </div><!-- /.col-md-3 -->
+      </div><!-- /.row -->
+    </div><!-- /.container -->
+    <script>
+      var weekdays = ["Null","Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+      var today = now.getDay();
+      if (today==0) {today=7;}
+      var offset = 86400 * today;
+      var html='<ol class="carousel-indicators">';
+      for (day = 1; day <= today; day++) {
+        html += '\n\
+        <li data-target="#myCarousel" data-slide-to="'+(day-1).toString()+'"';
+        if (day == 1) {
+          html += ' class="active"';
+        }
+        html += '></li>';
+      }
+      html += '\n\
+      </ol>\n\
+      <div class="carousel-inner" role="listbox">';
+      for (day = 1; day <= today; day++) {
+        html += '<div class="item';
+        if (day == 1) {
+          html += ' active';
+        }
+        html += '">\
+          <div class="container">\n\
+            <div id="carousel'+day.toString()+'" class="chartdiv carouselchart"></div>\n\
+            <div class="carousel-caption">\n\
+              <h1>{{page.title}}: '+weekdays[day]+'</h1>\n\
+            </div>\n\
+          </div>\n\
+        </div>';
+      }
+      html += '\n\
+      </div>\n\
+      <a class="left carousel-control" href="#myCarousel" role="button" data-slide="prev">\n\
+        <span class="glyphicon glyphicon-chevron-left"></span>\n\
+        <span class="sr-only">Previous</span>\n\
+      </a>\n\
+      <a class="right carousel-control" href="#myCarousel" role="button" data-slide="next">\n\
+        <span class="glyphicon glyphicon-chevron-right"></span>\n\
+        <span class="sr-only">Next</span>\n\
+      </a>';
+      //html=today.toString();
+      document.getElementById("myCarousel").innerHTML=html;
+    </script>
+    
+    
+{% include js.html %}
+    <!-- the chart code -->
+    <script>
+      // load the data
+      var chartData{{ page.table }} =
+          AmCharts.loadJSON('{{ site.baseurl }}/data.php?table={{ page.table }}'
+                            +'&start='+(Math.floor((now.getTime()/1000)-offset)).toString()
+                            +'&end='+(Math.floor(now.getTime()/1000)).toString()
+                            +'&aggregate=_15min');
+      var pathToImg = "{{ site.baseurl }}/assets/img/amcharts/";
+      var referencetime = (((now.getTime()/1000))-offset)*1000;
+      //console.log(new Date(referencetime));
+      var chart= [];
+      var start=[];
+      var end=[];
+      var d=0;
+      for (var day = 0; day < today; day++) {
+        chart[day] = AmCharts.makeChart("carousel"+(day+1).toString(), makeChart("dark", chartData{{ page.table }}, false, pathToImg));
+        start[day] = new Date(referencetime+(86400000*(day)));
+        end[day] = new Date(referencetime+(86400000*(day+1)-900000));
+      (function () {
+        var d=day;
+        chart[day].addListener("dataUpdated", function(){zoomChart(start[d],end[d],chart[d]);});
+      }())
+      }
+      var chart{{ page.table }} = AmCharts.makeChart("chart{{ page.table }}", makeChart("none", chartData{{ page.table }}, true, pathToImg));
+
+      // this method is called when chart is first inited as we listen for "dataUpdated" event
+      function zoomChart(start, end, chartObj) {
+        // different zoom methods can be used - zoomToIndexes, zoomToDates, zoomToCategoryValues
+        //console.log(chartObj);
+        if (start) {
+          chartObj.zoomToDates(start, end);
+        }
+      }
+
+      $('#myCarousel').on('slid.bs.carousel', function(e){
+        for (day = 0; day < today; day++) {
+          chart[day].handleResize();
+        } 
+      });
+      
+      $('#updateChart').click( function () {
+        var btn=$('#updateChart').button('loading');
+        var request = $.ajax('/');
+        request.done(function (data) {
+          var data = AmCharts.loadJSON('{{ site.baseurl }}/data.php?table={{ page.table }}'
+                                      +'&start='+(Math.floor((new Date(document.getElementById('startDate').value)).getTime()/1000)).toString()
+                                      +'&end='+(Math.floor((new Date(document.getElementById('endDate').value)).getTime()/1000)+86400).toString()
+                                      +'&aggregate='+document.getElementById('aggregate').value);
+          chart{{ page.table }}.dataProvider = data;
+          chart{{ page.table }}.validateData();
+        });
+        request.always(function () {
+          btn.button('reset');
+        });
+      });
+      
+      $('#exportToCsv').click( function () {
+        var $btn=$('#exportToCsv').button('loading');
+        var request = $.ajax('/');
+        request.done(function (data) {
+          var data = AmCharts.loadJSON('{{ site.baseurl }}/data.php?table={{ page.table }}'
+                    +'&start='+(Math.floor((new Date(document.getElementById('startDate').value)).getTime()/1000)).toString()
+                    +'&end='+(Math.floor((new Date(document.getElementById('endDate').value)).getTime()/1000)+86400).toString()
+                    +'&aggregate='+document.getElementById('aggregate').value);
+          exportToCsv('{{ page.table }}.csv', data);
+        });
+        request.always(function () {
+          $btn.button('reset');
+        });
+      });
+      
+      $('#exportAllToCsv').on('click', function () {
+        var $btn = $('#exportAllToCsv').button('loading');
+        var request = $.ajax('/');
+        request.done(function (data) {
+          var data = AmCharts.loadJSON('{{ site.baseurl }}/data.php?table={{ page.table }}'
+                    +'&start={% for sensor in site.data.config %}{% if sensor[1].table == page.table %}{{ sensor[1].firsttime }}{% endif %}{% endfor %}'
+                    +'&aggregate='+document.getElementById('aggregate').value);
+          exportToCsv('{{ page.table }}.csv', data);
+        });
+        request.always(function () {
+          $btn.button('reset');
+        });
+      });
+      if (navigator.userAgent.search("Safari") >= 0 && navigator.userAgent.search("Chrome") < 0) {
+        $('.safari-only').addClass("small").removeClass("hidden")
+      }
+    </script>
+    
+    <script>
+      $.fn.datepicker.defaults.format = "yyyy-mm-dd";
+      $.fn.datepicker.defaults.weekStart = 1;
+      $.fn.datepicker.defaults.todayBtn = "linked";
+      $.fn.datepicker.defaults.endDate = "Today";
+      $.fn.datepicker.defaults.calendarWeeks = true;
+      $.fn.datepicker.defaults.autoclose = true;
+      $.fn.datepicker.defaults.startDate = "{% for sensor in site.data.config %}{% if sensor[1].table == page.table %}{{ sensor[1].firsttime | date: "%F" }}{% endif %}{% endfor %}";
+      document.getElementById("startDate").value = new Date(referencetime).toISOString().slice(0, 10);
+      document.getElementById("endDate").value = now.toISOString().slice(0, 10);
+      $('.input-daterange').datepicker({
+        orientation: "bottom auto"
+      });
+    </script>
