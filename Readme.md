@@ -124,7 +124,7 @@ Jump directly to:
 1. Figure out the IP address of the raspi either from your router's web interface or by connecting a monitor to the raspi. It will tell you it's ip address at bootup. With some routers you can also use the hostname `raspberrypi` to connect to the raspi.
 1. Log into the raspi via ssh: `ssh p@<ip address>`
 1. add the following lines to `/boot/config.txt`:
-```
+```bash
 dtoverlay=w1-gpio,gpiopin=4,pullup=on
 max_usb_current=1
 ```
@@ -168,7 +168,7 @@ In this case we deploy from a separate machine. That way, we don't need to insta
 1. The following steps can be skipped if you don't want to create an image:
    1. Make sure the filesystem is resized to fill the entire sd card at next reboot: `sudo /usr/local/share/templog/_sbin/resize_root.sh`
    1. Overwrite free space with zeros to reduce the image file size later:
-```
+```bash
 sudo -s
 dd if=/dev/zero of=zero.small.file bs=1024 count=102400
 cat /dev/zero > zero.file
