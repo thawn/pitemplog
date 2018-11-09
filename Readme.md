@@ -27,21 +27,21 @@ Jump directly to:
 ## ToDo
  - [ ] Add support for vibration sensors
 
-### Screen shots
+## Screen shots
 
-#### Overview Page for Multiple Sensors
+### Overview Page for Multiple Sensors
 ![Overview Page for Multiple Sensors](doc/Overview page.png)
 
-#### Frontend Desktop
+### Frontend Desktop
 ![Frontend Desktop](doc/Example Screen.png)
 
-#### Frontend Mobile
+### Frontend Mobile
 ![Frontend Mobile](doc/Example mobile.png)
 
-#### Frontend Tablet
+### Frontend Tablet
 ![Frontend Tablet](doc/Example Tablet.png)
 
-#### Configuration
+### Configuration
 ![Database and Sensor Configuration](doc/Database and Sensor Configuration.png)
 
 ## Hardware setup<a name="hardware"></a>
