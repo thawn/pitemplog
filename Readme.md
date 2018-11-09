@@ -181,7 +181,7 @@ In this case we deploy from a separate machine. That way, we don't need to insta
    rm zero.small.file
    rm zero.file
    ```
-   1. Disable ssh: `sudo update-rc.d ssh disable`.
+   3. Disable ssh: `sudo update-rc.d ssh disable`.
    1. Shutdown the raspi: `sudo halt`.
    1. Connect the sd card to your development machine.
    1. Shrink the ext4 partition to ~1900MB using gparted (to allow installation on a 2GB sd card).
