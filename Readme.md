@@ -19,6 +19,7 @@ The hard-and software setup was inspired by [ModMyPi](https://www.modmypi.com/bl
 
 ### Screen shots
 
+![Database and Sensor Configuration](doc/Database and Sensor Configuration.png)
 
 ## Hardware setup<a name="hardware"></a>
 ### Material
