@@ -4,6 +4,11 @@ This web app is a frontend intended to run on a raspberry pi equipped with
 temperature sensors that are addressed via the 1 wire protocol.
 The hard-and software setup was inspired by [ModMyPi](https://www.modmypi.com/blog/ds18b20-one-wire-digital-temperature-sensor-and-the-raspberry-pi). Thanks a lot for that great tutorial.
 
+Jump directly to:
+* [Hardware setup](#hardware)
+* [Software installation](#installation)
+* [Configuration](#config)
+
 ## Features
 * Data logged in partitioned mysql database -> fast access even if millions of data points are stored
 * Responsive web frontend based on bootstrap and jQuery -> optimized for desktop and mobile clients
@@ -94,6 +99,13 @@ networks](https://www.maximintegrated.com/en/app-notes/index.mvp/id/148).
 ![final assembly](doc/final assembly.jpg)
 
 ## Installation
+Jump directly to:
+* [Install from image](#install-from-image)
+* [Manual installation](#manual)
+* [Lightweight installation (used for image creation)](#light)
+* [Updating an image with fresh source code](#updating-an-image-with-fresh-source-code)
+* [Dependencies](#deps)
+
 ### Install from image
 1. Download the image.
 1. Flash the image files to the sd card for example using [etcher](https://etcher.io/).
