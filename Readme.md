@@ -54,22 +54,22 @@ The hard-and software setup was inspired by [ModMyPi](https://www.modmypi.com/bl
 All soldering points should be insulated with individual shrink-on tubings. Then
 add one large shrink-on tubing around to protect and keep the wires together.
 1. Connect one of the 3-pin plugs to the raspi (see [picture below](#connect-to-raspi)):
-  1. wire 1 (black) to ground (PIN9 on the [Raspi GPIO pins](https://pinout.xyz))
-  2. wire 2 (brown) to BCM4/GPIO4 (PIN 7)
-  3. wire 3 (red) to 3.3V Power (PIN 1)
+   1. wire 1 (black) to ground (PIN9 on the [Raspi GPIO pins](https://pinout.xyz))
+   2. wire 2 (brown) to BCM4/GPIO4 (PIN 7)
+   3. wire 3 (red) to 3.3V Power (PIN 1)
 2. Add the 4.7K Ohm resistor between 3.3V and BCM4/GPIO4 (PIN1 and PIN7) 
 3. Solder the wires of the cable to the thermometer (see [picture below](#sensor-pinout)). In this example, the cable has white green and red wires. For example:
-  1. white to pin 1: GND
-  2. green to pin 2: DQ
-  3. red to pin 3: V<sub>DD</sub>
+   1. white to pin 1: GND
+   2. green to pin 2: DQ
+   3. red to pin 3: V<sub>DD</sub>
 4. solder the other end of the cable to the 3-pin socket:
-  1. White to pin 1 (corresponds to black wire on the plug)
-  2. green to pin 2 (corresponds to brown lead on the plug)
-  3. red to pin 3 (corresponds to red lead on the plug)
+   1. White to pin 1 (corresponds to black wire on the plug)
+   2. green to pin 2 (corresponds to brown lead on the plug)
+   3. red to pin 3 (corresponds to red lead on the plug)
 4. solder the wires of another plug parallel to the socket (see [picture below](#assembled-sensor)):
-  1. black to pin 1
-  2. brown to pin 2
-  2. red to pin 3 
+   1. black to pin 1
+   2. brown to pin 2
+   2. red to pin 3 
 
 #### Connect to Raspi
 ![connect to raspi](doc/connect to raspi.jpg)
