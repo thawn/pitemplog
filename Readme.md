@@ -4,6 +4,8 @@ This web app is a frontend intended to run on a raspberry pi equipped with
 temperature sensors that are addressed via the 1 wire protocol.
 The hard-and software setup was inspired by [ModMyPi](https://www.modmypi.com/blog/ds18b20-one-wire-digital-temperature-sensor-and-the-raspberry-pi). Thanks a lot for that great tutorial.
 
+Check out [the tags page](https://gitlab.com/Thawn/pitemplog/tags) for releases and sd-card image download links.
+
 Jump directly to:
 * [Hardware setup](#hardware)
 * [Software installation](#installation)
@@ -110,7 +112,7 @@ Jump directly to:
 * [Dependencies](#deps)
 
 ### Install from image
-1. Download the image.
+1. Download the image from [the tags page](https://gitlab.com/Thawn/pitemplog/tags).
 1. Flash the image files to the sd card for example using [etcher](https://etcher.io/).
 1. You may want to [enable ssh](https://www.raspberrypi.org/documentation/remote-access/ssh/) by putting a file named ssh on the boot partition. Don't forget to change the password using raspi-config after you boot up the raspi and ssh into it using the default username `pi` and password `raspberry`.
 1. Insert the sd card into the raspi.
