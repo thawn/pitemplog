@@ -41,8 +41,7 @@ Jump directly to:
 ### Frontend Tablet
 ![Frontend Tablet](doc/Example Tablet.png)
 
-### Configuration
-![Database and Sensor Configuration](doc/Database and Sensor Configuration.png)
+see also the [configuration screenshot](#configuration-screenshot).
 
 ## Hardware setup<a name="hardware"></a>
 ### Material
@@ -220,4 +219,8 @@ These packages are required on the system that deploys the logging system and we
 1. If this is the first time that you contact the raspi, you will be redirected to the configuration page. If you are not redirected, click on "Configuration" in the top right corner.
 1. On the configuration page you can configure the database (if you used the default database this will already work) and any attached or remote sensors. Remote sensors can be other raspi setups or you can write a plugin for scraping information from the web frontend of other sensors (an example for a mibi sensor is included).
 1. Once you are done with the configuration hit "Save"
+
+### Configuration Screenshot
+![Database and Sensor Configuration](doc/Database and Sensor Configuration.png)
+
 
