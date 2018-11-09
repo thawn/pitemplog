@@ -19,10 +19,26 @@ The hard-and software setup was inspired by [ModMyPi](https://www.modmypi.com/bl
 
 ### Screen shots
 
+#### Overview Page for Multiple Sensors
+![Overview Page for Multiple Sensors](doc/Overview page.png)
+
+#### Frontend Desktop
+![Frontend Desktop](doc/Example Screen.png)
+
+#### Frontend Mobile
+![Frontend Mobile](doc/Example mobile.png)
+
+#### Frontend Tablet
+![Frontend Tablet](doc/Example Tablet.png)
+
+#### Configuration
 ![Database and Sensor Configuration](doc/Database and Sensor Configuration.png)
 
 ## Hardware setup<a name="hardware"></a>
 ### Material
+
+![parts](doc/parts overview.png)
+
 * Raspberrypi 2 or 3 Model B
 * SD card with at least 2GB capacity
 * External usb harddisk (or a usb stick that uses wear leveling). If you don't want to use an external harddisk use the "nousb" image or follow the [manual installation instructions](#manual) below.
@@ -41,8 +57,8 @@ add one large shrink-on tubing around to protect and keep the wires together.
   1. wire 1 (black) to ground (PIN9 on the [Raspi GPIO pins](https://pinout.xyz))
   * wire 2 (brown) to BCM4/GPIO4 (PIN 7)
   * wire 3 (red) to 3.3V Power (PIN 1)
-* Add the 4.7K Ohm resistor between 3.3V and BCM4/GPIO4 (PIN1 and PIN7)
-* Solder the wires of the cable to the thermometer. In this example, the cable has white green and red wires. For example:
+* Add the 4.7K Ohm resistor between 3.3V and BCM4/GPIO4 (PIN1 and PIN7) ![connect to raspi](doc/connect to raspi.jpg)
+* Solder the wires of the cable to the thermometer. In this example, the cable has white green and red wires. For example: ![sensor pinout](sensor pinout.png)
   1. white to pin 1: GND
   * green to pin 2: DQ
   * red to pin 3: V<sub>DD</sub>
@@ -53,7 +69,8 @@ add one large shrink-on tubing around to protect and keep the wires together.
 * solder the wires of another plug parallel to the socket:
   1. black to pin 1
   * brown to pin 2
-  * red to pin 3
+  * red to pin 3 ![assembled sensor](doc/assembled sensor.jpg)
+
 
 Now you can connect many thermometers to the raspi as each thermometer will add
 its own plug such that all thermometers are connected in parallel.
@@ -64,6 +81,8 @@ a total of 50 meters of cable. However, at some point too much cable will
 deteriorate the signal so much that thermometers are not found any more or
 randomly disappear. See [here for recommendations on setting up large sensor
 networks](https://www.maximintegrated.com/en/app-notes/index.mvp/id/148).
+
+![final assembly](doc/final assembly.jpg)
 
 ## Installation
 ### Install from image
