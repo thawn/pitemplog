@@ -1,6 +1,6 @@
 {
   "name": "temperatures",
-  "version": "0.5.0",
+  "version": "1.2.1",
   "description": "Web App to log temperatures",
   "private": true,
   "main": " ",
