@@ -143,7 +143,7 @@ max_usb_current=1
 1. In Debian, jekyll depends on xdg-utils which in turn recommends to install the x-server, which in our case is totally unnecessary. Therefore we install jekyll with the *--no-install-recommends* option: `sudo apt-get install jekyll --no-install-recommends`
 1. Install peewee and PyYAML: `sudo pip install peewee pyyaml`
 1. Delete the symlink to the default apache configuration: `sudo rm /etc/apache2/sites-enabled/000-default.conf`
-1. Clone the git repository: `git clone --depth=1 ssh://git@thawn.noip.me:61022/home/git/websites/temperatures`
+1. Clone the git repository: `git clone --depth=1 https://gitlab.com/Thawn/pitemplog.git`
 1. Enter the source directory: `cd temperatures`
 1. Install the required node modules: `npm install`
 1. Compile and install the temperature logger and web frontend: `grunt install`
