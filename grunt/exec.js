@@ -53,6 +53,9 @@ module.exports = function (grunt) {
         'losetup -d /dev/loop1'
       ].join('&&')
     },
+    docker: {
+      cmd: 'docker build -t pitemplog .'
+    },
     uninstall: {
       cmd: [
         'chmod a+x build/_bin/uninstall.sh',

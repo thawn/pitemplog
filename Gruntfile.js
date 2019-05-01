@@ -60,5 +60,6 @@ module.exports = function(grunt) {
       'exec:closeimage'
     ]
   );
+  grunt.registerTask('docker', [ 'default', 'exec:docker' ]);
   grunt.registerTask('uninstall', ['exec:uninstall']);
 };
