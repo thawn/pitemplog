@@ -25,14 +25,14 @@ def emptyFolder(folder):
       try:
           if os.path.isfile(file_path):
               os.unlink(file_path)
-      except Exception, e:
-          print e
+      except Exception as e:
+          print(e)
 
 
 basepath=os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir))
 
 with open(os.path.join(basepath, '_config.yml'), 'r') as jekyllfile:
-  jekyll_conf=yaml.load(jekyllfile)
+  jekyll_conf=yaml.safe_load(jekyllfile)
 
 wwwConfigPath = os.path.join(jekyll_conf['destination'], 'conf/', 'config.json')
 configPath = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.json')
