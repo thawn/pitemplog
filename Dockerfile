@@ -12,11 +12,11 @@ RUN set -x \
   && useradd -mUs /bin/bash pi \
   && service cron start
 
-ARG INSTALL_DIR=/usr/local/share/templog/
-ENV LOCAL_SENSORS=no INSTALL_DIR=$INSTALL_DIR
+ARG INSTALL_DIR_ARG=/usr/local/share/templog/
+ENV LOCAL_SENSORS=no INSTALL_DIR=$INSTALL_DIR_ARG
 COPY build $INSTALL_DIR
-RUN chmod a+x ${INSTALL_DIR}/_bin/install.sh \
-  && ln -s ${INSTALL_DIR}/_bin/install.sh /usr/local/bin/pitemplog_entrypoint
+RUN chmod a+x ${INSTALL_DIR_ARG}/_bin/install.sh \
+  && ln -s ${INSTALL_DIR_ARG}/_bin/install.sh /usr/local/bin/pitemplog_entrypoint
 VOLUME $INSTALL_DIR
 WORKDIR /home/pi
 

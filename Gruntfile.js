@@ -61,5 +61,6 @@ module.exports = function(grunt) {
     ]
   );
   grunt.registerTask('docker', [ 'default', 'exec:docker' ]);
+  grunt.registerTask('docker_compose', [ 'default', 'exec:docker_compose' ]);
   grunt.registerTask('uninstall', ['exec:uninstall']);
 };

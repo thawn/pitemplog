@@ -56,6 +56,12 @@ module.exports = function (grunt) {
     docker: {
       cmd: 'docker build -t pitemplog .'
     },
+    docker_compose: {
+        cmd: [
+          'chmod a+x build/_bin/install.sh',
+          'docker-compose up'
+        ].join('&&')
+      },
     uninstall: {
       cmd: [
         'chmod a+x build/_bin/uninstall.sh',
