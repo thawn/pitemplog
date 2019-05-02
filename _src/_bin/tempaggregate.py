@@ -9,7 +9,7 @@ import time
 with open('/var/www/conf/config.json') as config_file:
     config=json.load(config_file)
 
-database = MySQLdb.connect(host='localhost', user=config["database"]["user"], passwd=config["database"]["pw"], db=config["database"]["db"])
+database = MySQLdb.connect(host=config["database"]["host"], user=config["database"]["user"], passwd=config["database"]["pw"], db=config["database"]["db"])
 
 def updateDB (database,table,extension):
     print("Updating aggregate times for: "+table+extension)

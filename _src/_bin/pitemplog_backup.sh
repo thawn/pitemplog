@@ -13,7 +13,11 @@ disk)
   ;;
 mysql)
   h=$HOSTNAME
-  /usr/bin/mysqldump --add-drop-database --hex-blob -x -uroot -pmpi-cbg temperatures | /usr/bin/ssh -i /home/pi/.ssh/id_rsa ${username}@${backup_host} "gzip > backup/$(date +%Y-%m-%d_%H-%M)_${h}_temperatures.sql.gz"
+  DB_HOST=${DB_HOST:-localhost}
+  DB_DB=${DB_DB:-temperatures}
+  DB_USER=${DB_USER:-temp}
+  DB_PW=${DB_PW:-temp}
+  /usr/bin/mysqldump -h $DB_HOST --add-drop-database --hex-blob -x -u${DB_USER} -p${DB_PW} ${DB_DB} | /usr/bin/ssh -i /home/pi/.ssh/id_rsa ${username}@${backup_host} "gzip > backup/$(date +%Y-%m-%d_%H-%M)_${h}_temperatures.sql.gz"
   ;;
 config)
   /usr/bin/scp /var/www/conf/config.json ${username}@${backup_host}:backup/$(date +%Y-%m-%d_%H-%M)_${HOSTNAME}_config.json

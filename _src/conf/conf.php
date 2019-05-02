@@ -1,4 +1,7 @@
---- layout: default title: Database and Sensor Configuration ---
+--- 
+layout: default
+title: Database and Sensor Configuration
+---
 <!-- Carousel
     ================================================== -->
 <div id="myCarousel" class="carousel" data-ride="carousel">
@@ -27,7 +30,7 @@ $errors['extURLError'] = $errors['extURLNameError'] = '';
 $model = array (
 		'name' => '',
 		'table' => '',
-		'category' => 'MPI',
+		'category' => 'DIEZLAB',
 		'enabled' => 'true',
 		'comment' => '',
 		'tabletest' => '',
@@ -35,9 +38,10 @@ $model = array (
 		'calibration' => '0'
 );
 $dbModel = array (
-		'db' => 'temperatures',
-		'user' => 'temp',
-		'pw' => 'temp',
+		'host' => $_ENV['DB_HOST'] ?: 'localhost',
+		'db' => $_ENV['DB_DB'] ?: 'temperatures',
+		'user' => $_ENV['DB_USER'] ?: 'temp',
+		'pw' => $_ENV['DB_PW'] ?: 'temp',
 		'aggregateTables' => [ 
 				'_5min',
 				'_15min',
@@ -46,14 +50,22 @@ $dbModel = array (
 		'dbtest' => '',
 		'dberrormsg' => ''
 );
-$messages = '';
-$input = $actions = $errors = $commands = [ ];
-$errors['nameErr'] = $errors['tableErr'] = $errors['categoryErr'] = $errors['calibrationErr'] = [ ];
-$errors['dbErr'] = $errors['userErr'] = $errors['extURLError'] = $errors['extURLNameError'] = '';
 $debug = false;
 if (isset( $_GET['debug'] )) {
 	$debug = true;
 }
+if (isset( $_ENV['DB_HOST'] ) || isset( $_ENV['DB_DB'] ) || isset( $_ENV['DB_USER'] ) || isset( $_ENV['DB_PW'] )) {
+	if ($debug) {
+		echo '<h4>Got database configuration from $_ENV:</h4><pre>';
+		print_r( $dbModel );
+		echo '</pre>';
+	}
+}
+
+$messages = '';
+$input = $actions = $errors = $commands = [ ];
+$errors['nameErr'] = $errors['tableErr'] = $errors['categoryErr'] = $errors['calibrationErr'] = [ ];
+$errors['dbErr'] = $errors['userErr'] = $errors['extURLError'] = $errors['extURLNameError'] = '';
 $parserdir = dirname( getcwd() ) . '/assets/parser/';
 $parsers = getExternalParsers( $parserdir );
 function abortWithError($message) {
@@ -84,6 +96,17 @@ function parseDatabaseInput($field, $value) {
 	global $actions, $errors;
 	$parsed = [ ];
 	switch ($field) {
+		case 'host' :
+			if (empty( $value )) {
+				$parsed['host'] = 'localhost';
+			} else {
+				$parsed['host'] = test_input( $value );
+				// check if name only contains letters
+				if (! filter_var( gethostbyname( $parsed['host'] ), FILTER_VALIDATE_IP )) {
+					$errors['dbErr'] = 'The database host name must be a valid and reachable ip address or domain name.';
+				}
+			}
+			break;
 		case 'db' :
 			if (empty( $value )) {
 				$errors['dbErr'] = 'Database name is required.';
@@ -546,7 +569,7 @@ if ($debug) {
 $success = true;
 if (! empty( $conf['database']['db'] ) && ! empty( $conf['database']['user'] )) {
 	try {
-		$dbh = new PDO( 'mysql:host=localhost;dbname=' . $conf['database']['db'], $conf['database']['user'], $conf['database']['pw'], array (
+		$dbh = new PDO( 'mysql:host=' . $conf['database']['host'] . ';dbname=' . $conf['database']['db'], $conf['database']['user'], $conf['database']['pw'], array (
 				PDO::ATTR_PERSISTENT => true
 		) );
 		// Close the connection
@@ -857,11 +880,12 @@ echo '
         <h2>Database configuration</h2>
         <table class="table table-condensed">
           <caption>
-            <p>Enter the database name, and the name and password of a user that has full access to that database</p>
+            <p>Enter the host of the database server, the database name, and the name and password of a user that has full access to that database</p>
             <p><span class="text-danger">* required field.</span></p>
           </caption>
           <thead>
             <tr>
+              <th class="col-md-2">Database Host <span class="text-danger">*</span></th>
               <th class="col-md-2">Database Name <span class="text-danger">*</span></th>
               <th class="col-md-1">Database User <span class="text-danger">*</span></th>
               <th class="col-md-1">Database Password</th>
@@ -870,6 +894,12 @@ echo '
           </thead>
           <tbody>
             <tr>
+              <td>
+                <div class="form-group">
+                  <input type="text" class="form-control" name="database/host" placeholder="Enter Database Host" value="' . $conf["database"]["host"] . '">
+                  <span class="text-danger">' . $errors["dbErr"] . '</span>
+                </div>
+              </td>
               <td>
                 <div class="form-group">
                   <input type="text" class="form-control" name="database/db" placeholder="Enter Database Name" value="' . $conf["database"]["db"] . '">

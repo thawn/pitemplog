@@ -31,7 +31,7 @@ def getXMLTemperatures(url,username,pw):
 with open('/var/www/conf/config.json') as config_file:
     config=json.load(config_file)
 
-database = MySQLDatabase(config["database"]["db"], **{'host': 'localhost', 'password': config["database"]["pw"], 'port': 3306, 'user': config["database"]["user"]})
+database = MySQLDatabase(config["database"]["db"], **{'host': config["database"]["host"], 'password': config["database"]["pw"], 'port': 3306, 'user': config["database"]["user"]})
 
 class UnknownField(object):
     pass
