@@ -17,7 +17,7 @@ module.exports = function (grunt) {
         'chmod a+x build/_bin/install.sh',
         'ssh ' + username + '@' + hostname + ' "sudo mkdir -p ' + installdir +' && sudo chown pi:pi ' + installdir +'"',
         'rsync --progress -a --delete -e "ssh -q" build/ ' + username + '@' + hostname + ':' + installdir + '/',
-        'ssh ' + username + '@' + hostname + ' "' + installdir + '/_bin/install.sh"'
+        'ssh ' + username + '@' + hostname + ' "sudo ' + installdir + '/_bin/install.sh"'
       ].join('&&')
     },
     install: {
