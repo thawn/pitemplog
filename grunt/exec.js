@@ -54,14 +54,29 @@ module.exports = function (grunt) {
       ].join('&&')
     },
     docker: {
-      cmd: 'docker build -t pitemplog .'
+      cmd: [
+        'docker build -t pitemplog ./',
+        'docker build -t pitemplog:test ./testing/'
+      ].join('&&')
     },
     docker_compose: {
-        cmd: [
-          'chmod a+x build/_bin/install.sh',
-          'docker-compose up'
-        ].join('&&')
-      },
+      cmd: [
+        'chmod a+x build/_bin/install.sh',
+        'docker-compose up -d'
+      ].join('&&')
+    },
+    docker_compose_down: {
+      cmd: 'docker-compose down -v &'
+    },
+    docker_compose_test: {
+      cmd: [
+        'chmod a+x build/_bin/install.sh',
+        'docker-compose -f ./testing/docker-compose.yml up -d'
+      ].join('&&')
+    },
+    docker_compose_test_down: {
+      cmd: 'docker-compose -f ./testing/docker-compose.yml down -v &'
+    },
     uninstall: {
       cmd: [
         'chmod a+x build/_bin/uninstall.sh',

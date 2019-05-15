@@ -1,15 +1,6 @@
 #!/bin/bash
-if [ "x$INSTALL_DIR" == "x" ]; then
-  target_dir=/usr/local/share/templog/
-else
-  target_dir=$INSTALL_DIR
-fi
-if [ "x$INSTALL_DIR" == "x" ]; then
-  target_dir=/usr/local/share/templog/
-else
-  target_dir=$INSTALL_DIR
-fi
-echo "Installing into: $INSTALL_DIR"
+target_dir=${INSTALL_DIR:-/usr/local/share/templog/}
+echo "Installing into: $target_dir"
 echo "Local sensors: $LOCAL_SENSORS"
 mkdir -p "$target_dir"
 chown pi:pi "$target_dir"
@@ -35,12 +26,16 @@ cp "${target_dir}"_bin/pitemplog_backup.sh /usr/local/bin/
 cp "${target_dir}"_bin/pitemplog_restore.sh /usr/local/bin/
 cp "${target_dir}"_bin/pitemplog.conf /etc/
 cp "${target_dir}"_sbin/pitemplog_partition_database.sh /usr/local/sbin/
-crontab "${target_dir}"_sbin/crontab_root
+echo "DB_HOST=${DB_HOST:-localhost}" > /tmp/crontab_env
+echo "DB_DB=${DB_DB:-temperatures}" >> /tmp/crontab_env
+echo "DB_USER=${DB_USER:-temp}" >> /tmp/crontab_env
+echo "DB_PW=${DB_PW:-temp}" >> /tmp/crontab_env
+cat /tmp/crontab_env "${target_dir}"_sbin/crontab_root | crontab -
 cgroup=$(grep cpuset /proc/1/cgroup | cut -d ':' -f 3)
-if [ "$LOCAL_SENSORS" == "no" ]; then
-  crontab -u pi "${target_dir}"_bin/crontab_nosensors
+if [ "${LOCAL_SENSORS:-yes}" == "no" ]; then
+  cat /tmp/crontab_env "${target_dir}"_bin/crontab_nosensors | crontab -u pi -
 else
-  crontab -u pi "${target_dir}"_bin/crontab
+  cat /tmp/crontab_env "${target_dir}"_bin/crontab | crontab -u pi -
 fi
 echo "Installation successful. (re)starting apache now."
 if [ "${cgroup#/docker}" == "$cgroup" ]; then
@@ -48,6 +43,7 @@ if [ "${cgroup#/docker}" == "$cgroup" ]; then
   service apache2 restart
 else
   #In a docker container, apache runs as foreground process and is passed any arguments passed to the container
+  service cron start
   if [ "${1#-}" != "$1" ]; then
 	set -- apache2-foreground "$@"
   fi

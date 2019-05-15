@@ -1,0 +1,55 @@
+version: "3"
+services:
+  pitemplog:
+    image: pitemplog:test
+    restart: unless-stopped
+    volumes:
+      - ../build:/usr/local/share/templog
+    environment:
+      - TZ=Europe/Berlin
+      - DB_HOST=mariadb
+      - RAND=1
+    depends_on:
+      - mariadb
+    ports:
+      - 8080:80
+
+  pitemplogext:
+    image: pitemplog:test
+    restart: unless-stopped
+    volumes:
+      - ../build:/usr/local/share/templog
+    environment:
+      - TZ=Europe/Berlin
+      - DB_HOST=mariadb
+      - RAND=4
+    depends_on:
+      - mariadb
+    ports:
+      - 8081:80
+
+  pitemplogfoo:
+    image: pitemplog:test
+    restart: unless-stopped
+    volumes:
+      - ../build:/usr/local/share/templog
+    environment:
+      - TZ=Europe/Berlin
+      - DB_HOST=mariadb
+      - RAND=7
+    depends_on:
+      - mariadb
+    ports:
+      - 8082:80
+
+  mariadb:
+    image: mariadb:10.3
+    restart: unless-stopped
+    volumes:
+    - /tmp/testing/datadir:/var/lib/mysql
+    environment:
+      - TZ=Europe/Berlin
+      - MYSQL_DATABASE=temperatures
+      - MYSQL_USER=temp
+      - MYSQL_PASSWORD=temp
+      - MYSQL_ROOT_PASSWORD=pitemplog_mariadb_pw_pls_change
