@@ -24,7 +24,7 @@ if ($_GET) {
   $model=array(
     'name' => '',
     'table' => '',
-    'category' => 'B CUBE',
+    'category' => 'DIEZLAB',
     'enabled' => 'true',
     'comment' => '',
     'tabletest' => '',

@@ -1,14 +1,13 @@
 #!/usr/bin/python
 import time
-import peewee
-from peewee import *
 import json
 import urllib2
 from contextlib import closing
 import xml.etree.ElementTree as ET
 import os
 import sys
-#from pprint import pprint
+import MySQLdb
+# from pprint import pprint
 
 def getXMLTemperatures(url,username,pw):
     passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
@@ -30,15 +29,10 @@ def getXMLTemperatures(url,username,pw):
 
 with open('/var/www/conf/config.json') as config_file:
     config=json.load(config_file)
+    
+sensordir = os.environ.get('SENSOR_DIR', '/sys/bus/w1/devices/')
 
-database = MySQLDatabase(config["database"]["db"], **{'host': config["database"]["host"], 'password': config["database"]["pw"], 'port': 3306, 'user': config["database"]["user"]})
-
-class UnknownField(object):
-    pass
-
-class BaseModel(Model):
-    class Meta:
-        database = database
+database = MySQLdb.connect(host=config["database"]["host"], user=config["database"]["user"], passwd=config["database"]["pw"], db=config["database"]["db"])
 
 lockFile="/tmp/templog_lock"
 if os.path.isfile(lockFile):
@@ -54,35 +48,38 @@ for sensor, conf in config.iteritems():
     if sensor != "database":
         if conf["enabled"]=="true":
             try:
-                class Temperatures(BaseModel):
-                    temp = FloatField(null=True)
-                    time = IntegerField(null=True)
-                    
-                    class Meta:
-                        db_table = conf["table"]
-                if "url" in conf:
-                    if conf["urlparser"]!="none":
+                if "exturl" in conf:
+                    #@todo: switch to using the local parsers 
+                    if "extparser" in conf and conf["extparser"]!="none":
                         try:
                             temperatures
                         except NameError:
-                            temperatures = getXMLTemperatures(conf["url"], conf["urlusername"], conf["urlpw"])
+                            temperatures = getXMLTemperatures(conf["exturl"], conf["extuser"], conf["extpw"])
                         temperature = temperatures[int(sensor[-1])-1] #the sensors in the mibi box are called temp1, temp2 ... tempN so for less than 10 sensors this should work...
                     else:
-                        url=conf["url"].split('?')[-2]+'?gettemp='+sensor[3:]
+                        if '?' in conf["exturl"]:
+                            url = conf["exturl"].split('?')[-2]
+                        else:
+                            url = conf["exturl"]
+                        url += '?gettemp=' + urllib2.quote(sensor)
                         with closing(urllib2.urlopen(url)) as externalBox:
                             temperature_data = externalBox.read()
                             temperature = float(temperature_data)
                 else:
-                    with open("/sys/bus/w1/devices/"+sensor+"/w1_slave") as tfile:
+                    with open(sensordir+sensor+"/w1_slave") as tfile:
                         text = tfile.read()
                         temperature_data = text.split()[-1]
                         temperature = float(temperature_data[2:])
                         temperature = temperature / 1000
                 temperature+=float(conf["calibration"])
                 timestamp=int(time.time())
-                Temp = Temperatures(temp=temperature, time=timestamp)
-                Temp.save()
-            except Exception, e:
+                cur = database.cursor()
+                query = "INSERT INTO %s (time, temp) VALUES (%d, %f)" % (conf["table"], timestamp, temperature)
+                cur.execute(query)
+                cur.close
+            except Exception as e:
                 print(e)
+database.commit()
+database.close()
 os.remove(lockFile)
 

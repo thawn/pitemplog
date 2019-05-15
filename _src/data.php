@@ -1,13 +1,20 @@
 <?php
 header( 'content-type: application/json; charset=utf-8' );
 header( "Access-Control-Allow-Origin: *" );
+$sensordir = $_ENV['SENSOR_DIR'] ?: '/sys/bus/w1/devices/';
 $starttime = 0;
 $endtime = 0;
-$db = "temperatures";
+$host = $_ENV['DB_HOST'] ?: 'localhost';
+$db = $_ENV['DB_DB'] ?: "temperatures";
 $table = "temperatures";
-$user = "temp";
-$pw = "temp";
+$user = $_ENV['DB_USER'] ?: "temp";
+$pw = $_ENV['DB_PW'] ?: "temp";
+/**
+ * @todo get database configuration from config file
+ */
 $aggregate = "_5min";
+$write_data = FALSE;
+$add_table = FALSE;
 if ($_GET) {
 	// print_r($_GET);
 	if (isset( $_GET["end"] )) {
@@ -45,15 +52,19 @@ if ($_GET) {
 		}
 	}
 	if (isset( $_GET["config"] ) && $_GET["config"] == "get") {
+		/**
+		 * 
+		 * @todo return config only for internal sensors
+		 */
 		$config_file = "conf/config.json";
 		if (file_exists( $config_file )) {
-			echo "[" . file_get_contents( $config_file ) . "]";
+			echo file_get_contents( $config_file );
 			exit();
 		}
 	}
 	if (isset( $_GET["gettemp"] )) {
 		// record the current temperature
-		$sensorpath = "/sys/bus/w1/devices/" . $_GET["gettemp"] . "/w1_slave";
+		$sensorpath = $sensordir . urldecode($_GET["gettemp"]) . "/w1_slave";
 		if (file_exists( $sensorpath )) {
 			$sensordata = (substr( trim( file_get_contents( $sensorpath ) ), - 5 )) / 1000;
 			echo $sensordata;
@@ -66,9 +77,9 @@ if ($_GET) {
 }
 if ($_POST) {
 	// print_r($_POST);
-	$aggregate = '';
 	if (isset( $_POST["temp"] )) {
 		$temperatures = explode( ',', $_POST["temp"] );
+		$write_data = TRUE;
 	}
 	if (isset( $_POST["time"] )) {
 		$times = explode( ',', $_POST["time"] );
@@ -99,7 +110,7 @@ if ($starttime == 0) {
 $table = $table . $aggregate;
 
 try {
-	$dbh = new PDO( 'mysql:host=localhost;dbname=' . $db, $user, $pw, array (
+	$dbh = new PDO( 'mysql:host=' . $host . ';dbname=' . $db, $user, $pw, array (
 			PDO::ATTR_PERSISTENT => true
 	) );
 
@@ -117,7 +128,7 @@ try {
 		}
 		echo "\n]";
 	}
-	if ($_POST) {
+	if ($write_data) {
 		if (count( $temperatures ) == count( $times )) {
 			for($n = 0; $n < count( $temperatures ); $n ++) {
 				$values .= '(' . $times[$n] . ',' . $temperatures[$n] . '),';

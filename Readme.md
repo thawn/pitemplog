@@ -54,7 +54,7 @@ see also the [configuration screenshot](#configuration-screenshot).
 * One-wire digital thermometer(s): DS 18B20
 * 4.7K Ohm resistor
 * 3x jumper contacts (or 2x 2W 245 PSK plug)
-* 2x 3-pin matching plug and socket (you'll need one more set than the number of sensors you want to connect)
+* min 2x 3-pin matching plug and socket (you'll need one more set than the number of sensors you want to connect, i.e for two sensors you need three, for three sensors four etc.)
 * Cable with three wires
 * soldering equipment
 * shrink-on tubing
@@ -67,7 +67,7 @@ add one large shrink-on tubing around to protect and keep the wires together.
    2. wire 2 (brown) to BCM4/GPIO4 (PIN 7)
    3. wire 3 (red) to 3.3V Power (PIN 1)
 2. Add the 4.7K Ohm resistor between 3.3V and BCM4/GPIO4 (PIN1 and PIN7) 
-3. Solder the wires of the cable to the thermometer (see [picture below](#sensor-pinout)). In this example, the cable has white green and red wires. For example:
+3. Solder the wires of the cable to the thermometer (see [picture below](#sensor-pinout) Note: In the front view of the sensor (on the left of the image) the pins are facing towards you). In this example, the cable has white green and red wires. For example:
    1. white to pin 1: GND
    2. green to pin 2: DQ
    3. red to pin 3: V<sub>DD</sub>
@@ -95,6 +95,8 @@ Check out the [picture of the final assembly](#final-assembly).
 
 #### Sensor Pinout
 ![sensor pinout](doc/sensor pinout.png)
+
+Note: In the front view of the sensor (left) the pins are facing towards you.
 
 #### Assembled Sensor
 ![assembled sensor](doc/assembled sensor.jpg)
@@ -222,5 +224,9 @@ These packages are required on the system that deploys the logging system and we
 
 ### Configuration Screenshot
 ![Database and Sensor Configuration](doc/Database and Sensor Configuration.png)
+
+## ToDo
+
+* Write selenium and python tests.
 
 

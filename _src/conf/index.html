@@ -1,0 +1,378 @@
+---
+layout: default
+title: Database and Sensor Configuration
+---
+<style>
+.small-gutter {
+	margin-right: -5px;
+	margin-left: -5px;
+}
+
+.small-gutter>[class*='col-'] {
+	padding-right: 5px;
+	padding-left: 5px;
+}
+</style>
+<!-- Carousel
+    ================================================== -->
+<div id="myCarousel" class="carousel" data-ride="carousel">
+	<div class="carousel-inner" role="listbox">
+		<div class="item active">
+
+			<div class="container">
+				<div class="carousel-caption">
+					<img class="pull-left" src="{{ site.baseurl }}/assets/img/config_icon1.png" alt="Config">
+					<h1>Database and Sensor Configuration</h1>
+					<p>All available sensors and their IDs should be listed here. Just add the database and Sensor information and
+						the data will show up in the graphs.</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /.carousel -->
+
+<div class="container">
+	<h2>Database configuration</h2>
+	<p>Enter the host of the database server, the database name, and the name and password of a database user that has
+		full access to that database.</p>
+	<p>
+		<span class="text-danger">* required field.</span>
+	</p>
+	<div id="dbConfig" class="row small-gutter">
+		<form id="dbForm">
+			<div class="col-sm-3">
+				<div class="form-group">
+					<label for="database/host"><span class="text-danger">*</span>Host: </label> <input type="text" class="form-control"
+						name="database/host" placeholder="Enter Database Host" value="localhost" required data-toggle="tooltip"
+						title="The host where the database is running. The temperature logger must be able to reach it.">
+				</div>
+			</div>
+			<div class="col-sm-2">
+				<div class="form-group">
+					<label for="database/db"><span class="text-danger">*</span>Name: </label> <input type="text" class="form-control"
+						name="database/db" placeholder="Enter Database Name" value="temperatures" required pattern="[a-zA-Z_]{4,20}"
+						data-toggle="tooltip" title="The name of the database. Only letters and underscore. 4-20 Characters long.">
+				</div>
+			</div>
+			<div class="col-sm-2">
+				<div class="form-group ">
+					<label for="database/user"><span class="text-danger">*</span>User: </label> <input type="text" class="form-control"
+						name="database/user" placeholder="Database User" value="temp" required pattern="[a-zA-Z_]{4,20}"
+						data-toggle="tooltip" title="Name of the database user.  Only letters and underscore. 4-20 Characters long.">
+				</div>
+			</div>
+			<div class="col-sm-2">
+				<div class="form-group">
+					<label for="database/pw">Password:</label> <input type="text" class="form-control" name="database/pw"
+						placeholder="Database Password" value="temp" data-toggle="tooltip" title="Password of the database user.">
+				</div>
+			</div>
+			<div class="col-sm-1">
+				<div class="form-group">
+					<label for="db-status-btn">Status:</label><br>
+					<button id="db-status-btn" name="status-btn" class="btn btn-default" data-toggle="tooltip"
+						title="Error: Cannot connect to the database.">
+						<span class="glyphicon glyphicon-refresh"></span>
+					</button>
+				</div>
+			</div>
+			<div class="col-sm-2">
+				<div class="form-group">
+					<label for="db-save-btn">Action:</label><br>
+					<button id="db-save" class="btn btn-primary" type="submit" data-toggle="tooltip"
+						title="Save the database configuration.">
+						<span class="glyphicon glyphicon-save"></span>
+					</button>
+					<button id="db-check-btn" class="btn btn-info" data-toggle="tooltip" title="Check the database connection.">
+						<span class="glyphicon glyphicon-refresh"></span>
+					</button>
+				</div>
+			</div>
+		</form>
+	</div>
+	<div id="local_sensors" style="display: none;">
+		<hr>
+		<h2>Local Sensor configuration</h2>
+		<p>Enter Names for the sensors, the corresponding database tables to be used and a category in which the sensor
+			will be shown on the start page.</p>
+		<div class="row small-gutter hidden-xs">
+			<div class="col-sm-2">
+				<h5>Current Temperature:</h5>
+			</div>
+			<div class="col-sm-1">
+				<h5>Cali&shy;bration:</h5>
+			</div>
+			<div class="col-sm-2">
+				<h5>
+					<span class="text-danger">*</span>Sensor Name:
+				</h5>
+			</div>
+			<div class="col-sm-1">
+				<h5>
+					<span class="text-danger">*</span>Table Name:
+				</h5>
+			</div>
+			<div class="col-sm-1">
+				<h5>
+					<span class="text-danger">*</span>Cate&shy;gory:
+				</h5>
+			</div>
+			<div class="col-sm-2">
+				<h5>Comment:</h5>
+			</div>
+			<div class="col-sm-1">
+				<h5>Status:</h5>
+			</div>
+			<div class="col-sm-2">
+				<h5>Action:</h5>
+			</div>
+		</div>
+	</div>
+	<div id="external_sensors" style="display: none;">
+		<hr>
+		<h2>External Sensor configuration</h2>
+		<p>Data from external sensors is fetched over the network instead of read out from local sensors.</p>
+	</div>
+	<div id="newExternal" style="display: none;">
+		<hr>
+		<h2>New External Sensor Configuration</h2>
+		<p>Enter the URL and a name for the external sensor box. If the external box requires a username and password, you
+			can enter those as well.</p>
+		<div class="row small-gutter">
+			<form id="newExternalForm">
+				<div class="col-sm-2">
+					<div class="form-group">
+						<label for="url"><span class="text-danger">*</span>URL:</label> <input id="newExtURL"
+							class="form-control" name="url" placeholder="http://diez-templog-1/data.php"
+							value="http://diez-templog-1/data.php" type="text">
+					</div>
+				</div>
+				<div class="col-sm-2">
+					<div class="form-group ">
+						<label for="name"><span class="text-danger">*</span>Name:</label> <input id="newExtName"
+							class="form-control" name="name" placeholder="Enter a name for the box." value="" type="text">
+					</div>
+				</div>
+				<div class="col-sm-2">
+					<div class="form-group ">
+						<label for="user"><span class="text-danger">*</span>Username:</label> <input
+							id="newExtUsername" class="form-control" name="user" placeholder="username" value="" type="text">
+					</div>
+				</div>
+				<div class="col-sm-2">
+					<div class="form-group">
+						<label for="pw"><span class="text-danger">*</span>Password:</label> <input id="newExtPassword"
+							class="form-control" name="pw" placeholder="password" value="" type="text">
+					</div>
+				</div>
+				<div class="col-sm-2">
+					<div class="form-group">
+						<label class="visible-xs" for="parser"><span class="text-danger">*</span>Parser: </label> <select
+							id="newExtParser" class="form-control form-control-inline" name="parser"
+							onchange="this.className=this.options[this.selectedIndex].className">
+							<option value="none" class="form-control form-control-inline">no parser</option>
+						</select>
+					</div>
+				</div>
+				<div class="col-sm-2">
+					<div class="form-group">
+						<button type="submit" id="getExternal" class="btn btn-primary" data-loading-text="Loading...">
+							<span class="glyphicon glyphicon-cloud-download"></span> Download external configuration
+						</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+	<div id="pushExternal" style="display: none;">
+		<hr>
+		<h2>Configure central server</h2>
+		<p>Enter the URL and a name for a central server that is running pitemplog. Once the connection is set up, the
+			temperature data of all local sensors will be regularly uploaded to this server.</p>
+		<!--  If the central server requires a username and password, you
+			can enter those as well. -->
+		<div class="row small-gutter">
+			<form id="newExternalForm">
+				<div class="col-sm-2">
+					<div class="form-group">
+						<label for="url"><span class="text-danger">*</span>URL:</label> <input id="newExtURL" class="form-control"
+							name="url" placeholder="http://diez-templog-1/data.php" value="http://diez-templog-1/data.php" type="text">
+					</div>
+				</div>
+				<div class="col-sm-2">
+					<div class="form-group ">
+						<label for="name"><span class="text-danger">*</span>Name:</label> <input id="newExtName" class="form-control"
+							name="name" placeholder="Enter a name for the box." value="" type="text">
+					</div>
+				</div>
+				<!-- 
+				<div class="col-sm-2">
+					<div class="form-group ">
+						<label for="user"><span class="text-danger">*</span>Username:</label> <input
+							id="newExtUsername" class="form-control" name="user" placeholder="username" value="" type="text">
+					</div>
+				</div>
+				<div class="col-sm-2">
+					<div class="form-group">
+						<label for="pw"><span class="text-danger">*</span>Password:</label> <input id="newExtPassword"
+							class="form-control" name="pw" placeholder="password" value="" type="text">
+					</div>
+				</div>
+				 -->
+				<div class="col-sm-2">
+					<div class="form-group">
+						<button type="submit" id="getExternal" class="btn btn-primary" data-loading-text="Loading...">
+							<span class="glyphicon glyphicon-cloud-upload"></span> Upload configuration to central server
+						</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+	<hr>
+	<div class="row">
+		<div class="col-sm-12">
+			<button type="button" id="addExternal" class="btn btn-info" data-loading-text="Loading...">
+				<span class="glyphicon glyphicon-plus"></span> Add external source
+			</button>
+			<button type="button" id="pushToServer" class="btn btn-info pull-right" data-loading-text="Pushing...">
+				<span class="glyphicon glyphicon-plus"></span> Configure central server
+			</button>
+		</div>
+	</div>
+	<hr>
+	<div class="row">
+		<div class="col-sm-12 text-center">
+			<button id="saveEverythingButton" class="btn btn-lg btn-primary" data-loading-text="Saving..." value="">Save
+				entire configuration</button>
+		</div>
+	</div>
+	<div id="messageWindow" style="display: none;">
+		<hr>
+		<h2>Messages:</h2>
+	</div>
+</div>
+<div class="container" style="display: none;">
+	<div id="externalSensorHeading-template">
+		<hr>
+		<h3>External Sensor Name</h3>
+		<p>URL of external sensor</p><!-- ui to edit external configuration will go here. -->
+		<div class="row small-gutter hidden-xs">
+			<div class="col-sm-2">
+				<h5>Current Temperature:</h5>
+			</div>
+			<div class="col-sm-1">
+				<h5>Cali&shy;bration:</h5>
+			</div>
+			<div class="col-sm-2">
+				<h5>
+					<span class="text-danger">*</span>Sensor Name:
+				</h5>
+			</div>
+			<div class="col-sm-1">
+				<h5>
+					<span class="text-danger">*</span>Table Name:
+				</h5>
+			</div>
+			<div class="col-sm-1">
+				<h5>
+					<span class="text-danger">*</span>Cate&shy;gory:
+				</h5>
+			</div>
+			<div class="col-sm-2">
+				<h5>Comment:</h5>
+			</div>
+			<div class="col-sm-1">
+				<h5>Status:</h5>
+			</div>
+			<div class="col-sm-2">
+				<h5>Action:</h5>
+			</div>
+		</div>
+	</div>
+	<div id="element-template">
+		<h3 class="sensor-title visible-xs">Sensor 28-000323058:</h3>
+		<form class="sensor-form">
+			<div class="row small-gutter">
+				<div class="col-sm-2">
+					<div class="form-group">
+						<label class="visible-xs" for="temperature">Current Temperature:</label>
+						<div class="input-group">
+							<span class="input-group-addon"><span class="glyphicon glyphicon-refresh"></span></span> <input type="text"
+								class="form-control" name="temperature" value="" placeholder="Reading..." disabled data-toggle="tooltip"
+								title="The current temperature of this sensor.">
+						</div>
+						<input type="hidden" class="sensorID" name="sensor" value=""> <input type="hidden" name="enabled"
+							value="true">
+					</div>
+				</div>
+				<div class="col-sm-1">
+					<div class="form-group ">
+						<label class="visible-xs" for="calibration">Cali&shy;bration:</label> <input type="text" class="form-control"
+							name="calibration" value="0.0" data-toggle="tooltip"
+							title="This value will be added to the temperature when saving the data to the database.">
+					</div>
+				</div>
+				<div class="col-sm-2">
+					<div class="form-group ">
+						<label class="visible-xs" for="name"><span class="text-danger">*</span>Sensor Name:</label> <input type="text"
+							class="form-control" name="name" placeholder="Enter Sensor Name" required pattern="[a-zA-Z0-9_\- ]*" value=""
+							placeholder="Sensor Name" data-toggle="tooltip" title="Name of the sensor.">
+					</div>
+				</div>
+				<div class="col-sm-1">
+					<div class="form-group">
+						<label class="visible-xs" for="table"><span class="text-danger">*</span>Table Name:</label> <input type="text"
+							class="form-control" name="table" placeholder="Enter Database Table Name" required
+							pattern="[a-zA-Z][a-zA-Z0-9_]{3,19}" value="" placeholder="name" data-toggle="tooltip"
+							title="Name of the database table. Only letters, numbers and underscore allowed. Must start with a letter and between 4 and 20 characters long.">
+						<input type="hidden" name="table_old">
+					</div>
+				</div>
+				<div class="col-sm-1">
+					<div class="form-group">
+						<label class="visible-xs" for="category"><span class="text-danger">*</span>Category:</label> <input type="text"
+							class="form-control" name="category" placeholder="Enter Category" required pattern="[a-zA-Z0-9_\- ]*" value=""
+							data-toggle="tooltip" title="Category of the sensor. Will be used to group sensors on the overview page.">
+					</div>
+				</div>
+				<div class="col-sm-2">
+					<div class="form-group">
+						<label class="visible-xs" for="comment">Comment:</label> <input type="text" class="form-control" name="comment"
+							placeholder="Enter Comment" value="" data-toggle="tooltip" title="Comment describing the sensor.">
+					</div>
+				</div>
+				<div class="col-sm-1">
+					<div class="form-group">
+						<label class="visible-xs" for="status-btn">Status:</label>
+						<button name="status-btn" class="btn btn-default" data-toggle="tooltip"
+							title="An error has occurred, the sensor is not configured properly.">
+							<span class="glyphicon glyphicon-refresh"></span>
+						</button>
+					</div>
+				</div>
+				<div class="col-sm-2">
+					<div class="form-group">
+						<label class="visible-xs" for="db-save-btn">Action:<br></label>
+						<button name="save-btn" type="submit" class="btn btn-primary" data-toggle="tooltip"
+							title="Save the configuration for this sensor.">
+							<span class="glyphicon glyphicon-save"></span>
+						</button>
+						<button name="disable-btn" class="btn btn-warning" style="display: none;" data-toggle="tooltip" title="Disable this sensor.">
+							<span class="glyphicon glyphicon-pause"></span>
+						</button>
+						<button name="delete-btn" class="btn btn-danger" style="display: none;" data-toggle="tooltip"
+							title="Delete this sensor.">
+							<span class="glyphicon glyphicon-remove"></span>
+						</button>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+{% include js.html %}
+<!-- build:js {{site.baseurl}}/assets/js/conf.min.js -->
+<script src="{{ site.baseurl }}/assets/js/conf.js" type="text/javascript"></script>
+<!-- /build -->
