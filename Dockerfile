@@ -5,7 +5,7 @@ RUN set -x \
   && apt-get install -y python-mysqldb python-pip \
   && apt-get install -y --no-install-recommends jekyll cron \
   && docker-php-ext-install pdo_mysql \
-  && pip install peewee pyyaml \
+  && pip install pyyaml \
   && apt-get remove -y --auto-remove python-pip \
   && rm -rf /var/lib/apt/lists/* \
   && rm -f /etc/apache2/sites-enabled/*.conf \

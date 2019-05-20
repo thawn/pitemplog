@@ -143,7 +143,7 @@ max_usb_current=1
 1. Update the debian system: `sudo apt-get update && sudo apt-get dist-upgrade`
 1. Install required packages: `sudo apt-get install mysql-server php php-mysql php-curl python-mysqldb python-pip grunt npm git`
 1. In Debian, jekyll depends on xdg-utils which in turn recommends to install the x-server, which in our case is totally unnecessary. Therefore we install jekyll with the *--no-install-recommends* option: `sudo apt-get install jekyll --no-install-recommends`
-1. Install peewee and PyYAML: `sudo pip install peewee pyyaml`
+1. Install PyYAML: `sudo pip install pyyaml`
 1. Delete the symlink to the default apache configuration: `sudo rm /etc/apache2/sites-enabled/000-default.conf`
 1. Clone the git repository: `git clone --depth=1 https://gitlab.com/Thawn/pitemplog.git`
 1. Enter the source directory: `cd temperatures`
@@ -203,7 +203,6 @@ These packages are required on the raspi for running the database and web fronte
 * jekyll (>2.x)
 * python-mysqldb
 * pip (only required for installing/updating pewee and pyyaml)
-* peewee
 * PyYAML (>3.x)
 * php5-curl
 * php5-mysql
