@@ -18,7 +18,7 @@ ENV DB_HOST=mariadb DB_DB=temperatures DB_USER=temp DB_PW=temp
 COPY build $INSTALL_DIR
 RUN chmod a+x "${INSTALL_DIR_ARG}/_bin/install.sh" \
   && ln -s "${INSTALL_DIR_ARG}/_bin/install.sh" /usr/local/bin/pitemplog_entrypoint
-VOLUME ["$INSTALL_DIR", "/etc/apache2/apache2.conf", "/var/www/conf/config.json"]
+VOLUME ["$INSTALL_DIR"]
 WORKDIR /home/pi
 
 ENTRYPOINT ["pitemplog_entrypoint"]

@@ -44,7 +44,13 @@ if os.path.isfile(lockFile):
         os.remove(lockFile)
 with open(lockFile,'a'):
     os.utime(lockFile,None)
-for sensor, conf in config.iteritems():
+if 'local_sensors' in config:
+  if 'remote_sensors' in config and isinstance(config['remote_sensors'], dict):
+      configs = config['local_sensors'].copy()
+      configs.update(config['remote_sensors'])
+  else:
+        configs = config['local_sensors']
+for sensor, conf in configs.iteritems():
     if sensor != "database":
         if conf["enabled"]=="true":
             try:

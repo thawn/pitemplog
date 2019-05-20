@@ -31,7 +31,7 @@ var displayMessages = function (message) {
      * @param: message: html string containing the messages.
      */
     $('#messageWindow').append(message);
-    $('#messageWindow').slideDown(400);
+    $('#messageWindow').show();
 };
 
 var resetMessages = function () {
@@ -72,7 +72,7 @@ var getData = function (getVars, callback) {
     if (getQueryVariable('debug')) {
         getVars += '&debug=' + getQueryVariable('debug');
     }
-    resetMessages();
+    // resetMessages();
     $.getJSON(apiURL, getVars).done(function (data, textStatus, jqXHR) {
         if (data.log) {
             displayMessages(data.log);
@@ -84,19 +84,6 @@ var getData = function (getVars, callback) {
         }
     }).fail(displayFailMessage);
 };
-
-var checkErrors = function (data) {
-    if (data.dbErrors) {
-        showDBErrors(data.dbErrors);
-    }
-    if (data.sensorError) {
-        for ( var sensor in data.sensorError) {
-            $id = $('.sensorID[value="' + sensor + '"').parents('form').first()
-                    .parent();
-            showSensorErrors($id, data.sensorError[sensor]);
-        }
-    }
-}
 
 var getTemperature = function ($id) {
     /**
@@ -116,28 +103,18 @@ var getTemperature = function ($id) {
     });
 };
 
-var insertSensor = function (sensor, data) {
-    if (!data.sensor_config[sensor]['sensor']) {
-        data.sensor_config[sensor]['sensor'] = sensor;
-    }
-    var error_data;
-    if (data.sensorError) {
-        error_data = data.sensorError[sensor];
-    } else {
-        error_data = false;
-    }
+var insertSensor = function (sensor_data, error_data) {
     var parent_id;
-    if (data.sensor_config[sensor]['exturl']) {
-        if ($('#' + url2ID(data.sensor_config[sensor]['exturl'])).length < 1) {
-            addExternalSensorGroup(data.sensor_config[sensor]['extname'],
-                    data.sensor_config[sensor]['exturl']);
+    if (sensor_data['exturl']) {
+        if ($('#' + url2ID(sensor_data['exturl'])).length < 1) {
+            addExternalSensorGroup(sensor_data['extname'],
+                    sensor_data['exturl']);
         }
-        parent_id = url2ID(data.sensor_config[sensor]['exturl']);
+        parent_id = url2ID(sensor_data['exturl']);
     } else {
         parent_id = 'local_sensors';
     }
-    var $id = insertElement('#' + parent_id, data.sensor_config[sensor],
-            error_data);
+    var $id = insertElement('#' + parent_id, sensor_data, error_data);
     var id = $id.attr('id');
     $id.find('button, input, .input-group-addon>.glyphicon-refresh').data(
             'item-id', id);
@@ -225,14 +202,67 @@ var fillInElement = function (id, data, error_data) {
 };
 
 var refreshSensorData = function (id, data, sensor) {
-    var sensor_error;
-    if (data.sensorError) {
-        sensor_error = data.sensorError[sensor];
-    } else {
-        sensor_error = false;
+    if (!jQuery.isEmptyObject(data.local_sensors)) {
+        fillInElement(id, data.local_sensors[sensor],
+                data.local_sensor_error[sensor]);
     }
-    fillInElement(id, data.sensor_config[sensor], sensor_error);
+    if (!jQuery.isEmptyObject(data.remote_sensors)) {
+        fillInElement(id, data.remote_sensors[sensor],
+                data.remote_sensor_error[sensor]);
+    }
 };
+
+var loopThroughSensors = function (sensors, errors, refresh) {
+    for ( var sensor in sensors) {
+        var error;
+        if (errors) {
+            error = errors[sensor];
+        }
+        if (refresh) {
+            fillInElement($('[value="' + sensor + '"]').parents('form').first()
+                    .parent().attr('id'), sensors[sensor], error);
+        } else {
+            insertSensor(sensors[sensor], error);
+        }
+    }
+
+}
+
+var fillAllFields = function (data, refresh) {
+    if (data.db_config) {
+        fillInDBConfig(data.db_config);
+    }
+    if (!jQuery.isEmptyObject(data.local_sensors)) {
+        loopThroughSensors(data.local_sensors, data.local_sensor_error, refresh)
+    }
+    if (!jQuery.isEmptyObject(data.remote_sensors)) {
+        loopThroughSensors(data.remote_sensors, data.remote_sensor_error,
+                refresh)
+    }
+    $('#saveEverythingButton').html('Save entire configuration');
+    $('#saveEverythingButton').removeClass('btn-default').addClass(
+            'btn-primary');
+}
+
+var checkErrors = function (data) {
+    if (!jQuery.isEmptyObject(data.dbErrors)) {
+        showDBErrors(data.dbErrors);
+    }
+    if (!jQuery.isEmptyObject(data.local_sensor_error)) {
+        for ( var sensor in data.local_sensor_error) {
+            var $id = $('.sensorID[value="' + sensor + '"').parents('form')
+                    .first().parent();
+            showSensorErrors($id, data.local_sensor_error[sensor]);
+        }
+    }
+    if (!jQuery.isEmptyObject(data.remote_sensor_error)) {
+        for ( var sensor in data.remote_sensor_error) {
+            var $id = $('.sensorID[value="' + sensor + '"').parents('form')
+                    .first().parent();
+            showSensorErrors($id, data.remote_sensor_error[sensor]);
+        }
+    }
+}
 
 var showError = function ($id, message) {
     $id.parent('.form-group').removeClass('has-success').addClass('has-error')
@@ -248,7 +278,7 @@ var showSensorErrors = function ($id, errors) {
 
 var checkSensorErrors = function ($id, data, error_data) {
     var sensor = data.sensor
-    if (error_data || data.tabletest !== 'OK') {
+    if (error_data || (data.table && data.tabletest !== 'OK')) {
         showSensorErrors($id, error_data);
     } else {
         setButtonStatus($id.find('button[name="status-btn"]'), true, 'sensor');
@@ -259,7 +289,7 @@ var checkSensorErrors = function ($id, data, error_data) {
 var fillInDBConfig = function (data) {
     var $id = $('#dbConfig');
     for ( var i in data) {
-        $id.find('[name="database/' + i + '"]').val(data[i]);
+        $id.find('[name="' + i + '"]').val(data[i]);
     }
     checkDBErrors(data);
 };
@@ -275,7 +305,7 @@ var checkDBErrors = function (data) {
 var showDBErrors = function (errors) {
     var $id = $('#dbConfig');
     for ( var i in errors) {
-        showError($id.find('[name="database/' + i + '"]'), errors[i]);
+        showError($id.find('[name="' + i + '"]'), errors[i]);
     }
     setDBStatus(false);
 };
@@ -325,27 +355,8 @@ var setButtonStatus = function ($button, success, item) {
 };
 
 var loadPageData = function () {
-    getData('db_config&sensor_config', fillAllFields);
+    getData('db_config&local_sensors&remote_sensors', fillAllFields);
 };
-
-var fillAllFields = function (data, refresh) {
-    if (data.db_config) {
-        fillInDBConfig(data.db_config);
-    }
-    if (data.sensor_config) {
-        for ( var sensor in data.sensor_config) {
-            if (refresh) {
-                refreshSensorData($('[value="' + sensor + '"]').parents('form')
-                        .first().parent().attr('id'), data, sensor);
-            } else {
-                insertSensor(sensor, data);
-            }
-        }
-    }
-    $('#saveEverythingButton').html('Save entire configuration');
-    $('#saveEverythingButton').removeClass('btn-default').addClass(
-            'btn-primary');
-}
 
 /*
  * functions for submitting data:
@@ -367,14 +378,14 @@ var postData = function (action, postData, callback) {
     resetMessages();
     $.post(apiURL + '?action=' + action, postData).done(
             function cb(data, textStatus, jqXHR) {
+                if (data.log) {
+                    displayMessages(data.log);
+                }
                 if (data.confirm) {
                     confirmAction(data.confirm, cb);
                 } else {
-                    if (data.log) {
-                        displayMessages(data.log);
-                    }
                     if (data.alert) {
-                        alert(data.alert.message);
+                        alert(data.alert);
                     }
                     if (data.status === "success") {
                         callback(data);
@@ -408,10 +419,8 @@ var saveSensorConfig = function ($form) {
     var $button = $form.find('button[name="status-btn"]');
     setButtonStatus($button, 'loading', 'sensor');
     postData('save_sensor', $form.serialize(), function (data) {
-        if (data.sensor_config) {
-            refreshSensorData($button.data('item-id'), data, $form.find(
-                    'input[name="sensor"]').val());
-        }
+        refreshSensorData($button.data('item-id'), data, $form.find(
+                'input[name="sensor"]').val());
     });
 }
 
@@ -430,7 +439,9 @@ var confirmAction = function (data, callback) {
 }
 
 var saveEverything = function () {
-    var conf = {};
+    var conf = {
+        'all_sensors' : {}
+    };
     $('form').each(
             function () {
                 if (this.id !== 'newExternalSensor'
@@ -446,7 +457,7 @@ var saveEverything = function () {
                         conf.database = config;
                     } else {
                         var sensor = config.sensor;
-                        conf[sensor] = config;
+                        conf.all_sensors[sensor] = config;
                     }
                 }
             });
@@ -466,6 +477,7 @@ var toggleSensorDisableButton = function (event) {
     } else {
         action = 'disable_sensor';
     }
+    setButtonStatus($id.find('button[name="status-btn"]'), 'loading', 'sensor');
     postData(action, 'sensor=' + sensor, function (data) {
         refreshSensorData(id, data, sensor);
     });
@@ -476,10 +488,13 @@ var deleteSensor = function (event) {
     var $id = $(this).parents('form').parent();
     var answer = confirm('This will delete the sensor from the configuration file but will not remove any data from the database. Do you want to proceed?');
     if (answer == true) {
+        setButtonStatus($id.find('button[name="status-btn"]'), 'loading',
+                'sensor');
         postData('delete_sensor',
                 'sensor=' + $id.find('[name="sensor"]').val(), function (data) {
                     if (data.sensor) {
-                        $('[value="' + data.sensor + '"]').parents('form').parent().remove();
+                        $('[value="' + data.sensor + '"]').parents('form')
+                                .parent().remove();
                     }
                 });
     }
@@ -539,11 +554,10 @@ var getExternalConfig = function ($form) {
             function (data) {
                 addExternalSensorGroup(name, url);
                 var conf = {
-                    'sensor_config' : data.external_config
+                    'remote_sensors' : data.external_config
                 };
-                for ( var sensor in conf.sensor_config) {
-                    var $id = insertSensor(sensor, conf);
-                    addHiddenFields($id, $('#newExternalForm'));
+                for ( var sensor in conf.remote_sensors) {
+                    var $id = insertSensor(conf.remote_sensors[sensor], {});
                     $id.find('[name="temperature"]').val(getTemperature($id));
                     setButtonStatus($id.find('[name="status-btn"]'), 'unsaved',
                             'sensor');

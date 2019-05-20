@@ -77,14 +77,20 @@ def updateDB (database,table,extension):
     cur.close()
     os.remove(lockFile)
 
+if 'local_sensors' in config:
+  if 'remote_sensors' in config and isinstance(config['remote_sensors'], dict):
+      configs = config['local_sensors'].copy()
+      configs.update(config['remote_sensors'])
+  else:
+        configs = config['local_sensors']
 if len(sys.argv)>2:
-    for sensor, conf in config.iteritems():
+    for sensor, conf in configs.iteritems():
         if sensor != "database":
             if conf["enabled"]=="true":
                 if conf["table"]==sys.argv[2]:
                     updateDB(database,sys.argv[2],sys.argv[1])
 else:
-    for sensor, conf in config.iteritems():
+    for sensor, conf in configs.iteritems():
         if sensor != "database":
             if conf["enabled"]=="true":
                 if len(sys.argv)>1:

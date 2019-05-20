@@ -43,28 +43,28 @@ title: Database and Sensor Configuration
 		<form id="dbForm">
 			<div class="col-sm-3">
 				<div class="form-group">
-					<label for="database/host"><span class="text-danger">*</span>Host: </label> <input type="text" class="form-control"
-						name="database/host" placeholder="Enter Database Host" value="localhost" required data-toggle="tooltip"
+					<label for="host"><span class="text-danger">*</span>Host: </label> <input type="text" class="form-control"
+						name="host" placeholder="Enter Database Host" value="localhost" required data-toggle="tooltip"
 						title="The host where the database is running. The temperature logger must be able to reach it.">
 				</div>
 			</div>
 			<div class="col-sm-2">
 				<div class="form-group">
-					<label for="database/db"><span class="text-danger">*</span>Name: </label> <input type="text" class="form-control"
-						name="database/db" placeholder="Enter Database Name" value="temperatures" required pattern="[a-zA-Z_]{4,20}"
+					<label for="db"><span class="text-danger">*</span>Name: </label> <input type="text" class="form-control"
+						name="db" placeholder="Enter Database Name" value="temperatures" required pattern="[a-zA-Z_]{4,20}"
 						data-toggle="tooltip" title="The name of the database. Only letters and underscore. 4-20 Characters long.">
 				</div>
 			</div>
 			<div class="col-sm-2">
 				<div class="form-group ">
-					<label for="database/user"><span class="text-danger">*</span>User: </label> <input type="text" class="form-control"
-						name="database/user" placeholder="Database User" value="temp" required pattern="[a-zA-Z_]{4,20}"
+					<label for="user"><span class="text-danger">*</span>User: </label> <input type="text" class="form-control"
+						name="user" placeholder="Database User" value="temp" required pattern="[a-zA-Z_]{4,20}"
 						data-toggle="tooltip" title="Name of the database user.  Only letters and underscore. 4-20 Characters long.">
 				</div>
 			</div>
 			<div class="col-sm-2">
 				<div class="form-group">
-					<label for="database/pw">Password:</label> <input type="text" class="form-control" name="database/pw"
+					<label for="pw">Password:</label> <input type="text" class="form-control" name="pw"
 						placeholder="Database Password" value="temp" data-toggle="tooltip" title="Password of the database user.">
 				</div>
 			</div>
@@ -156,19 +156,19 @@ title: Database and Sensor Configuration
 				</div>
 				<div class="col-sm-2">
 					<div class="form-group ">
-						<label for="user"><span class="text-danger">*</span>Username:</label> <input
+						<label for="user">Username:</label> <input
 							id="newExtUsername" class="form-control" name="user" placeholder="username" value="" type="text">
 					</div>
 				</div>
 				<div class="col-sm-2">
 					<div class="form-group">
-						<label for="pw"><span class="text-danger">*</span>Password:</label> <input id="newExtPassword"
+						<label for="pw">Password:</label> <input id="newExtPassword"
 							class="form-control" name="pw" placeholder="password" value="" type="text">
 					</div>
 				</div>
 				<div class="col-sm-2">
 					<div class="form-group">
-						<label class="visible-xs" for="parser"><span class="text-danger">*</span>Parser: </label> <select
+						<label for="parser">Parser: </label> <select
 							id="newExtParser" class="form-control form-control-inline" name="parser"
 							onchange="this.className=this.options[this.selectedIndex].className">
 							<option value="none" class="form-control form-control-inline">no parser</option>
@@ -177,6 +177,7 @@ title: Database and Sensor Configuration
 				</div>
 				<div class="col-sm-2">
 					<div class="form-group">
+					<label for="getExternal">Action: </label>
 						<button type="submit" id="getExternal" class="btn btn-primary" data-loading-text="Loading...">
 							<span class="glyphicon glyphicon-cloud-download"></span> Download external configuration
 						</button>

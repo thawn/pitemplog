@@ -24,7 +24,7 @@
                 </li>
               </ul>
               <ul class="nav navbar-nav navbar-right">
-                <li{% capture conf %}{{ site.baseurl }}/conf/conf.php{% endcapture %}{% if page.url == conf %} class="active"{% endif %}><a href="{{ site.baseurl }}/conf/conf.php"><span class="glyphicon glyphicon-cog"></span> Configuration</a></li>
+                <li{% capture conf %}{{ site.baseurl }}/conf/{% endcapture %}{% if page.url == conf %} class="active"{% endif %}><a href="{{ site.baseurl }}/conf/"><span class="glyphicon glyphicon-cog"></span> Configuration</a></li>
               </ul>
             </div>
           </div>

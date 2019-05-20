@@ -58,7 +58,8 @@ if ($_GET) {
 		 */
 		$config_file = "conf/config.json";
 		if (file_exists( $config_file )) {
-			echo file_get_contents( $config_file );
+			$conf = json_decode( file_get_contents( $config_file ), true );
+			echo json_encode( $conf['local_sensors'] );
 			exit();
 		}
 	}

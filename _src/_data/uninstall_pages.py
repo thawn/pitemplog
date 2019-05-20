@@ -18,8 +18,13 @@ wwwConfigPath = os.path.join(jekyll_conf['destination'], 'conf/', 'config.json')
 if (os.path.exists(wwwConfigPath)):
   with open(wwwConfigPath) as config_file:
     config=json.load(config_file)
-  for sensor, conf in config.iteritems():
-    if sensor != "database":
+  if 'local_sensors' in config:
+    if 'remote_sensors' in config and isinstance(config['remote_sensors'], dict):
+      configs = config['local_sensors'].copy()
+      configs.update(config['remote_sensors'])
+    else:
+      configs = config['local_sensors']
+    for sensor, conf in configs.iteritems():
       categoryPath=os.path.join(jekyll_conf['destination'],conf["category"])
       if os.path.exists(categoryPath):
         print("Deleting: "+categoryPath)

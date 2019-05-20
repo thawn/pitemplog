@@ -31,3 +31,4 @@ _site/
 .jekyll-assets-cache/
 dist/
 /vendor/
+htdocs_debug/ 
