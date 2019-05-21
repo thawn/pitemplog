@@ -121,12 +121,9 @@ function get_sensor_temperature($response, $data) {
  * @param array $conf
  * @param object $data
  */
-function save_everything($conf, $data) {
-	global $response;
+function save_everything($response, $conf, $data) {
 	foreach ( $data as $prop => $config ) {
-		if ($prop === 'database') {
-			$conf->save_database_config( $config, FALSE );
-		} elseif (substr_compare( $prop, '_sensors', - 8 ) === 0) {
+		if (substr_compare( $prop, '_sensors', - 8 ) === 0) {
 			foreach ( $config as $sensor ) {
 				$conf->save_sensor_config( $sensor, FALSE );
 			}
@@ -164,9 +161,6 @@ if ($_GET) {
 if (isset( $_GET['action'] )) {
 	$conf = new ConfigClass( $response );
 	switch ($_GET['action']) {
-		case 'save_db' :
-			$conf->save_database_config( $_POST );
-			break;
 		case 'save_sensor' :
 			$conf->save_sensor_config( $_POST );
 			break;
@@ -184,7 +178,7 @@ if (isset( $_GET['action'] )) {
 			$conf->create_pages( $response );
 			break;
 		case 'save_everything' :
-			save_everything( $conf, json_decode( $_POST['conf'], TRUE ) );
+			save_everything( $response, $conf, json_decode( $_POST['conf'], TRUE ) );
 			break;
 		case 'get_external' :
 			$response->external_config = getExternal( $response, $_POST, 'config' );

@@ -12,10 +12,10 @@ class DBHandler extends AutoAssignProp {
 	 * 
 	 * @todo remove possibility to configure database via config file. Switch entirely to using environment variables (for safety reasons).
 	 */
-	public $host = 'localhost';
-	public $db = 'temperatures';
-	public $user = 'temp';
-	public $pw = 'temp';
+	protected $host = 'localhost';
+	protected $db = 'temperatures';
+	protected $user = 'temp';
+	protected $pw = 'temp';
 	public $aggregateTables = [ 
 			'_5min',
 			'_15min',
@@ -53,22 +53,8 @@ class DBHandler extends AutoAssignProp {
 		}
 		return $val;
 	}
-	function set_host(string $val) {
-		$this->host = filter_var( $val, FILTER_SANITIZE_URL );
-		if (! filter_var( gethostbyname( $this->host . '.' ), FILTER_VALIDATE_IP )) {
-			$this->set_error( 'host', 'The database host name must be a valid and reachable ip address or domain name.' );
-		}
-	}
-	function set_db(string $val) {
-		$this->db = $this->filter_default( $val, 'db' );
-	}
-	function set_user(string $val) {
-		$this->user = $this->filter_default( $val, 'user' );
-	}
-	function set_pw(string $val) {
-		$this->pw = $val;
-	}
 	function set_aggregateTables(string $val) {
+		$this->aggregateTables = [];
 		foreach ( $val as $suffix ) {
 			$this->aggregateTables[] = $this->filter_default( $val, 'aggregateTables' );
 		}
@@ -77,8 +63,9 @@ class DBHandler extends AutoAssignProp {
 		$this->dbtest = $val === 'OK' ? 'OK' : '';
 	}
 	function set_error(string $prop, string $message) {
+		$this->dbtest = '';
 		$this->has_error = TRUE;
-		$this->response->dbErrors[$prop] = $message;
+		$this->response->dbErrors[] = $message;
 	}
 	/**
 	 * Open a connection to the database.

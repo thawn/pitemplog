@@ -33,63 +33,25 @@ title: Database and Sensor Configuration
 <!-- /.carousel -->
 
 <div class="container">
-	<h2>Database configuration</h2>
-	<p>Enter the host of the database server, the database name, and the name and password of a database user that has
-		full access to that database.</p>
-	<p>
-		<span class="text-danger">* required field.</span>
-	</p>
+	<h2>Database status</h2>
 	<div id="dbConfig" class="row small-gutter">
-		<form id="dbForm">
-			<div class="col-sm-3">
-				<div class="form-group">
-					<label for="host"><span class="text-danger">*</span>Host: </label> <input type="text" class="form-control"
-						name="host" placeholder="Enter Database Host" value="localhost" required data-toggle="tooltip"
-						title="The host where the database is running. The temperature logger must be able to reach it.">
-				</div>
+		<div class="col-sm-1">
+			<div class="form-group">
+				<label for="db-status-btn">Status:</label><br>
+				<button id="db-status-btn" name="status-btn" class="btn btn-default" data-toggle="tooltip"
+					title="Error: Cannot connect to the database.">
+					<span class="glyphicon glyphicon-refresh"></span>
+				</button>
 			</div>
-			<div class="col-sm-2">
-				<div class="form-group">
-					<label for="db"><span class="text-danger">*</span>Name: </label> <input type="text" class="form-control"
-						name="db" placeholder="Enter Database Name" value="temperatures" required pattern="[a-zA-Z_]{4,20}"
-						data-toggle="tooltip" title="The name of the database. Only letters and underscore. 4-20 Characters long.">
-				</div>
+		</div>
+		<div class="col-sm-2">
+			<div class="form-group">
+				<label for="db-check-btn">Action:</label><br>
+				<button id="db-check-btn" class="btn btn-info" data-toggle="tooltip" title="Check the database connection.">
+					<span class="glyphicon glyphicon-refresh"></span>
+				</button>
 			</div>
-			<div class="col-sm-2">
-				<div class="form-group ">
-					<label for="user"><span class="text-danger">*</span>User: </label> <input type="text" class="form-control"
-						name="user" placeholder="Database User" value="temp" required pattern="[a-zA-Z_]{4,20}"
-						data-toggle="tooltip" title="Name of the database user.  Only letters and underscore. 4-20 Characters long.">
-				</div>
-			</div>
-			<div class="col-sm-2">
-				<div class="form-group">
-					<label for="pw">Password:</label> <input type="text" class="form-control" name="pw"
-						placeholder="Database Password" value="temp" data-toggle="tooltip" title="Password of the database user.">
-				</div>
-			</div>
-			<div class="col-sm-1">
-				<div class="form-group">
-					<label for="db-status-btn">Status:</label><br>
-					<button id="db-status-btn" name="status-btn" class="btn btn-default" data-toggle="tooltip"
-						title="Error: Cannot connect to the database.">
-						<span class="glyphicon glyphicon-refresh"></span>
-					</button>
-				</div>
-			</div>
-			<div class="col-sm-2">
-				<div class="form-group">
-					<label for="db-save-btn">Action:</label><br>
-					<button id="db-save" class="btn btn-primary" type="submit" data-toggle="tooltip"
-						title="Save the database configuration.">
-						<span class="glyphicon glyphicon-save"></span>
-					</button>
-					<button id="db-check-btn" class="btn btn-info" data-toggle="tooltip" title="Check the database connection.">
-						<span class="glyphicon glyphicon-refresh"></span>
-					</button>
-				</div>
-			</div>
-		</form>
+		</div>
 	</div>
 	<div id="local_sensors" style="display: none;">
 		<hr>

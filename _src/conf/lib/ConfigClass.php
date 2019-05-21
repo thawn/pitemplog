@@ -61,6 +61,7 @@ class ConfigClass {
 	 */
 	function __construct(ResponseClass $response, string $config_file = NULL) {
 		$this->response = $response;
+		$this->database = new DBHandler( $this->response );
 		if ($config_file)
 			$this->config_file = $config_file;
 		$this->sensordir = $_ENV['SENSOR_DIR'] ?: '/sys/bus/w1/devices/';
@@ -72,9 +73,6 @@ class ConfigClass {
 			} else {
 				$this->import_data( $conf );
 			}
-		}
-		if (! $this->database) {
-			$this->database = new DBHandler( $this->response );
 		}
 		$this->populate_local_sensors();
 		if ($this->config_changed) {
@@ -171,15 +169,6 @@ class ConfigClass {
 	}
 
 	/**
-	 * Add a database handler.
-	 *
-	 * @param array $data
-	 */
-	function add_database(array $data) {
-		$this->database = new DBHandler( $this->response );
-	}
-
-	/**
 	 * upgrade configuration of an older version to the current version
 	 *
 	 * @param array $conf
@@ -204,9 +193,6 @@ class ConfigClass {
 	 * @param array $data
 	 */
 	function import_data(array $data) {
-		if (isset( $data['database'] )) {
-			$this->add_database( $data['database'] );
-		}
 		foreach ( $data['local_sensors'] as $sensor ) {
 			$this->add_sensor( $sensor, 'local' );
 		}
@@ -216,18 +202,6 @@ class ConfigClass {
 		foreach ( $data['push_servers'] as $sensor ) {
 			$this->push_servers[$sensor['sensor']] = new PushServer( $this->response, $sensor );
 		}
-	}
-
-	/**
-	 * Update database configuration and save the configuration to file.
-	 *
-	 * @param array $data
-	 */
-	function save_database_config(array $data, $save_to_disk = TRUE) {
-		$this->add_database( $data );
-		$this->response->db_config = $this->database;
-		if ($save_to_disk)
-			$this->write_config();
 	}
 
 	/**

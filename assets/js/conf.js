@@ -68,12 +68,11 @@ var getData = function (getVars, callback) {
      * @param: callback: function that is executed upon successful execution of
      *         the request receives the data as parameter
      */
-    var url;
     if (getQueryVariable('debug')) {
         getVars += '&debug=' + getQueryVariable('debug');
     }
     // resetMessages();
-    $.getJSON(apiURL, getVars).done(function (data, textStatus, jqXHR) {
+    $.getJSON(apiURL, getVars).done(function (data) {
         if (data.log) {
             displayMessages(data.log);
         }
@@ -228,16 +227,31 @@ var loopThroughSensors = function (sensors, errors, refresh) {
 
 }
 
+var checkDBErrors = function (data) {
+    if (data.db_config.dbtest != 'OK') {
+        showDBErrors(data.dbErrors);
+    } else {
+        setButtonStatus($('#db-status-btn'), true, 'database');
+    }
+};
+
+var showDBErrors = function (errors) {
+    for ( var i in errors) {
+        showError($('#db-status-btn'), errors[i]);
+    }
+    setButtonStatus($('#db-status-btn'), false, 'database');
+};
+
 var fillAllFields = function (data, refresh) {
-    if (data.db_config) {
-        fillInDBConfig(data.db_config);
+    if (!jQuery.isEmptyObject(data.db_config)) {
+        checkDBErrors(data);
     }
     if (!jQuery.isEmptyObject(data.local_sensors)) {
-        loopThroughSensors(data.local_sensors, data.local_sensor_error, refresh)
+        loopThroughSensors(data.local_sensors, data.local_sensor_error, refresh);
     }
     if (!jQuery.isEmptyObject(data.remote_sensors)) {
         loopThroughSensors(data.remote_sensors, data.remote_sensor_error,
-                refresh)
+                refresh);
     }
     $('#saveEverythingButton').html('Save entire configuration');
     $('#saveEverythingButton').removeClass('btn-default').addClass(
@@ -245,27 +259,28 @@ var fillAllFields = function (data, refresh) {
 }
 
 var checkErrors = function (data) {
+    var $id;
     if (!jQuery.isEmptyObject(data.dbErrors)) {
         showDBErrors(data.dbErrors);
     }
     if (!jQuery.isEmptyObject(data.local_sensor_error)) {
         for ( var sensor in data.local_sensor_error) {
-            var $id = $('.sensorID[value="' + sensor + '"').parents('form')
-                    .first().parent();
+            $id = $('.sensorID[value="' + sensor + '"').parents('form').first()
+                    .parent();
             showSensorErrors($id, data.local_sensor_error[sensor]);
         }
     }
     if (!jQuery.isEmptyObject(data.remote_sensor_error)) {
         for ( var sensor in data.remote_sensor_error) {
-            var $id = $('.sensorID[value="' + sensor + '"').parents('form')
-                    .first().parent();
+            $id = $('.sensorID[value="' + sensor + '"').parents('form').first()
+                    .parent();
             showSensorErrors($id, data.remote_sensor_error[sensor]);
         }
     }
 }
 
 var showError = function ($id, message) {
-    $id.parent('.form-group').removeClass('has-success').addClass('has-error')
+    $id.parent('.form-group').removeClass('has-success').addClass('has-error');
     $id.attr('data-original-title', message).tooltip('show');
 }
 
@@ -277,46 +292,12 @@ var showSensorErrors = function ($id, errors) {
 };
 
 var checkSensorErrors = function ($id, data, error_data) {
-    var sensor = data.sensor
     if (error_data || (data.table && data.tabletest !== 'OK')) {
         showSensorErrors($id, error_data);
     } else {
         setButtonStatus($id.find('button[name="status-btn"]'), true, 'sensor');
     }
 
-};
-
-var fillInDBConfig = function (data) {
-    var $id = $('#dbConfig');
-    for ( var i in data) {
-        $id.find('[name="' + i + '"]').val(data[i]);
-    }
-    checkDBErrors(data);
-};
-
-var checkDBErrors = function (data) {
-    if (data.dbErrors || (data.db_config && data.db_config.dbtest != 'OK')) {
-        showDBErrors(data.dbErrors);
-    } else {
-        setDBStatus(true);
-    }
-};
-
-var showDBErrors = function (errors) {
-    var $id = $('#dbConfig');
-    for ( var i in errors) {
-        showError($id.find('[name="' + i + '"]'), errors[i]);
-    }
-    setDBStatus(false);
-};
-
-var setDBStatus = function (success) {
-    var $button = $('#db-status-btn');
-    setButtonStatus($button, success, 'database');
-    if (success === true) {
-        $('#dbConfig').find('input').tooltip('hide').parent('.form-group')
-                .removeClass('has-error');
-    }
 };
 
 var removeAllBtnClass = function (index, className) {
@@ -353,6 +334,11 @@ var setButtonStatus = function ($button, success, item) {
                 + item + '.');
     }
 };
+
+var checkDBConnection = function () {
+    setButtonStatus($('#db-status-btn'), 'loading', 'database');
+    getData('db_config', checkDBErrors);
+}
 
 var loadPageData = function () {
     getData('db_config&local_sensors&remote_sensors', fillAllFields);
@@ -396,20 +382,6 @@ var postData = function (action, postData, callback) {
             }).fail(displayFailMessage);
 };
 
-var saveDBConfig = function ($form) {
-    /**
-     * saves the database configuration
-     * 
-     * @param: $form: jQuery object representing the database configuration form
-     */
-    setDBStatus('loading');
-    postData('save_db', $form.serialize(), function (data) {
-        if (data.db_config) {
-            fillInDBConfig(data.db_config);
-        }
-    });
-}
-
 var saveSensorConfig = function ($form) {
     /**
      * saves the database configuration
@@ -434,6 +406,8 @@ var confirmAction = function (data, callback) {
             }
             serialData = serialData.slice(0, -1);
             postData(data.action, serialData, callback);
+        } else {
+            location.reload();
         }
     }
 }
@@ -453,12 +427,8 @@ var saveEverything = function () {
                             config[field] = $(this).val();
                         }
                     });
-                    if (this.id == 'dbForm') {
-                        conf.database = config;
-                    } else {
-                        var sensor = config.sensor;
-                        conf.all_sensors[sensor] = config;
-                    }
+                    var sensor = config.sensor;
+                    conf.all_sensors[sensor] = config;
                 }
             });
     postData('save_everything', 'conf=' + JSON.stringify(conf),
@@ -584,10 +554,7 @@ var getExternalConfig = function ($form) {
 $(function () {
     $('[data-toggle="tooltip"]').tooltip();
     loadPageData();
-    $('#dbForm').submit(function (event) {
-        saveDBConfig($(this));
-        event.preventDefault();
-    });
+    $('#db-check-btn').click(checkDBConnection);
     $('#saveEverythingButton').click(function (event) {
         setButtonStatus($(this), 'loading');
         $(this).addClass('btn-lg')
@@ -613,6 +580,8 @@ $(function () {
                             if (match = this.value
                                     .match(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n\?\=]+)/im)) {
                                 result = match[1];
+                                result = result.charAt(0).toUpperCase()
+                                        + result.slice(1);
                             }
                             $('#newExternalForm').find('input[name="name"]')
                                     .val(result);
