@@ -68,7 +68,7 @@ class LocalSensor extends AutoAssignProp {
 		$this->tabletest = $val === 'OK' ? 'OK' : '';
 	}
 	function set_table_old(string $val) {
-		$this->response->logger('Caught attempt to write the property "table_old" to the configuration:', $this, 0);
+		$this->response->logger('Caught attempt to write the property "table_old" to the configuration:', $this, 3);
 	}
 	function set_error(string $prop, string $message) {
 		$this->has_error = TRUE;

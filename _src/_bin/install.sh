@@ -21,6 +21,7 @@ if ! [ -e /usr/local/bin/jekyll ]; then
 fi
 su - www-data -s /bin/bash -c "/usr/bin/python \"${target_dir}\"_data/create_pages.py"
 su - www-data -s /bin/bash -c "/usr/local/bin/jekyll build --source \"${target_dir}\""
+cp "${target_dir}"_bin/pitemplog.py '/usr/local/lib/python2.7/dist-packages/'
 cp "${target_dir}"_bin/*.py /usr/local/bin/
 cp "${target_dir}"_bin/pitemplog_backup.sh /usr/local/bin/
 cp "${target_dir}"_bin/pitemplog_restore.sh /usr/local/bin/
@@ -39,6 +40,8 @@ else
 fi
 echo "Installation successful. (re)starting apache now."
 if [ "${cgroup#/docker}" == "$cgroup" ]; then
+  #make sure necessary environment variables are set
+  sed -e 's/^/export /' /tmp/crontab_env > /etc/profile.d/pitemplog.sh
   #if we are not in a docker container, we restart the apache service
   service apache2 restart
 else

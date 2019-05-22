@@ -1,81 +1,42 @@
 #!/usr/bin/python
-import time
-import datetime
-import json
-import MySQLdb
-import sys
 import os
-from pprint import pprint
+import datetime
+#from pprint import pprint
 
-with open('/var/www/conf/config.json') as config_file:
-    config=json.load(config_file)
+import pitemplog
 
-database = MySQLdb.connect(host=config["database"]["host"], user=config["database"]["user"], passwd=config["database"]["pw"], db=config["database"]["db"])
 
-def resetDB (database,table,extension):
-    print(str(datetime.datetime.now())+" Resetting: "+table+extension)
+def reset_table(conf, database, table, extension):
+    table_name = table + extension
+    print(str(datetime.datetime.now()) + " Resetting: " + table_name)
     if not extension:
         print("Extension is empty, refusing to reset main table! Nothing done.")
         return
-    #create the lock file
-    lockFile="/tmp/"+table+extension+"_lock"
-    with open(lockFile,'a'):
-        os.utime(lockFile,None)
-    cur=database.cursor()
-    query="SELECT time FROM "+table+" ORDER BY time ASC LIMIT 1"
+    # create the lock file
+    lock_file = pitemplog.lock_table(table, extension)
+    cur, now, one_year, two_weeks, cur_interval = pitemplog.calculate_partition_borders(database, table)
+    count = int(0)
+    query = "DROP TABLE IF EXISTS `%s`" % table_name
     cur.execute(query)
-    rows=cur.fetchall()
-    now=int(time.time())
-    if not rows:
-        firstTime=now
-    else:
-        firstTime=int(rows[0][0])
-    oneYear=366*24*3600;
-    if (now-firstTime)>oneYear: #if first logged time is older than one year
-        firstInterval=now-oneYear
-    else:
-        firstInterval=firstTime
-    firstDateTime=datetime.date.fromtimestamp(firstInterval)
-    firstSaturdayDate=firstDateTime + datetime.timedelta( (5-firstDateTime.weekday()) % 7 )
-    firstSaturday=(firstSaturdayDate-datetime.date(1970,1,1)).total_seconds()
-    twoWeeks=int(14*24*3600)
-    curInterval=int(firstSaturday)
-    count=int(0)
-    query="DROP TABLE "+table+extension
-    cur.execute(query)
-    database.commit()    
-    query="CREATE TABLE "+table+extension+"(`time` int(11) DEFAULT NULL,`temp` float DEFAULT NULL) ENGINE=InnoDB DEFAULT CHARSET=latin1 PARTITION BY RANGE (time) ("
-    while curInterval<(now+oneYear):
-        query+=" PARTITION p"+str(count)+" VALUES LESS THAN ("+str(curInterval)+"),"
-        curInterval+=twoWeeks
-        count+=int(1)
-    query+=" PARTITION p"+str(count)+" VALUES LESS THAN MAXVALUE);"
-    #pprint(query)
+    database.commit()
+    query = "CREATE TABLE `%s`" % table_name + \
+        "(`time` int(11) DEFAULT NULL,`temp` float DEFAULT NULL) ENGINE=InnoDB DEFAULT CHARSET=latin1 PARTITION BY RANGE (time) ("
+    while cur_interval < (now + one_year):
+        query += " PARTITION p" + str(count) + " VALUES LESS THAN (" + str(cur_interval) + "),"
+        cur_interval += two_weeks
+        count += int(1)
+    query += " PARTITION p" + str(count) + " VALUES LESS THAN MAXVALUE);"
+    # pprint(query)
     cur.execute(query)
     database.commit()
     cur.close()
-    os.remove(lockFile)
-    print(str(datetime.datetime.now())+" Done.")
+    os.remove(lock_file)
+    print(str(datetime.datetime.now()) + " Done.")
 
-if 'local_sensors' in config:
-  if 'remote_sensors' in config and isinstance(config['remote_sensors'], dict):
-      configs = config['local_sensors'].copy()
-      configs.update(config['remote_sensors'])
-  else:
-        configs = config['local_sensors']
-if len(sys.argv)>2:
-    for sensor, conf in configs.iteritems():
-        if sensor != "database":
-            if conf["enabled"]=="true":
-                if conf["table"]==sys.argv[2]:
-                    resetDB(database,sys.argv[2],sys.argv[1])
-else:
-    for sensor, conf in configs.iteritems():
-        if sensor != "database":
-            if conf["enabled"]=="true":
-                if len(sys.argv)>1:
-                    resetDB(database,conf["table"],sys.argv[1])
-                else:
-                    for extension in config["database"]["aggregateTables"]:
-                        resetDB(database,conf["table"],extension)
-database.close()
+
+def main():
+    pitemplog.modify_tables(reset_table)
+
+
+if __name__ == "__main__":
+    main()

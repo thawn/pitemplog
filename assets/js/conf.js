@@ -227,21 +227,6 @@ var loopThroughSensors = function (sensors, errors, refresh) {
 
 }
 
-var checkDBErrors = function (data) {
-    if (data.db_config.dbtest != 'OK') {
-        showDBErrors(data.dbErrors);
-    } else {
-        setButtonStatus($('#db-status-btn'), true, 'database');
-    }
-};
-
-var showDBErrors = function (errors) {
-    for ( var i in errors) {
-        showError($('#db-status-btn'), errors[i]);
-    }
-    setButtonStatus($('#db-status-btn'), false, 'database');
-};
-
 var fillAllFields = function (data, refresh) {
     if (!jQuery.isEmptyObject(data.db_config)) {
         checkDBErrors(data);
@@ -298,6 +283,22 @@ var checkSensorErrors = function ($id, data, error_data) {
         setButtonStatus($id.find('button[name="status-btn"]'), true, 'sensor');
     }
 
+};
+
+var checkDBErrors = function (data) {
+    if (data.db_config.dbtest != 'OK') {
+        showDBErrors(data.dbErrors);
+    } else {
+        $('#db-status-btn').tooltip('hide');
+        setButtonStatus($('#db-status-btn'), true, 'database');
+    }
+};
+
+var showDBErrors = function (errors) {
+    for ( var i in errors) {
+        showError($('#db-status-btn'), errors[i]);
+    }
+    setButtonStatus($('#db-status-btn'), false, 'database');
 };
 
 var removeAllBtnClass = function (index, className) {

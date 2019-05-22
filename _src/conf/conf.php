@@ -122,6 +122,7 @@ function get_sensor_temperature($response, $data) {
  * @param object $data
  */
 function save_everything($response, $conf, $data) {
+	$response->db_config = $conf->database;
 	foreach ( $data as $prop => $config ) {
 		if (substr_compare( $prop, '_sensors', - 8 ) === 0) {
 			foreach ( $config as $sensor ) {
