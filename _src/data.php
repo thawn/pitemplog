@@ -9,7 +9,7 @@ $starttime = 0;
 $endtime = 0;
 $host = $_ENV['DB_HOST'] ?: 'localhost';
 $db = $_ENV['DB_DB'] ?: "temperatures";
-$table = "temperatures";
+$table = "";
 $user = $_ENV['DB_USER'] ?: "temp";
 $pw = $_ENV['DB_PW'] ?: "temp";
 /**
@@ -25,17 +25,8 @@ if ($_GET) {
 	if (isset( $_GET["start"] )) {
 		$starttime = intval( $_GET["start"] );
 	}
-	if (isset( $_GET["db"] )) {
-		$db = $_GET["db"];
-	}
 	if (isset( $_GET["table"] )) {
 		$table = $_GET["table"];
-	}
-	if (isset( $_GET["user"] )) {
-		$user = $_GET["user"];
-	}
-	if (isset( $_GET["pw"] )) {
-		$pw = $_GET["pw"];
 	}
 	if (isset( $_GET["aggregate"] )) {
 		switch ($_GET["aggregate"]) {
@@ -135,19 +126,14 @@ try {
 			\PDO::ATTR_PERSISTENT => true
 	) );
 
-	if ($_GET) {
-		$prefix = '';
-		echo "[\n";
+	if (isset( $_GET["table"] )) {
+		$result = [];
 		// Fetch the data and print it out as JSON
 		foreach ( $dbh->query( 'SELECT FROM_UNIXTIME(time),temp FROM ' . $table . ' WHERE time BETWEEN ' . $starttime . ' AND ' . $endtime . ' ORDER BY time ASC' ) as $row ) {
-			echo $prefix . " {\n";
-			// print_r($row);
-			echo '  "time": "' . $row['FROM_UNIXTIME(time)'] . '",' . "\n";
-			echo '  "temp": ' . $row['temp'] . ',' . "\n";
-			echo " }";
-			$prefix = ",\n";
+			$result[] = ['time' => $row['FROM_UNIXTIME(time)'],
+			'temp' => $row['temp']];
 		}
-		echo "\n]";
+		echo json_encode( $result );
 	}
 	// Close the connection
 	$dbh = null;

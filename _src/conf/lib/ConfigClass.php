@@ -25,6 +25,11 @@ class ConfigClass {
 	public $remote_sensors = [ ];
 	/**
 	 *
+	 * @var RemoteSensor[] || LocalSensor[]
+	 */
+	public $all_sensors = [ ];
+	/**
+	 *
 	 * @var PitemplogServer[]
 	 */
 	public $push_servers = [ ];
@@ -153,6 +158,7 @@ class ConfigClass {
 			$this->response->{$prop_name}[$data['sensor']] = $this->{$prop_name}[$data['sensor']];
 			$this->response->logger( 'Checking sensor for errors:' . $this->{$prop_name}[$data['sensor']]->has_error(), $this->{$prop_name}[$data['sensor']], 3 );
 			if (! $this->{$prop_name}[$data['sensor']]->has_error()) {
+				$this->merge_sensors();
 				$new_commands = $this->{$prop_name}[$data['sensor']]->get_commands();
 				if ($new_commands)
 					$this->commands = array_merge( $this->commands, $new_commands );
@@ -166,6 +172,13 @@ class ConfigClass {
 			$this->{$prop_name}[$data['sensor']]->set_error( 'table', 'This table is already used by another sensor, please choose a different table name.' );
 			$this->response->abort( 'Please change the table name of sensor: ' . $data['sensor'], $data );
 		}
+	}
+
+	/**
+	 * Merge local and remote sensors into one array.
+	 */
+	protected function merge_sensors() {
+		$this->all_sensors = array_merge( $this->remote_sensors, $this->local_sensors );
 	}
 
 	/**
@@ -400,7 +413,7 @@ class ConfigClass {
 		$this->response->logger( 'Received push data:', $data );
 		try {
 			foreach ( $data['sensor'] as $key => $sensor ) {
-				$sql = sprintf( 'INSERT INTO `%s`(time,temp) VALUES (?,?)', $this->remote_sensors[strval($sensor)]->table );
+				$sql = sprintf( 'INSERT INTO `%s`(time,temp) VALUES (?,?)', $this->remote_sensors[strval( $sensor )]->table );
 				$sth = $this->database->prepare( $sql );
 				$sth->execute( [ 
 						$data['time'][$key],
