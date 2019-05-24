@@ -32,7 +32,7 @@ class ConfigClass {
 	 *
 	 * @var float
 	 */
-	public $version = 2.0;
+	public $version = '2.0';
 	/**
 	 *
 	 * @var string
@@ -59,7 +59,7 @@ class ConfigClass {
 	 * @param ResponseClass $response
 	 * @param string $config_file
 	 */
-	function __construct(ResponseClass $response, string $config_file = NULL) {
+	public function __construct(ResponseClass $response, string $config_file = NULL) {
 		$this->response = $response;
 		$this->database = new DBHandler( $this->response );
 		if ($config_file)
@@ -68,7 +68,7 @@ class ConfigClass {
 		if (file_exists( $this->config_file )) {
 			$conf = json_decode( file_get_contents( $this->config_file ), true );
 			$this->response->logger( 'Raw configuration from the config file', $conf, 3 );
-			if (! isset( $conf['version'] ) || $conf['version'] < $this->version) {
+			if (! isset( $conf['version'] ) || version_compare( $conf['version'], $this->version, '<' )) {
 				$this->upgrade_config( $conf );
 			} else {
 				$this->import_data( $conf );
@@ -86,7 +86,7 @@ class ConfigClass {
 	 * @param string $sensor
 	 * @return string
 	 */
-	function get_sensor_type(string $sensor) {
+	public function get_sensor_type(string $sensor) {
 		if (array_key_exists( $sensor, $this->local_sensors )) {
 			return 'local_sensors';
 		} elseif (array_key_exists( $sensor, $this->remote_sensors )) {
@@ -103,7 +103,7 @@ class ConfigClass {
 	 * @param string $target_sensor:
 	 * @return boolean
 	 */
-	function is_table_used(string $table, string $target_sensor) {
+	public function is_table_used(string $table, string $target_sensor) {
 		$used = FALSE;
 		if ($table) {
 			$this->response->logger( sprintf( 'Checking whether table %s is already used by a sensor other than %s.', $table, $target_sensor ), $conf, 3 );
@@ -123,7 +123,7 @@ class ConfigClass {
 	 * @param array $data
 	 * @param string $type
 	 */
-	function add_sensor(array $data, string $type = 'local') {
+	protected function add_sensor(array $data, string $type = 'local') {
 		$sensor_type = $type . '_sensors';
 		if (isset( $this->{$sensor_type}[$data['sensor']] )) {
 			$this->response->logger( 'Updating sensor with data:', $data, 3 );
@@ -141,7 +141,7 @@ class ConfigClass {
 	 *
 	 * @param array $data
 	 */
-	function save_sensor_config(array $data, $save_to_disk = TRUE) {
+	public function save_sensor_config(array $data, $save_to_disk = TRUE) {
 		if (isset( $data['exturl'] )) {
 			$type = 'remote';
 		} else {
@@ -173,7 +173,7 @@ class ConfigClass {
 	 *
 	 * @param array $conf
 	 */
-	function upgrade_config(array $conf) {
+	protected function upgrade_config(array $conf) {
 		if (! isset( $conf['version'] )) { // import legacy configuration file
 			foreach ( $conf as $config ) {
 				if (! $sensor == 'database') {
@@ -192,7 +192,7 @@ class ConfigClass {
 	 *
 	 * @param array $data
 	 */
-	function import_data(array $data) {
+	protected function import_data(array $data) {
 		foreach ( $data['local_sensors'] as $sensor ) {
 			$this->add_sensor( $sensor, 'local' );
 		}
@@ -208,7 +208,7 @@ class ConfigClass {
 	 * Save changes to config file.
 	 * Also checks if there are changes and pages need to be rebuilt.
 	 */
-	function write_config(bool $create_pages = FALSE) {
+	public function write_config(bool $create_pages = FALSE) {
 		$this->response->logger( 'Attempting to write configuration to: ' . $this->config_file, $this, 3 );
 		if (is_writable( $this->config_file )) {
 			file_put_contents( $this->config_file, json_encode( $this, JSON_UNESCAPED_SLASHES ), LOCK_EX );
@@ -235,7 +235,7 @@ class ConfigClass {
 	 * @param array $conf
 	 * @return array
 	 */
-	function populate_local_sensors() {
+	protected function populate_local_sensors() {
 		// look for available temperature sensors
 		$sensors = [ ];
 		if (file_exists( $this->sensordir )) {
@@ -258,7 +258,7 @@ class ConfigClass {
 	 * @param string $sensor
 	 * @param bool $enabled
 	 */
-	function toggle_sensor(string $sensor, bool $enabled = TRUE) {
+	public function toggle_sensor(string $sensor, bool $enabled = TRUE) {
 		$sensor_type = $this->get_sensor_type( $sensor );
 		if ($sensor_type) {
 			$state = $enabled ? 'true' : 'false';
@@ -277,7 +277,7 @@ class ConfigClass {
 	 * @param string $sensor
 	 * @return boolean
 	 */
-	function delete_sensor(string $sensor) {
+	public function delete_sensor(string $sensor) {
 		$sensor_type = $this->get_sensor_type( $sensor );
 		$deleted = FALSE;
 		if ($sensor_type) {
@@ -296,7 +296,7 @@ class ConfigClass {
 	/**
 	 * Run commands that were stored in the command queue.
 	 */
-	function run_commands() {
+	public function run_commands() {
 		foreach ( $this->commands as $command ) {
 			$output = shell_exec( $command );
 			$this->response->logger( 'Executed command: ' . $command, $output );
@@ -306,7 +306,7 @@ class ConfigClass {
 	/**
 	 * execute commands that create the html pages and update the website.
 	 */
-	function create_pages() {
+	public function create_pages() {
 		$this->response->logger( 'Attempting to create pages:', FALSE, 3 );
 		$create_pages = escapeshellcmd( '/usr/local/share/templog/_data/create_pages.py' );
 		$create_pages .= ' 2>&1';
@@ -319,9 +319,119 @@ class ConfigClass {
 		$this->response->logger( 'Updated Site:', $jekyll_ouptut, 1 );
 	}
 
-/**
- *
- * @todo configure push to external server
- */
+	/**
+	 * Add/update a push server.
+	 *
+	 * @param array $data
+	 */
+	public function add_push_server(array $data) {
+		$this->push_servers[$data['url']] = new PushServer( $this->response, $data );
+		$this->write_config();
+	}
+
+	/**
+	 * Push the local sensor configuration to an external server.
+	 *
+	 * @param array $server_data
+	 */
+	public function push_config(array $server_data) {
+		if (! isset( $server_data['url'] )) {
+			$this->response->abort( 'Could not process sensor without an url: ', $server_data );
+		}
+		$ch = curl_init();
+		curl_setopt( $ch, CURLOPT_HEADER, 0 );
+		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+		$push_url = $server_data['url'] . '?action=receive_push_config';
+		if ($this->response->get_debug()) {
+			$push_url .= '&debug=' . $this->response->get_debug();
+		}
+		curl_setopt( $ch, CURLOPT_URL, $push_url );
+		curl_setopt( $ch, CURLOPT_POST, 1 );
+		$local_sensor_config = json_decode( json_encode( $this->local_sensors ), TRUE );
+		$local_sensor_config = ConfigClass::local_2_remote( $local_sensor_config, $server_data );
+		foreach ( $local_sensor_config as $sensor => $conf ) {
+			$local_sensor_config[$sensor]['exturl'] = 'http://' . $_SERVER['HTTP_HOST'];
+			$local_sensor_config[$sensor]['extname'] = 'Pushed data: ' . gethostname();
+		}
+		$this->response->logger( 'Merged sensor config:', $local_sensor_config, 3 );
+		$this->response->logger( 'Urlencoded sensor config:', http_build_query( $local_sensor_config ), 3 );
+		curl_setopt( $ch, CURLOPT_POSTFIELDS, http_build_query( $local_sensor_config ) );
+		$raw_result = curl_exec( $ch );
+		$result = json_decode( $raw_result, true );
+		if ($result) {
+			$this->response->logger( sprintf( 'Pushed configuration to: %s ', $push_url ), FALSE, 3 );
+			if (! empty( $result['log'] )) {
+				$this->response->log .= sprintf( '<div class="panel panel-info"><div class="panel-heading">Push server (url: %s) responded with messages:</div><div class="panel-body">%s</div></div>', $push_url, $result['log'] );
+				unset( $result['log'] );
+			}
+			$this->response->logger( sprintf( 'Received answer from: %s ', $push_url ), $result, 3 );
+			if ($result['status'] === 'success') {
+				$this->response->logger( 'Saving server data:', $server_data, 3 );
+				$this->add_push_server( $server_data );
+				$this->response->push_servers = $this->push_servers;
+			} else {
+				$this->response->abort( 'Could not push configuration to: ' . $server_data['url'], $result );
+			}
+		} else {
+			$this->response->abort( 'Remote API error: ' . $push_url, $raw_result );
+		}
+	}
+	/**
+	 * Save sensor configuration received by a push client.
+	 *
+	 * @param array $data
+	 */
+	public function receive_push_config(array $data) {
+		$this->response->logger( 'Received sensor config:', $data, 3 );
+		foreach ( $data as $sensor => $conf ) {
+			if (isset( $conf['table'] ) && isset( $conf['sensor'] )) {
+				$counter = 1;
+				while ( $this->is_table_used( $conf['table'], $conf['sensor'] ) ) {
+					$conf['table'] = sprintf( '%s_%2d', substr( $conf['table'], 0, - 3 ), $counter ++ );
+				}
+				$conf['push'] = 'true';
+				$this->save_sensor_config( $conf );
+			}
+		}
+	}
+	public function save_pushed_data(array $data) {
+		$this->database->open_connection();
+		$this->database->begin();
+		$this->response->logger( 'Received push data:', $data );
+		try {
+			foreach ( $data['sensor'] as $key => $sensor ) {
+				$sql = sprintf( 'INSERT INTO `%s`(time,temp) VALUES (?,?)', $this->remote_sensors[strval($sensor)]->table );
+				$sth = $this->database->prepare( $sql );
+				$sth->execute( [ 
+						$data['time'][$key],
+						$data['temp'][$key]
+				] );
+				$sth = NULL;
+			}
+			$this->database->commit();
+		} catch ( \PDOException $e ) {
+			$this->database->roll_back();
+			$this->response->abort( 'Caught error trying to save pushed data: ' . $e->getMessage() );
+		}
+	}
+
+	/**
+	 * Convert local sensor configuration into remote sensor configuration by merging the sensor
+	 * configuration with the remote server configuration.
+	 *
+	 * @param array $sensor_data
+	 * @param array $server_data
+	 * @return array
+	 */
+	public static function local_2_remote(array $sensors, array $server_data) {
+		$ext_conf = array_combine( array_map( function ($k) {
+			return 'ext' . $k;
+		}, array_keys( $server_data ) ), $server_data );
+		foreach ( $sensors as $sensor => $conf ) {
+			$sensors[$sensor] = array_merge( ( array ) $conf, $ext_conf );
+			$sensors[$sensor]['exttable'] = $sensors[$sensor]['table'];
+		}
+		return $sensors;
+	}
 }
 ?>

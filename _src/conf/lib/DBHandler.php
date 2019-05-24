@@ -33,7 +33,7 @@ class DBHandler extends AutoAssignProp {
 	 * @param ResponseClass $response
 	 * @param array $data
 	 */
-	function __construct(ResponseClass $response, array $data = []) {
+	public function __construct(ResponseClass $response, array $data = []) {
 		parent::__construct( $response );
 		$this->init_props( $data );
 		$this->host = $_ENV['DB_HOST'] ?: 'localhost';
@@ -42,27 +42,16 @@ class DBHandler extends AutoAssignProp {
 		$this->pw = $_ENV['DB_PW'] ?: 'temp';
 		$this->open_connection();
 	}
-	function filter_default(string $val, string $field, string $regexp = "/^[a-zA-Z_]{4,20}$/", string $message = '') {
-		$val = filter_var( $val, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_BACKTICK );
-		if (! filter_var( $val, FILTER_VALIDATE_REGEXP, [ 
-				'options' => [ 
-						'regexp' => $regexp
-				]
-		] )) {
-			$this->set_error( $field, 'Only letters and underscore allowed. The ' . $field . ' name must be 4-20 characters long.' );
-		}
-		return $val;
-	}
-	function set_aggregateTables(string $val) {
+	public function set_aggregateTables(string $val) {
 		$this->aggregateTables = [];
 		foreach ( $val as $suffix ) {
 			$this->aggregateTables[] = $this->filter_default( $val, 'aggregateTables' );
 		}
 	}
-	function set_dbtest(string $val) {
+	public function set_dbtest(string $val) {
 		$this->dbtest = $val === 'OK' ? 'OK' : '';
 	}
-	function set_error(string $prop, string $message) {
+	public function set_error(string $prop, string $message) {
 		$this->dbtest = '';
 		$this->has_error = TRUE;
 		$this->response->dbErrors[] = $message;
@@ -70,7 +59,7 @@ class DBHandler extends AutoAssignProp {
 	/**
 	 * Open a connection to the database.
 	 */
-	function open_connection() {
+	public function open_connection() {
 		try {
 			$this->dbh = new \PDO( 'mysql:host=' . $this->host . ';dbname=' . $this->db, $this->user, $this->pw, array (
 					\PDO::ATTR_PERSISTENT => true
@@ -98,7 +87,7 @@ class DBHandler extends AutoAssignProp {
 	/**
 	 * Test whether the database connection exists.
 	 */
-	function test_connection() {
+	public function test_connection() {
 		return isset( $this->dbh );
 	}
 	/**
@@ -107,13 +96,36 @@ class DBHandler extends AutoAssignProp {
 	 * @param string $query
 	 * @return \PDOStatement
 	 */
-	function query(string $query) {
+	public function query(string $query) {
 		return $this->dbh->query( $query );
+	}
+	public function prepare($sql) {
+		return $this->dbh->prepare($sql);
+	}
+	public function begin() {
+		return $this->dbh->beginTransaction();
+	}
+	public function commit() {
+		return $this->dbh->commit();
+	}
+	public function roll_back() {
+		return $this->dbh->rollBack();
+	}
+	protected function filter_default(string $val, string $field, string $regexp = "/^[a-zA-Z_]{4,20}$/", string $message = '') {
+		$val = filter_var( $val, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_BACKTICK );
+		if (! filter_var( $val, FILTER_VALIDATE_REGEXP, [
+				'options' => [
+						'regexp' => $regexp
+				]
+		] )) {
+			$this->set_error( $field, 'Only letters and underscore allowed. The ' . $field . ' name must be 4-20 characters long.' );
+		}
+		return $val;
 	}
 	/**
 	 * make sure the database connection is closed properly
 	 */
-	function __destruct() {
+	public function __destruct() {
 		$this->dbh = null;
 	}
 }

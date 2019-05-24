@@ -19,9 +19,9 @@ ln -s /etc/apache2/sites-available/templog.conf /etc/apache2/sites-enabled/0000-
 if ! [ -e /usr/local/bin/jekyll ]; then
   ln -s /usr/bin/jekyll /usr/local/bin/jekyll
 fi
+cp "${target_dir}"_bin/pitemplog.py '/usr/local/lib/python2.7/dist-packages/'
 su - www-data -s /bin/bash -c "/usr/bin/python \"${target_dir}\"_data/create_pages.py"
 su - www-data -s /bin/bash -c "/usr/local/bin/jekyll build --source \"${target_dir}\""
-cp "${target_dir}"_bin/pitemplog.py '/usr/local/lib/python2.7/dist-packages/'
 cp "${target_dir}"_bin/*.py /usr/local/bin/
 cp "${target_dir}"_bin/pitemplog_backup.sh /usr/local/bin/
 cp "${target_dir}"_bin/pitemplog_restore.sh /usr/local/bin/

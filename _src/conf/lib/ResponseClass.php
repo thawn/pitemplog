@@ -15,6 +15,8 @@ class ResponseClass {
 	public $local_sensor_error = [ ];
 	public $remote_sensors = [ ];
 	public $remote_sensor_error = [ ];
+	public $push_servers = [];
+	public $push_server_errors = [];
 	public $config_changed = FALSE;
 	public $temperature = '';
 	public $confirm = FALSE;
@@ -30,14 +32,16 @@ class ResponseClass {
 	 */
 	protected $debug = 0;
 	protected $table_alerts = [ ];
-	function __construct() {
+	public function __construct() {
 		if (isset( $_GET['debug'] )) {
 			$this->debug = intval( $_GET['debug'] );
 		} elseif (isset( $_POST['debug'] )) {
 			$this->debug = intval( $_POST['debug'] );
 		}
 	}
-
+	public function get_debug(){
+		return $this->debug;
+	}
 	/**
 	 * store debug messages in log property
 	 *

@@ -35,7 +35,8 @@ def reset_table(conf, database, table, extension):
 
 
 def main():
-    pitemplog.modify_tables(reset_table)
+    config = pitemplog.PiTempLogConf()
+    config.modify_tables(reset_table)
 
 
 if __name__ == "__main__":

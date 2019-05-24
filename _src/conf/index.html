@@ -105,41 +105,39 @@ title: Database and Sensor Configuration
 			<form id="newExternalForm">
 				<div class="col-sm-2">
 					<div class="form-group">
-						<label for="url"><span class="text-danger">*</span>URL:</label> <input id="newExtURL"
-							class="form-control" name="url" placeholder="http://diez-templog-1/data.php"
-							value="http://diez-templog-1/data.php" type="text">
+						<label for="url"><span class="text-danger">*</span>URL:</label> <input id="newExtURL" class="form-control"
+							name="url" placeholder="http://pitemplog/data.php" value="http://pitemplog/data.php" type="text">
 					</div>
 				</div>
 				<div class="col-sm-2">
 					<div class="form-group ">
-						<label for="name"><span class="text-danger">*</span>Name:</label> <input id="newExtName"
-							class="form-control" name="name" placeholder="Enter a name for the box." value="" type="text">
+						<label for="name"><span class="text-danger">*</span>Name:</label> <input id="newExtName" class="form-control"
+							name="name" placeholder="Enter a name for the box." value="" type="text">
 					</div>
 				</div>
 				<div class="col-sm-2">
 					<div class="form-group ">
-						<label for="user">Username:</label> <input
-							id="newExtUsername" class="form-control" name="user" placeholder="username" value="" type="text">
+						<label for="user">Username:</label> <input id="newExtUsername" class="form-control" name="user"
+							placeholder="username" value="" type="text">
 					</div>
 				</div>
 				<div class="col-sm-2">
 					<div class="form-group">
-						<label for="pw">Password:</label> <input id="newExtPassword"
-							class="form-control" name="pw" placeholder="password" value="" type="text">
+						<label for="pw">Password:</label> <input id="newExtPassword" class="form-control" name="pw" placeholder="password"
+							value="" type="text">
 					</div>
 				</div>
 				<div class="col-sm-2">
 					<div class="form-group">
-						<label for="parser">Parser: </label> <select
-							id="newExtParser" class="form-control form-control-inline" name="parser"
-							onchange="this.className=this.options[this.selectedIndex].className">
+						<label for="parser">Parser: </label> <select id="newExtParser" class="form-control form-control-inline"
+							name="parser" onchange="this.className=this.options[this.selectedIndex].className">
 							<option value="none" class="form-control form-control-inline">no parser</option>
 						</select>
 					</div>
 				</div>
 				<div class="col-sm-2">
 					<div class="form-group">
-					<label for="getExternal">Action: </label>
+						<label for="getExternal">Action: </label>
 						<button type="submit" id="getExternal" class="btn btn-primary" data-loading-text="Loading...">
 							<span class="glyphicon glyphicon-cloud-download"></span> Download external configuration
 						</button>
@@ -148,25 +146,48 @@ title: Database and Sensor Configuration
 			</form>
 		</div>
 	</div>
-	<div id="pushExternal" style="display: none;">
+	<div id="push_servers" style="display: none;">
+		<hr>
+		<h2>External Server configuration</h2>
+		<p>Data from local sensors is pushed over the network to an external server. This is particularly useful, if there
+			is a firewall between this pitemplog box and the external server that only allows connections from the box to the
+			server.</p>
+		<div class="row small-gutter hidden-xs">
+			<div class="col-sm-3">
+				<h5>
+					<span class="text-danger">*</span>URL:
+				</h5>
+			</div>
+			<div class="col-sm-3">
+				<h5>
+					<span class="text-danger">*</span>Name:
+				</h5>
+			</div>
+			<div class="col-sm-3">
+				<h5>Action:</h5>
+			</div>
+		</div>
+	</div>
+	<div id="newPushServer" style="display: none;">
 		<hr>
 		<h2>Configure central server</h2>
 		<p>Enter the URL and a name for a central server that is running pitemplog. Once the connection is set up, the
-			temperature data of all local sensors will be regularly uploaded to this server.</p>
+			temperature data of all local sensors will be regularly uploaded to this server. This is useful, if there is a
+			firewall between this pitemplog box and the external server that only allows connections in one direction.</p>
 		<!--  If the central server requires a username and password, you
 			can enter those as well. -->
 		<div class="row small-gutter">
-			<form id="newExternalForm">
-				<div class="col-sm-2">
+			<form id="newPushServerForm">
+				<div class="col-sm-3">
 					<div class="form-group">
 						<label for="url"><span class="text-danger">*</span>URL:</label> <input id="newExtURL" class="form-control"
-							name="url" placeholder="http://diez-templog-1/data.php" value="http://diez-templog-1/data.php" type="text">
+							name="url" placeholder="http://pitemplog/data.php" value="http://pitemplog/data.php" type="text">
 					</div>
 				</div>
-				<div class="col-sm-2">
+				<div class="col-sm-3">
 					<div class="form-group ">
 						<label for="name"><span class="text-danger">*</span>Name:</label> <input id="newExtName" class="form-control"
-							name="name" placeholder="Enter a name for the box." value="" type="text">
+							name="name" placeholder="Enter a name for the server." value="" type="text">
 					</div>
 				</div>
 				<!-- 
@@ -183,9 +204,10 @@ title: Database and Sensor Configuration
 					</div>
 				</div>
 				 -->
-				<div class="col-sm-2">
+				<div class="col-sm-3">
 					<div class="form-group">
-						<button type="submit" id="getExternal" class="btn btn-primary" data-loading-text="Loading...">
+						<label for="push-external-btn">Action: </label>
+						<button type="submit" name="push-external-btn" id="pushExternal" class="btn btn-primary" data-loading-text="Loading...">
 							<span class="glyphicon glyphicon-cloud-upload"></span> Upload configuration to central server
 						</button>
 					</div>
@@ -199,7 +221,8 @@ title: Database and Sensor Configuration
 			<button type="button" id="addExternal" class="btn btn-info" data-loading-text="Loading...">
 				<span class="glyphicon glyphicon-plus"></span> Add external source
 			</button>
-			<button type="button" id="pushToServer" class="btn btn-info pull-right" data-loading-text="Pushing...">
+			<button type="button" id="addPushServer" class="btn btn-info pull-right" data-loading-text="Pushing..."
+				style="display: none;">
 				<span class="glyphicon glyphicon-plus"></span> Configure central server
 			</button>
 		</div>
@@ -220,7 +243,8 @@ title: Database and Sensor Configuration
 	<div id="externalSensorHeading-template">
 		<hr>
 		<h3>External Sensor Name</h3>
-		<p>URL of external sensor</p><!-- ui to edit external configuration will go here. -->
+		<p>URL of external sensor</p>
+		<!-- ui to edit external configuration will go here. -->
 		<div class="row small-gutter hidden-xs">
 			<div class="col-sm-2">
 				<h5>Current Temperature:</h5>
@@ -322,12 +346,55 @@ title: Database and Sensor Configuration
 							title="Save the configuration for this sensor.">
 							<span class="glyphicon glyphicon-save"></span>
 						</button>
-						<button name="disable-btn" class="btn btn-warning" style="display: none;" data-toggle="tooltip" title="Disable this sensor.">
+						<button name="disable-btn" class="btn btn-warning" style="display: none;" data-toggle="tooltip"
+							title="Disable this sensor.">
 							<span class="glyphicon glyphicon-pause"></span>
 						</button>
 						<button name="delete-btn" class="btn btn-danger" style="display: none;" data-toggle="tooltip"
 							title="Delete this sensor.">
 							<span class="glyphicon glyphicon-remove"></span>
+						</button>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+	<div id="pushServerTemplate">
+		<h3 class="sensor-title visible-xs">Push server: url</h3>
+		<form class="push-server-form">
+			<div class="row small-gutter">
+				<div class="col-sm-3">
+					<div class="form-group">
+						<label class="visible-xs" for="url"><span class="text-danger">*</span>URL:</label> <input
+							class="form-control" name="url" placeholder="http://pitemplog/data.php"
+							value="" type="text">
+					</div>
+				</div>
+				<div class="col-sm-3">
+					<div class="form-group ">
+						<label class="visible-xs" for="name"><span class="text-danger">*</span>Name:</label> <input
+							class="form-control" name="name" placeholder="Enter a name for the external server" value="" type="text">
+					</div>
+				</div>
+				<!-- 
+				<div class="col-sm-2">
+					<div class="form-group ">
+						<label class="visible-xs" for="user"><span class="text-danger">*</span>Username:</label> <input
+							class="form-control" name="user" placeholder="username" value="" type="text">
+					</div>
+				</div>
+				<div class="col-sm-2">
+					<div class="form-group">
+						<label class="visible-xs" for="pw"><span class="text-danger">*</span>Password:</label> <input
+							class="form-control" name="pw" placeholder="password" value="" type="text">
+					</div>
+				</div>
+				 -->
+				<div class="col-sm-3">
+					<div class="form-group">
+						<label class="visible-xs" for="push-external-btn">Action: </label>
+						<button name="push-external-btn" type="submit" class="btn btn-primary" data-loading-text="Loading...">
+							<span class="glyphicon glyphicon-refresh"></span> Update configuration on central server
 						</button>
 					</div>
 				</div>

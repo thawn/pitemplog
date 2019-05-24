@@ -117,10 +117,6 @@ var insertSensor = function (sensor_data, error_data) {
     var id = $id.attr('id');
     $id.find('button, input, .input-group-addon>.glyphicon-refresh').data(
             'item-id', id);
-    $id.find('.input-group-addon>.glyphicon-refresh').click(function () {
-        $id = $('#' + $(this).data('item-id'));
-        $id.find('[name="temperature"]').val(getTemperature($id));
-    });
     $id.find('[data-toggle="tooltip"]').tooltip();
     $id.find('.sensor-form').submit(function (event) {
         saveSensorConfig($(this));
@@ -129,9 +125,19 @@ var insertSensor = function (sensor_data, error_data) {
     $id.find('button[name="disable-btn"]').click(toggleSensorDisableButton);
     $id.find('button[name="delete-btn"]').click(deleteSensor);
     $id.find('input').change(validateInput);
-    $id.find('[name="temperature"]').val(getTemperature($id));
     if (!$id.find('[name="table"]').val()) {
         setButtonStatus($id.find('[name="status-btn"]'), 'unsaved', 'sensor');
+    }
+    if (sensor_data['push'] === 'true') {
+        $id.find('[name="temperature"]').parents('.col-sm-2').first().hide();
+        $('#' + url2ID(sensor_data['exturl'])).find('div.row').first()
+                .children('.col-sm-2').first().hide();
+    } else {
+        $id.find('[name="temperature"]').val(getTemperature($id));
+        $id.find('.input-group-addon>.glyphicon-refresh').click(function () {
+            $id = $('#' + $(this).data('item-id'));
+            $id.find('[name="temperature"]').val(getTemperature($id));
+        });
     }
     $('#local_sensors').show();
     return $id;
@@ -224,7 +230,6 @@ var loopThroughSensors = function (sensors, errors, refresh) {
             insertSensor(sensors[sensor], error);
         }
     }
-
 }
 
 var fillAllFields = function (data, refresh) {
@@ -237,6 +242,9 @@ var fillAllFields = function (data, refresh) {
     if (!jQuery.isEmptyObject(data.remote_sensors)) {
         loopThroughSensors(data.remote_sensors, data.remote_sensor_error,
                 refresh);
+    }
+    if (!jQuery.isEmptyObject(data.push_servers)) {
+        insertPushServers(data.push_servers, data.push_server_errors, refresh);
     }
     $('#saveEverythingButton').html('Save entire configuration');
     $('#saveEverythingButton').removeClass('btn-default').addClass(
@@ -281,6 +289,9 @@ var checkSensorErrors = function ($id, data, error_data) {
         showSensorErrors($id, error_data);
     } else {
         setButtonStatus($id.find('button[name="status-btn"]'), true, 'sensor');
+        if (!data['exturl']) {
+            $('#addPushServer').show();
+        }
     }
 
 };
@@ -342,7 +353,8 @@ var checkDBConnection = function () {
 }
 
 var loadPageData = function () {
-    getData('db_config&local_sensors&remote_sensors', fillAllFields);
+    getData('db_config&local_sensors&remote_sensors&push_servers',
+            fillAllFields);
 };
 
 /*
@@ -413,23 +425,35 @@ var confirmAction = function (data, callback) {
     }
 }
 
+var extractFormData = function ($form) {
+    var config = {};
+    $form.find('input').each(function () {
+        var field = $(this).attr('name');
+        if (field !== 'temperature') {
+            config[field] = $(this).val();
+        }
+    });
+    return config
+}
+
 var saveEverything = function () {
     var conf = {
-        'all_sensors' : {}
+        'all_sensors' : {},
+        'push_servers' : {}
     };
     $('form').each(
             function () {
-                if (this.id !== 'newExternalSensor'
-                        && $(this).find('[name="table"]').val()) {
-                    var config = {};
-                    $(this).find('input').each(function () {
-                        var field = $(this).attr('name');
-                        if (field !== 'temperature') {
-                            config[field] = $(this).val();
-                        }
-                    });
+                if ($(this).find('[name="table"]').val()) {
+                    var config = extractFormData($(this));
                     var sensor = config.sensor;
                     conf.all_sensors[sensor] = config;
+                }
+                if ($(this).find('[name="url"]').val()
+                        && this.id !== 'newExternalForm'
+                        && this.id !== 'newPushServerForm') {
+                    var config = extractFormData($(this));
+                    var url = config.url;
+                    conf.push_servers[url] = config;
                 }
             });
     postData('save_everything', 'conf=' + JSON.stringify(conf),
@@ -500,9 +524,12 @@ var addHiddenFields = function ($id, $form) {
                                 + this.getAttribute('name') + '" value="'
                                 + this.value + '">');
             });
-    $id.find('form').append(
-            '<input type="hidden" class="ext-sensor" name="exttable" value="'
-                    + $id.find('input[name="table"]').val() + '">');
+    $id
+            .find('form')
+            .append(
+                    '<input type="hidden" class="ext-sensor" name="exttable" value="'
+                            + $id.find('input[name="table"]').val()
+                            + '"><input type="hidden" class="ext-sensor" name="push" value="">');
 
 };
 
@@ -544,10 +571,61 @@ var getExternalConfig = function ($form) {
             });
 }
 
-/**
- * 
- * @todo: configure push to external server
+/*
+ * Push configuration to external server
  */
+var insertPushServers = function (push_servers, push_server_errors, refresh) {
+    for ( var url in push_servers) {
+        var error;
+        if (push_server_errors) {
+            error = push_server_errors[url];
+        }
+        if (refresh) {
+            var $id = fillInElement($('[value="' + url + '"]').parents('form')
+                    .first().parent().attr('id'), push_servers[url], error);
+        } else {
+            var id = 'el' + elementCount;
+            var newElement = document.getElementById('pushServerTemplate')
+                    .cloneNode(true);
+            newElement.id = id;
+            newElement.style.display = 'none';
+            $('#push_servers').append(newElement);
+            elementCount++;
+            var $id = fillInElement(id, push_servers[url], error);
+            $id.find('.push-server-form').submit(function (event) {
+                pushConfig2Server($(this), true);
+                event.preventDefault();
+            });
+        }
+        $id.find('h3.sensor-title').html(
+                'External Server: ' + push_servers[url]['name']);
+        $id.find('button[name="push-external-btn"]').removeClass('btn-default')
+                .addClass('btn-primary').html(
+                        '<span class="glyphicon glyphicon-refresh"></span>'
+                                + ' Update configuration on central server');
+    }
+    $('#push_servers').slideDown(100);
+};
+
+var pushConfig2Server = function ($form, refresh) {
+    postData('push_config', $form.serialize(), function (data) {
+        insertPushServers(data.push_servers, data.push_server_errors, refresh);
+        $('#newPushServer').hide();
+    });
+};
+
+var url2Name = function ($form, input) {
+    var result = '';
+    var match
+    if (!$form.find('input[name="name"]').val()) {
+        if (match = input.value
+                .match(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n\?\=]+)/im)) {
+            result = match[1];
+            result = result.charAt(0).toUpperCase() + result.slice(1);
+        }
+        $form.find('input[name="name"]').val(result);
+    }
+};
 
 /*
  * code that is executed on page load:
@@ -570,22 +648,18 @@ $(function () {
         getExternalConfig($(this));
         event.preventDefault();
     });
-    $('#newExternalForm')
-            .find('input[name="url"]')
-            .change(
-                    function () {
-                        var result = '';
-                        var match
-                        if (!$('#newExternalForm').find('input[name="name"]')
-                                .val()) {
-                            if (match = this.value
-                                    .match(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n\?\=]+)/im)) {
-                                result = match[1];
-                                result = result.charAt(0).toUpperCase()
-                                        + result.slice(1);
-                            }
-                            $('#newExternalForm').find('input[name="name"]')
-                                    .val(result);
-                        }
-                    });
+    $('#newExternalForm').find('input[name="url"]').change(function () {
+        url2Name($('#newExternalForm'), this);
+    });
+    $('#addPushServer').click(function () {
+        $('#newPushServer').show();
+    });
+    $('#newPushServerForm').submit(function (event) {
+        setButtonStatus($(this), 'loading');
+        pushConfig2Server($(this), false);
+        event.preventDefault();
+    });
+    $('#newPushServerForm').find('input[name="url"]').change(function () {
+        url2Name($('#newPushServerForm'), this);
+    });
 });

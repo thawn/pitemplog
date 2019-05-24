@@ -18,7 +18,12 @@ class Autoloader {
 				return true;
 			}
 			$dir = dirname( $file );
-			$libfile = $dir . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . basename( $file );
+			$file = strtolower( $dir ) . DIRECTORY_SEPARATOR . basename( $file );
+			if (file_exists( $file )) {
+				require $file;
+				return true;
+			}
+			$libfile = strtolower($dir) . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . basename( $file );
 			if (file_exists( $libfile )) {
 				require $libfile;
 				return true;
@@ -54,15 +59,17 @@ $commands = [ ];
  * @param unknown $command
  * @return mixed
  */
-function getExternal($response, $config, $command) {
+function get_external($response, $config, $command) {
 	$ch = curl_init();
 	curl_setopt( $ch, CURLOPT_HEADER, 0 );
 	curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
 	if (array_key_exists( 'parser', $config ) && ! empty( $config['parser'] ) && $config['parser'] != 'none') {
-		$tempurl = 'http://' . $_SERVER['SERVER_NAME'] . '/assets/parser/' . $config['parser'] . '?url=' . (urlencode( $config['url'] )) . '&user=' . (urlencode( $config['username'] )) . '&pw=' . (urlencode( $config['pw'] ));
+		$tempurl = 'http://' . $_SERVER['SERVER_NAME'] . '/assets/parser/' . $config['parser'];
 		curl_setopt( $ch, CURLOPT_POST, 1 );
 		curl_setopt( $ch, CURLOPT_POSTFIELDS, http_build_query( array (
-				'postvar1' => 'value1'
+				'url' => $config['url'],
+				'user' => $config['username'],
+				'pw' => $config['pw']
 		) ) );
 	} else {
 		$tempurl = explode( '?', $config['url'] );
@@ -79,14 +86,7 @@ function getExternal($response, $config, $command) {
 	curl_close( $ch );
 	if (is_array( $result )) {
 		$response->logger( 'Got external config from: ' . $tempurl, $result, 3 );
-		$ext_conf = array_combine( array_map( function ($k) {
-			return 'ext' . $k;
-		}, array_keys( $config ) ), $config );
-		$response->logger( 'Processed url config:', $ext_conf, 3 );
-		foreach ( $result as $sensor => $conf ) {
-			$result[$sensor] = array_merge( ( array ) $conf, $ext_conf );
-			$result[$sensor]['exttable'] = $result[$sensor]['table'];
-		}
+		$result = ConfigClass::local_2_remote( $result, $config );
 		$response->logger( 'Merged external sensor config:', $result, 3 );
 	} else {
 		$response->logger( sprintf( 'Got temperature %f from %s', $result, $tempurl ), FALSE );
@@ -106,11 +106,11 @@ function get_sensor_temperature($response, $data) {
 	if (! $data['url']) {
 		$data['url'] = 'http://localhost/data.php';
 	}
-	$sensordata = getExternal( $response, $data, 'temperature' );
+	$sensordata = get_external( $response, $data, 'temperature' );
 	if ($sensordata) {
 		$temperature = $sensordata . ' ˚C';
 	} else {
-		$response->logger( 'Error: reading external temperature failed for sensor: ' . $data['sensor'], $data, 0 );
+		$response->logger( 'Error: reading temperature failed for sensor: ' . $data['sensor'], $data, 0 );
 	}
 	return $temperature;
 }
@@ -130,6 +130,11 @@ function save_everything($response, $conf, $data) {
 			}
 		}
 	}
+	if ($data['push_servers']) {
+		foreach ( $data['push_servers'] as $server ) {
+			$conf->push_config( $server );
+		}
+	}
 	$conf->write_config( TRUE );
 	$conf->run_commands();
 	$response->logger( 'Saved entire configuration:', $conf );
@@ -139,7 +144,7 @@ function save_everything($response, $conf, $data) {
  * Handle GET requests
  */
 if ($_GET) {
-	if (isset( $_GET['db_config'] ) || isset( $_GET['local_sensors'] ) || isset( $_GET['remote_sensors'] )) {
+	if (isset( $_GET['db_config'] ) || isset( $_GET['local_sensors'] ) || isset( $_GET['remote_sensors'] ) || isset( $_GET['push_servers'] )) {
 		$conf = new ConfigClass( $response );
 	}
 	if (isset( $_GET['db_config'] )) {
@@ -150,6 +155,9 @@ if ($_GET) {
 	}
 	if (isset( $_GET['remote_sensors'] )) {
 		$response->remote_sensors = $conf->remote_sensors;
+	}
+	if (isset( $_GET['push_servers'] )) {
+		$response->push_servers = $conf->push_servers;
 	}
 	if (isset( $_GET['temperature'] )) {
 		$response->temperature = get_sensor_temperature( $response, $_GET );
@@ -182,7 +190,13 @@ if (isset( $_GET['action'] )) {
 			save_everything( $response, $conf, json_decode( $_POST['conf'], TRUE ) );
 			break;
 		case 'get_external' :
-			$response->external_config = getExternal( $response, $_POST, 'config' );
+			$response->external_config = get_external( $response, $_POST, 'config' );
+			break;
+		case 'push_config' :
+			$conf->push_config( $_POST );
+			break;
+		case 'receive_push_config' :
+			$conf->receive_push_config( $_POST );
 			break;
 		default :
 			abortWithError( 'Error: unknown action:', $_GET['action'] );

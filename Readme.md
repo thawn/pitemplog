@@ -24,9 +24,6 @@ Jump directly to:
 * Flexible and easy setup of data sharing between several raspi sensor hubs so that all data can be visualized via one web frontend and data is backed up between several raspberry pi systems.
 * Backup of data and configuration via rsync to centralized server possible with minimal configuration effort via backup scripts.
 
-## ToDo
- - [ ] Add support for vibration sensors
-
 ## Screen shots
 
 ### Overview Page for Multiple Sensors
@@ -201,7 +198,7 @@ These packages are required on the raspi for running the database and web fronte
 * php
 * mysql (with a database and a user that has full privileges for said database)
 * jekyll (>2.x)
-* python-mysqldb
+* python-mysqldb (the debian package for [mysqlclient](https://github.com/PyMySQL/mysqlclient-python)
 * pip (only required for installing/updating pewee and pyyaml)
 * PyYAML (>3.x)
 * php5-curl
@@ -226,6 +223,7 @@ These packages are required on the system that deploys the logging system and we
 
 ## ToDo
 
-* Write selenium and python tests.
+ - [ ] Write selenium and python tests.
+ - [ ] Add support for vibration sensors
 
 

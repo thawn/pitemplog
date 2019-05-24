@@ -1,4 +1,7 @@
 <?php
+
+namespace Pitemplog;
+
 header( 'content-type: application/json; charset=utf-8' );
 header( "Access-Control-Allow-Origin: *" );
 $sensordir = $_ENV['SENSOR_DIR'] ?: '/sys/bus/w1/devices/';
@@ -10,11 +13,10 @@ $table = "temperatures";
 $user = $_ENV['DB_USER'] ?: "temp";
 $pw = $_ENV['DB_PW'] ?: "temp";
 /**
+ *
  * @todo get database configuration from config file
  */
 $aggregate = "_5min";
-$write_data = FALSE;
-$add_table = FALSE;
 if ($_GET) {
 	// print_r($_GET);
 	if (isset( $_GET["end"] )) {
@@ -53,7 +55,7 @@ if ($_GET) {
 	}
 	if (isset( $_GET["config"] ) && $_GET["config"] == "get") {
 		/**
-		 * 
+		 *
 		 * @todo return config only for internal sensors
 		 */
 		$config_file = "conf/config.json";
@@ -65,7 +67,7 @@ if ($_GET) {
 	}
 	if (isset( $_GET["gettemp"] )) {
 		// record the current temperature
-		$sensorpath = $sensordir . urldecode($_GET["gettemp"]) . "/w1_slave";
+		$sensorpath = $sensordir . urldecode( $_GET["gettemp"] ) . "/w1_slave";
 		if (file_exists( $sensorpath )) {
 			$sensordata = (substr( trim( file_get_contents( $sensorpath ) ), - 5 )) / 1000;
 			echo $sensordata;
@@ -75,44 +77,62 @@ if ($_GET) {
 			exit();
 		}
 	}
-}
-if ($_POST) {
-	// print_r($_POST);
-	if (isset( $_POST["temp"] )) {
-		$temperatures = explode( ',', $_POST["temp"] );
-		$write_data = TRUE;
-	}
-	if (isset( $_POST["time"] )) {
-		$times = explode( ',', $_POST["time"] );
-	} else {
-		$times = array (
-				time()
-		);
-	}
-	if (isset( $_POST["db"] )) {
-		$db = $_POST["db"];
-	}
-	if (isset( $_POST["table"] )) {
-		$table = $_POST["table"];
-	}
-	if (isset( $_POST["user"] )) {
-		$user = $_POST["user"];
-	}
-	if (isset( $_POST["pw"] )) {
-		$pw = $_POST["pw"];
+	if (isset( $_GET["action"] )) {
+		class Autoloader {
+			public static function register() {
+				spl_autoload_register( function ($class) {
+					$prefix = 'Pitemplog\\';
+					$len = strlen( $prefix );
+					if (strncmp( $prefix, $class, $len ) !== 0) {
+						return false;
+					}
+					$relative_class = substr( $class, $len );
+
+					$file = str_replace( '\\', DIRECTORY_SEPARATOR, $relative_class ) . '.php';
+					if (file_exists( $file )) {
+						require $file;
+						return true;
+					}
+					$dir = dirname( $file );
+					$file = strtolower( $dir ) . DIRECTORY_SEPARATOR . basename( $file );
+					if (file_exists( $file )) {
+						require $file;
+						return true;
+					}
+					$libfile = strtolower( $dir ) . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . basename( $file );
+					if (file_exists( $libfile )) {
+						require $libfile;
+						return true;
+					}
+					return false;
+				} );
+			}
+		}
+		Autoloader::register();
+		$response = new Conf\ResponseClass();
+		$conf = new Conf\ConfigClass( $response, 'conf/config.json' );
+		switch ($_GET['action']) {
+			case 'receive_push_config' :
+				$conf->receive_push_config( $_POST );
+				break;
+			case 'receive_push_temperatures' :
+				$conf->save_pushed_data( json_decode( $_POST['data'], TRUE) );
+				break;
+		}
+		$response->finish();
 	}
 }
 if ($endtime == 0) {
 	$endtime = time();
 }
 if ($starttime == 0) {
-	$starttime = $endtime - (1 * 24 * 60 * 60); // by default we get one weeks worth of data
+	$starttime = $endtime - (1 * 24 * 60 * 60); // by default we get one days worth of data
 }
 $table = $table . $aggregate;
 
 try {
-	$dbh = new PDO( 'mysql:host=' . $host . ';dbname=' . $db, $user, $pw, array (
-			PDO::ATTR_PERSISTENT => true
+	$dbh = new \PDO( 'mysql:host=' . $host . ';dbname=' . $db, $user, $pw, array (
+			\PDO::ATTR_PERSISTENT => true
 	) );
 
 	if ($_GET) {
@@ -129,22 +149,9 @@ try {
 		}
 		echo "\n]";
 	}
-	if ($write_data) {
-		if (count( $temperatures ) == count( $times )) {
-			for($n = 0; $n < count( $temperatures ); $n ++) {
-				$values .= '(' . $times[$n] . ',' . $temperatures[$n] . '),';
-			}
-			$values = rtrim( $values, ", " );
-		} else {
-			print "Error, time and temperature should be comma separated lists with the same number of elements.<br/>";
-			$dbh = null;
-			die();
-		}
-		$dbh->exec( 'INSERT INTO ' . $table . ' VALUES ' . $values );
-	}
 	// Close the connection
 	$dbh = null;
-} catch ( PDOException $e ) {
+} catch ( \PDOException $e ) {
 	print "Error!: " . $e->getMessage() . "<br/>";
 	die();
 }

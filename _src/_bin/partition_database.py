@@ -27,7 +27,8 @@ def partition_table(conf, database, table, extension):
 
 
 def main():
-    pitemplog.modify_tables(partition_table)
+    config = pitemplog.PiTempLogConf()
+    config.modify_tables(partition_table)
 
 
 if __name__ == "__main__":

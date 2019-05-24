@@ -14,10 +14,10 @@ class AutoAssignProp {
 	 */
 	protected $response;
 	protected $has_error = FALSE;
-	function __construct(ResponseClass $response) {
+	public function __construct(ResponseClass $response) {
 		$this->response = $response;
 	}
-	function init_props(array $data) {
+	protected function init_props(array $data) {
 		foreach ( get_object_vars( $this ) as $prop => $value ) {
 			if (isset( $data[$prop] )) {
 				$this->{'set_' . $prop}( $this->prepare_input( $data[$prop] ) );
@@ -28,14 +28,14 @@ class AutoAssignProp {
 			$this->response->logger( 'Warning: unknown properties for: ' . get_class( $this ), $data, 2 );
 		}
 	}
-	function prepare_input($input) {
+	protected function prepare_input($input) {
 		if (is_string( $input )) {
 			return trim( $input );
 		} else {
 			return ($input);
 		}
 	}
-	function filter_default(string $val, string $field, string $regexp = "/^[a-zA-Z0-9_\- ]*$/", string $message = '') {
+	protected function filter_default(string $val, string $field, string $regexp = "/^[a-zA-Z0-9_\- ]*$/", string $message = '') {
 		$val = filter_var( $val, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_BACKTICK );
 		if (! filter_var( $val, FILTER_VALIDATE_REGEXP, [ 
 				'options' => [ 
@@ -46,7 +46,14 @@ class AutoAssignProp {
 		}
 		return $val;
 	}
-	function set_error(string $prop, string $message) {
+	protected function filter_url(string $val, string $prop) {
+		$val = filter_var( $val, FILTER_SANITIZE_URL );
+		if (! filter_var( gethostbyname( parse_url( $val, PHP_URL_HOST ) . '.' ), FILTER_VALIDATE_IP )) {
+			$this->set_error($prop, 'The url ' . $val . ' must be a valid and reachable ip address or domain name.');
+		}
+		return $val;
+	}
+	public function set_error(string $prop, string $message) {
 		$this->has_error = TRUE;
 	}
 }
