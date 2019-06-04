@@ -28,7 +28,6 @@ class LocalSensor extends AutoAssignProp {
 	 */
 	protected $commands = [ ];
 	protected $table_old = '';
-	protected $has_error = FALSE;
 	/**
 	 * creates a new DBHandler object
 	 *
@@ -71,7 +70,6 @@ class LocalSensor extends AutoAssignProp {
 		$this->response->logger( 'Caught attempt to write the property "table_old" to the configuration:', $this, 3 );
 	}
 	public function set_error(string $prop, string $message) {
-		$this->has_error = TRUE;
 		$this->response->local_sensor_error[$this->sensor][$prop] = $message;
 		if ($prop === 'table') {
 			$this->tabletest = '';
@@ -84,7 +82,6 @@ class LocalSensor extends AutoAssignProp {
 		return $this->tabletest !== 'OK';
 	}
 	public function update_config(array $data) {
-		$this->has_error = FALSE;
 		if (isset( $data['table_old'] )) {
 			/*
 			 * the field table_old is not stored and thus if it exists, that means we got the data
@@ -123,6 +120,7 @@ class LocalSensor extends AutoAssignProp {
 						];
 						$this->response->confirm['data']['table_old'] = $table_old;
 						$this->response->logger( 'Confirmation info: ', $this->response->confirm, 3 );
+						$this->tabletest = 'OK';
 					}
 				}
 			} elseif ($this->table !== $table_old) {
@@ -141,7 +139,6 @@ class LocalSensor extends AutoAssignProp {
 		$this->response->logger( 'New sensor config is:', $this, 3 );
 		$this->response->sensor_config[$this->sensor] = $this;
 		if (! $this->has_error()) {
-			$this->response->logger( 'Tabletest OK and has_error is: ' . $this->has_error, FALSE, 3 );
 			$this->confirmed = '';
 		}
 	}

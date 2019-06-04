@@ -96,6 +96,28 @@ title: Database and Sensor Configuration
 		<h2>External Sensor configuration</h2>
 		<p>Data from external sensors is fetched over the network instead of read out from local sensors.</p>
 	</div>
+	<div id="push_servers" style="display: none;">
+		<hr>
+		<h2>External Server configuration</h2>
+		<p>Data from local sensors is pushed over the network to an external server. This is particularly useful, if there
+			is a firewall between this pitemplog box and the external server that only allows connections from the box to the
+			server.</p>
+		<div class="row small-gutter hidden-xs">
+			<div class="col-sm-3">
+				<h5>
+					<span class="text-danger">*</span>URL:
+				</h5>
+			</div>
+			<div class="col-sm-3">
+				<h5>
+					<span class="text-danger">*</span>Name:
+				</h5>
+			</div>
+			<div class="col-sm-3">
+				<h5>Action:</h5>
+			</div>
+		</div>
+	</div>
 	<div id="newExternal" style="display: none;">
 		<hr>
 		<h2>New External Sensor Configuration</h2>
@@ -146,28 +168,6 @@ title: Database and Sensor Configuration
 			</form>
 		</div>
 	</div>
-	<div id="push_servers" style="display: none;">
-		<hr>
-		<h2>External Server configuration</h2>
-		<p>Data from local sensors is pushed over the network to an external server. This is particularly useful, if there
-			is a firewall between this pitemplog box and the external server that only allows connections from the box to the
-			server.</p>
-		<div class="row small-gutter hidden-xs">
-			<div class="col-sm-3">
-				<h5>
-					<span class="text-danger">*</span>URL:
-				</h5>
-			</div>
-			<div class="col-sm-3">
-				<h5>
-					<span class="text-danger">*</span>Name:
-				</h5>
-			</div>
-			<div class="col-sm-3">
-				<h5>Action:</h5>
-			</div>
-		</div>
-	</div>
 	<div id="newPushServer" style="display: none;">
 		<hr>
 		<h2>Configure central server</h2>
@@ -206,7 +206,7 @@ title: Database and Sensor Configuration
 				 -->
 				<div class="col-sm-3">
 					<div class="form-group">
-						<label for="push-external-btn">Action: </label>
+						<label for="push-external-btn">Action: </label><br>
 						<button type="submit" name="push-external-btn" id="pushExternal" class="btn btn-primary" data-loading-text="Loading...">
 							<span class="glyphicon glyphicon-cloud-upload"></span> Upload configuration to central server
 						</button>

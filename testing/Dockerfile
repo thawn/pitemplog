@@ -8,9 +8,14 @@ RUN set -x \
   && pecl install xdebug-2.6.0 \
   && docker-php-ext-enable xdebug \
   && apt-get update \
-  && apt-get install -y mysql-client
+  && apt-get install -y mysql-client python-pip\
+  && pip install unittest2 mock
 
-VOLUME ["/var/www/"]
+COPY src "${INSTALL_DIR}"../templog_tests
+
+VOLUME ["/var/www/", "/usr/local/share/templog_tests"]
+
+WORKDIR /usr/local/share/templog_tests
 
 ENTRYPOINT ["pitemplog_entrypoint_test"]
 

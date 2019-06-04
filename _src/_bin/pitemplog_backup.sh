@@ -20,6 +20,6 @@ mysql)
   /usr/bin/mysqldump -h $DB_HOST --add-drop-database --hex-blob -x -u${DB_USER} -p${DB_PW} ${DB_DB} | /usr/bin/ssh -i /home/pi/.ssh/id_rsa ${username}@${backup_host} "gzip > backup/$(date +%Y-%m-%d_%H-%M)_${h}_temperatures.sql.gz"
   ;;
 config)
-  /usr/bin/scp /var/www/conf/config.json ${username}@${backup_host}:backup/$(date +%Y-%m-%d_%H-%M)_${HOSTNAME}_config.json
+  /usr/bin/scp /var/www/html/conf/config.json ${username}@${backup_host}:backup/$(date +%Y-%m-%d_%H-%M)_${HOSTNAME}_config.json
   ;;
 esac

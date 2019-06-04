@@ -158,7 +158,7 @@ class ConfigClass {
 			$this->response->{$prop_name}[$data['sensor']] = $this->{$prop_name}[$data['sensor']];
 			$this->response->logger( 'Checking sensor for errors:' . $this->{$prop_name}[$data['sensor']]->has_error(), $this->{$prop_name}[$data['sensor']], 3 );
 			if (! $this->{$prop_name}[$data['sensor']]->has_error()) {
-				$this->merge_sensors();
+				$this->populate_all_sensors();
 				$new_commands = $this->{$prop_name}[$data['sensor']]->get_commands();
 				if ($new_commands)
 					$this->commands = array_merge( $this->commands, $new_commands );
@@ -177,7 +177,7 @@ class ConfigClass {
 	/**
 	 * Merge local and remote sensors into one array.
 	 */
-	protected function merge_sensors() {
+	protected function populate_all_sensors() {
 		$this->all_sensors = array_merge( $this->remote_sensors, $this->local_sensors );
 	}
 
@@ -212,8 +212,8 @@ class ConfigClass {
 		foreach ( $data['remote_sensors'] as $sensor ) {
 			$this->add_sensor( $sensor, 'remote' );
 		}
-		foreach ( $data['push_servers'] as $sensor ) {
-			$this->push_servers[$sensor['sensor']] = new PushServer( $this->response, $sensor );
+		foreach ( $data['push_servers'] as $server ) {
+			$this->push_servers[$server['url']] = new PushServer( $this->response, $server );
 		}
 	}
 
@@ -230,6 +230,7 @@ class ConfigClass {
 			$build_conf = escapeshellarg( '/usr/local/share/templog/_data/config.json' );
 			$diff = escapeshellcmd( '/usr/bin/diff -q ' . $build_conf . ' ' . $local_conf );
 			$diff_output = shell_exec( $diff );
+			$this->response->logger( 'Difference between old and new configuration:', $diff_output, 3 );
 			if (! empty( $diff_output )) {
 				$this->response->logger( 'Configuration saved successfully.', FALSE, 1 );
 				$this->response->config_changed = TRUE;
@@ -277,9 +278,7 @@ class ConfigClass {
 			$state = $enabled ? 'true' : 'false';
 			$this->{$sensor_type}[$sensor]->enabled = $state;
 			$this->write_config( TRUE );
-			if ($response->config_changed) {
-				$this->create_pages();
-			}
+			$this->response->logger( ($enabled? 'Enabled' : 'Disabled') . ' sensor: ' . $sensor, $this->{$sensor_type}[$sensor]);
 			$this->response->{$sensor_type}[$sensor] = $this->{$sensor_type}[$sensor];
 		}
 	}
@@ -291,14 +290,13 @@ class ConfigClass {
 	 * @return boolean
 	 */
 	public function delete_sensor(string $sensor) {
-		$sensor_type = $this->get_sensor_type( $sensor );
 		$deleted = FALSE;
-		if ($sensor_type) {
-			$this->response->logger( 'Attempting to delete ' . $sensor_type . ': ' . $sensor, $this->{$sensor_type}[$sensor] );
-			unset( $this->{$sensor_type}[$sensor] );
+		$this->response->logger( 'Attempting to delete remote sensor: ' . $sensor, $this->remote_sensors[$sensor] );
+		if ($this->remote_sensors[$sensor]) {
+			unset( $this->remote_sensors[$sensor] );
+			$this->populate_all_sensors();
 			$this->write_config( TRUE );
 			if ($response->config_changed) {
-				$this->create_pages();
 				$this->response->logger( 'Deleted: ' . $sensor, FALSE );
 			}
 			$deleted = TRUE;
@@ -338,6 +336,7 @@ class ConfigClass {
 	 * @param array $data
 	 */
 	public function add_push_server(array $data) {
+		$this->response->logger( 'Adding push server: ', $data, 3 );
 		$this->push_servers[$data['url']] = new PushServer( $this->response, $data );
 		$this->write_config();
 	}
@@ -396,15 +395,48 @@ class ConfigClass {
 	 */
 	public function receive_push_config(array $data) {
 		$this->response->logger( 'Received sensor config:', $data, 3 );
-		foreach ( $data as $sensor => $conf ) {
-			if (isset( $conf['table'] ) && isset( $conf['sensor'] )) {
+		$required_fields = [ 
+				'sensor',
+				'table',
+				'name',
+				'category',
+				'exturl',
+				'extname',
+				'exttable'
+		];
+		$config_changed = FALSE;
+		foreach ( $data as $conf ) {
+			$fields_ok = TRUE;
+			if (isset( $conf['sensor'] )) {
+				foreach ( $required_fields as $field ) {
+					if (! isset( $conf[$field] )) {
+						$this->response->remote_sensor_errors[$conf['sensor']][$field] = sprintf( 'Missing configuration parametner: Set the field "%s" in your configuration data.', $field );
+						$fields_ok = FALSE;
+					}
+				}
+			} else {
+				$this->response->abort( 'Cannot save sensor without a sensor id. This api expects a JSON encoded array of the form{"sensor_id": {"table": "new_table", "sensor": "new_sensor","name": "New Sensor", "exturl": "http://example.com", "extname": "New push"}}.', $conf );
+			}
+			if ($fields_ok) {
+				if (! isset( $conf['table_old'] )) {
+					$conf['table_old'] = '';
+				}
 				$counter = 1;
+				$table_name = $conf['table'];
 				while ( $this->is_table_used( $conf['table'], $conf['sensor'] ) ) {
-					$conf['table'] = sprintf( '%s_%2d', substr( $conf['table'], 0, - 3 ), $counter ++ );
+					$conf['table'] = sprintf( '%s_%02d', $table_name, $counter ++ );
 				}
 				$conf['push'] = 'true';
-				$this->save_sensor_config( $conf );
+				$this->save_sensor_config( $conf, FALSE );
+				if (! $this->remote_sensors[$conf['sensor']]->has_error()) {
+					$config_changed = TRUE;
+				}
 			}
+		}
+		if ($config_changed) {
+			$this->write_config( TRUE );
+			$this->run_commands();
+			$this->response->logger( 'Saved push sensors:', $data );
 		}
 	}
 	public function save_pushed_data(array $data) {
@@ -413,13 +445,18 @@ class ConfigClass {
 		$this->response->logger( 'Received push data:', $data );
 		try {
 			foreach ( $data['sensor'] as $key => $sensor ) {
-				$sql = sprintf( 'INSERT INTO `%s`(time,temp) VALUES (?,?)', $this->remote_sensors[strval( $sensor )]->table );
-				$sth = $this->database->prepare( $sql );
-				$sth->execute( [ 
-						$data['time'][$key],
-						$data['temp'][$key]
-				] );
-				$sth = NULL;
+				/**
+				 * @todo: check api key
+				 */
+				if ($this->remote_sensors[strval( $sensor )]->push == 'true') {
+					$sql = sprintf( 'INSERT INTO `%s`(time,temp) VALUES (?,?)', $this->remote_sensors[strval( $sensor )]->table );
+					$sth = $this->database->prepare( $sql );
+					$sth->execute( [ 
+							$data['time'][$key],
+							$data['temp'][$key]
+					] );
+					$sth = NULL;
+				}
 			}
 			$this->database->commit();
 		} catch ( \PDOException $e ) {

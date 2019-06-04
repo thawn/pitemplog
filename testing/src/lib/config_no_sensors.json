@@ -1,0 +1,15 @@
+{
+	"database": {
+		"aggregateTables": [
+			"_5min",
+			"_15min",
+			"_60min"
+		],
+		"dbtest": "OK"
+	},
+	"local_sensors": [],
+	"remote_sensors": [],
+	"all_sensors": [],
+	"push_servers": [],
+	"version": "2.0"
+}

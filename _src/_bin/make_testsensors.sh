@@ -4,7 +4,8 @@ declare -a directories=("$RANDOM" "$RANDOM" "$RANDOM" )
 for sensor in "${directories[@]}"; do
 	sensordir=/tmp/devices/"$sensor"
 	mkdir -p "$sensordir"
-	printf "temp: %05d" $RANDOM > "${sensordir}"/w1_slave
+	printf "70 01 4b 46 7f ff 10 10 e1 : crc=e1 YES
+70 01 4b 46 7f ff 10 10 e1 t=%05d\n" $RANDOM > "${sensordir}"/w1_slave
 done
 rm "${sensordir}"/w1_slave
 chown -R www-data /tmp/devices/

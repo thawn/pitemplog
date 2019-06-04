@@ -9,23 +9,19 @@ except ImportError:
     from urllib import urlencode
 from contextlib import closing
 import xml.etree.ElementTree as ET
-import os
-from pprint import pprint
+import argparse
+from pprint import pformat
 
 import pitemplog
 
 
 def get_local_temperature(conf, database, table):
-    sensordir = pitemplog.get_sensor_dir()
-    with open(sensordir + conf["sensor"] + "/w1_slave") as tfile:
-        text = tfile.read()
-        temperature_data = text.split()[-1]
-        temperature = float(temperature_data[2:])
-        temperature = temperature / 1000
-    return save_temperature(conf, database, table, temperature)
+    return save_temperature(conf, database, table, pitemplog.get_sensor_temperature(conf["sensor"]))
 
 
 def get_remote_temperature(conf, database, table):
+    if conf["push"] == 'true':
+        raise ValueError('')
     if "extparser" in conf and conf["extparser"] != "none":
         temperatures = get_xml_temperatures(conf["exturl"], conf["extuser"], conf["extpw"])
         # the sensors in the mibi box are called temp1, temp2 ... tempN so for
@@ -46,10 +42,9 @@ def get_remote_temperature(conf, database, table):
 def save_temperature(conf, database, table, temperature):
     temperature += float(conf["calibration"])
     timestamp = int(time.time())
-    cur = database.cursor()
     query = "INSERT INTO `%s` (time, temp) VALUES (%d, %f)" % (table, timestamp, temperature)
-    cur.execute(query)
-    cur.close
+    with database as cur:
+        cur.execute(query)
     return {"sensor": conf["sensor"], "time": timestamp, "temp": temperature}
 
 
@@ -79,27 +74,38 @@ def push_temperature(conf, data):
     try:
         json_result = json.loads(result)
         if json_result["status"] != 'success':
-            print('Api error: \n')
-            pprint(json_result)
+            pitemplog.log.warning('Api error: \n')
+            pitemplog.log.warning(json_result.pop("log"))
+            pitemplog.log.warning(pformat(json_result))
     except ValueError:
-        print('Api error: \n' + result)
+        pitemplog.log.warning('Api error: \n' + result)
 
 
 def main():
     config = pitemplog.PiTempLogConf()
-    config.db_open()
-
-    if pitemplog.is_table_locked('templog', ''):
-        return
-    lock_file = pitemplog.lock_table('templog', '')
-
-    temperature_data = config.each_local_sensor_database(get_local_temperature)
-    config.each_push_server(push_temperature, temperature_data)
-    config.each_remote_sensor_database(get_remote_temperature)
-    config.db_commit()
-    config.db_close()
-    os.remove(lock_file)
+    lock = pitemplog.LockTable('templog')
+    if not lock.is_locked():
+        with lock:
+            config.db_open()
+            temperature_data = config.each_local_sensor_database(get_local_temperature)
+            config.each_push_server(push_temperature, temperature_data)
+            config.each_remote_sensor_database(get_remote_temperature)
+            config.db_close()
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-d', '--debug',
+        help="Print lots of debugging statements",
+        action="store_const", dest="log_level", const=10,
+        default=30,
+    )
+    parser.add_argument(
+        '-v', '--verbose',
+        help="Be verbose",
+        action="store_const", dest="log_level", const=20,
+    )
+    args = parser.parse_args() 
+    pitemplog.log.setLevel(args.log_level)   
     main()

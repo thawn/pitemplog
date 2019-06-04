@@ -6,12 +6,12 @@ import yaml
 
 import pitemplog
 
-
 def delete_category_path(conf, basepath):
     category_path = os.path.join(basepath, conf["category"])
     if os.path.exists(category_path):
-        print("Deleting: " + category_path)
         shutil.rmtree(category_path, True)
+        pitemplog.log.info("Deleting: " + category_path)
+            
 
 
 def main():
@@ -28,4 +28,5 @@ def main():
 
 
 if __name__ == "__main__":
+    pitemplog.log.setLevel(20)
     main()

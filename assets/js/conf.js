@@ -655,7 +655,7 @@ $(function () {
         $('#newPushServer').show();
     });
     $('#newPushServerForm').submit(function (event) {
-        setButtonStatus($(this), 'loading');
+        setButtonStatus($(this).find('button[name="push-external-btn"]'), 'loading');
         pushConfig2Server($(this), false);
         event.preventDefault();
     });

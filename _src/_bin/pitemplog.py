@@ -5,109 +5,32 @@ import MySQLdb
 import time
 import datetime
 import re
-from pprint import pprint
+import logging
+from pprint import pformat
 
 
-def get_sensor_dir():
-    '''
-    Get the sensor dir from the environment or use the default value.
-    '''
-    return os.environ.get('SENSOR_DIR', '/sys/bus/w1/devices/')
+class LockTable:
+    def __init__(self, table_name):
+        self.table_name = table_name
+        self.lock_file = "/tmp/" + table_name + "_lock"
 
+    def __enter__(self, *unused):
+        with open(self.lock_file, 'a'):
+            os.utime(self.lock_file, None)
+        return self
 
-def get_lock_file(table, extension):
-    '''
-    Get the lock file name for a specific table and extension.
-    Args:
-        table: string
-        extension: string
-    '''
-    return "/tmp/" + table + extension + "_lock"
+    def __exit__(self, *unused):
+        os.remove(self.lock_file)
 
-
-def is_table_locked(table, extension):
-    '''
-    Check if a table is locked. Remove stale lockfiles.
-
-    Args:
-        table: string
-        extension: string
-    '''
-    lock_file = get_lock_file(table, extension)
-    if os.path.isfile(lock_file):
-        two_hours_ago = time.time() - 7200
-        if os.stat(lock_file).st_ctime > two_hours_ago:
-            print("another process is working on: " + table + extension + " aborting...")
-            return True
-        else:
-            os.remove(lock_file)
-    return False
-
-
-def lock_table(table, extension):
-    '''
-    Create lock file for a table.
-    Args:
-        table: string
-        extension: string
-    '''
-    lock_file = get_lock_file(table, extension)
-    with open(lock_file, 'a'):
-        os.utime(lock_file, None)
-    return lock_file
-
-
-def calculate_partition_borders(database, table):
-    '''
-    Calculate partition borders for partitioning the mysql database tables. Partition borders will correspond to timestamps saturday at 24:00 h.
-
-    Args:
-        database: string
-        table: string
-    Returns:
-        cur: database cursor
-        now: int unix timestamp for current time
-        one_year: int number of seconds in one year
-        two_weeks: int number of seconds in two weeks
-        cur_interval: int unix timestamp corresponding to the first saturday in
-    '''
-    cur = database.cursor()
-    query = "SELECT time FROM " + table + " ORDER BY time ASC LIMIT 1"
-    cur.execute(query)
-    rows = cur.fetchall()
-    now = int(time.time())
-    if not rows:
-        first_time = now
-    else:
-        first_time = int(rows[0][0])
-    one_year = 366 * 24 * 3600
-    if (now - first_time) > one_year:  # if first logged time is older than one year
-        first_interval = now - one_year
-    else:
-        first_interval = first_time
-    first_date_time = datetime.date.fromtimestamp(first_interval)
-    first_saturday_date = first_date_time + datetime.timedelta((5 - first_date_time.weekday()) % 7)
-    first_saturday = (first_saturday_date - datetime.date(1970, 1, 1)).total_seconds()
-    two_weeks = int(14 * 24 * 3600)
-    cur_interval = int(first_saturday)
-    return cur, now, one_year, two_weeks, cur_interval
-
-
-def merge_local_remote(local, remote):
-    '''
-    Merge the results returned by PiTempLogConf.each_local() and PiTempLogConf.each_remote()
-
-    Args:
-        local: dict containing arrays of results
-        remote: dict containing arrays of results
-    Returns: dict containing arrays of results
-    '''
-    for key, array in remote:
-        try:
-            local[key] = local[key] + array
-        except KeyError:
-            local[key] = array
-    return local
+    def is_locked(self):
+        if os.path.isfile(self.lock_file):
+            two_hours_ago = time.time() - 7200
+            if os.stat(self.lock_file).st_ctime > two_hours_ago:
+                log.warning("another process is working on: " + self.table_name + " aborting...")
+                return True
+            else:
+                os.remove(self.lock_file)
+        return False
 
 
 class PiTempLogConf:
@@ -137,17 +60,15 @@ class PiTempLogConf:
         each_remote_sensor_database apply a functio to each remote sensor, provides the database handler
         each_push_server apply a functio to each push server
         get_timespan get the timespan in seconds associated to a certain table extension
-        log: print debugging messages depending on the debug level
     '''
 
-    def __init__(self, config_file_path='/var/www/conf/config.json'):
+    def __init__(self, config_file_path='/var/www/html/conf/config.json'):
         '''
         Initialize a PiTempLogConf class from a json config file.
 
         Args:
             config_file_path: string path to the config file
         '''
-        self.debug = int(float(os.environ.get('PITEMPLOG_DEBUG', '0')))
         self.database = {
             'host': os.environ.get('DB_HOST', 'localhost'),
             'db': os.environ.get('DB_DB', 'temperatures'),
@@ -155,9 +76,12 @@ class PiTempLogConf:
             'pw': os.environ.get('DB_PW', 'temp'),
             'aggregateTables': ['_5min', "_15min", "_60min"]
         }
-        with open(config_file_path) as config_file:
-            config = json.load(config_file)
-        self.log('raw config from file:', config, 3)
+        try:
+            with open(config_file_path) as config_file:
+                config = json.load(config_file)
+        except IOError:
+            config = json.loads(config_file_path)
+        log.debug("raw config from file:\n" + pformat(config))
         try:
             self.database['aggregateTables'] = config['database']['aggregateTables']
         except KeyError:
@@ -178,17 +102,11 @@ class PiTempLogConf:
             self.version = config['version']
         except KeyError:
             self.version = '2.0'
-        self.log('processed config:', self)
+        log.debug("processed config:\n" + pformat(self))
 
     def db_open(self):
         self.dbh = MySQLdb.connect(
             host=self.database["host"], user=self.database["user"], passwd=self.database["pw"], db=self.database["db"])
-
-    def db_commit(self):
-        try:
-            self.dbh.commit()
-        except AttributeError:
-            print('Error: Nothing to commit, open a database connection and do some queries first.')
 
     def db_close(self):
         try:
@@ -225,7 +143,7 @@ class PiTempLogConf:
         '''
         local = self.each_local_sensor(function_handle, *args)
         remote = self.each_remote_sensor(function_handle, *args)
-        return local.update(remote)
+        return merge_local_remote(local, remote)
 
     def each_sensor_database(self, function_handle, *args):
         '''
@@ -244,7 +162,7 @@ class PiTempLogConf:
         '''
         local = self.each_local_sensor_database(function_handle, *args)
         remote = self.each_remote_sensor_database(function_handle, *args)
-        return local.update(remote)
+        return merge_local_remote(local, remote)
 
     def each_sensor_table(self, table, function_handle, *args):
         '''
@@ -361,20 +279,6 @@ class PiTempLogConf:
             raise LookupError("could not interpret unit: %s. Valid units are %s" %
                               (unit, ', '.join(unit_factors.keys())))
 
-    def log(self, message, obj, level=1):
-        '''
-        Log messages to stdout.
-
-        Args:
-            message: string. The log message
-            obj: mixed. The content of this variable is pprinted below the log message
-            level: int. Log level. Printing will happen only if the current debug level 
-                is higher than the log level.
-        '''
-        if level <= self.debug:
-            print(message)
-            pprint(obj)
-
     def _loop_config(self, attrname, function_handle, *args):
         '''
         Execute a function for each element in an attribute.
@@ -401,7 +305,8 @@ class PiTempLogConf:
                 except AttributeError:
                     pass
             except Exception as e:
-                print(e)
+                log.debug("{function} caused an error: ".format(function=function_handle.__name__), exc_info=True)
+                log.info("{function} caused an error: {error}".format(function=function_handle.__name__, error=e))
         return result
 
     def _with_database(self, conf, function_handle, *args):
@@ -449,5 +354,91 @@ class PiTempLogConf:
                 return function_handle(conf, self.dbh, *args)
 
     def __repr__(self):
-        from pprint import pformat
         return pformat(vars(self), indent=4, width=1)
+
+    def __eq__(self, other):
+        if not isinstance(other, PiTempLogConf):
+            # don't attempt to compare against unrelated types
+            return NotImplemented
+        return self.database == other.database and self.local_sensors == other.local_sensors and self.remote_sensors == other.remote_sensors and self.push_servers == other.push_servers
+
+
+def merge_local_remote(local, remote):
+    '''
+    Merge the results returned by PiTempLogConf.each_local() and PiTempLogConf.each_remote()
+
+    Args:
+        local: dict containing arrays of results
+        remote: dict containing arrays of results
+    Returns: dict containing arrays of results
+    '''
+    result = local.copy()
+    for key, array in remote.items():
+        try:
+            result[key] = local[key] + array
+        except KeyError:
+            result[key] = array
+    return result
+
+
+def calculate_partition_borders(database, table):
+    '''
+    Calculate partition borders for partitioning the mysql database tables. Partition borders will correspond to timestamps saturday at 24:00 h.
+
+    Args:
+        database: string
+        table: string
+    Returns:
+        cur: database cursor
+        now: int unix timestamp for current time
+        one_year: int number of seconds in one year
+        two_weeks: int number of seconds in two weeks
+        cur_interval: int unix timestamp corresponding to the first saturday in
+    '''
+    cur = database.cursor()
+    query = "SELECT time FROM " + table + " ORDER BY time ASC LIMIT 1"
+    cur.execute(query)
+    rows = cur.fetchall()
+    now = int(time.time())
+    if not rows:
+        first_time = now
+    else:
+        first_time = int(rows[0][0])
+    one_year = 366 * 24 * 3600
+    if (now - first_time) > one_year:  # if first logged time is older than one year
+        first_interval = now - one_year
+    else:
+        first_interval = first_time
+    first_date_time = datetime.date.fromtimestamp(first_interval)
+    first_saturday_date = first_date_time + datetime.timedelta((5 - first_date_time.weekday()) % 7)
+    first_saturday = (first_saturday_date - datetime.date(1970, 1, 1)).total_seconds()
+    two_weeks = int(14 * 24 * 3600)
+    cur_interval = int(first_saturday)
+    return now, one_year, two_weeks, cur_interval
+
+
+def get_sensor_dir():
+    '''
+    Get the sensor dir from the environment or use the default value.
+    '''
+    return os.environ.get('SENSOR_DIR', '/sys/bus/w1/devices/')
+
+
+def get_sensor_temperature(sensor):
+    with open(get_sensor_dir() + sensor + "/w1_slave") as tfile:
+        text = tfile.read()
+        temperature_data = text.split('=')[-1]
+        return float(temperature_data) / 1000
+
+
+def get_sensor_page_filename(table):
+    return "{date}-{table}-temperatures.html".format(date=datetime.date.today().isoformat(), table=table)
+
+log = logging.getLogger(__name__)
+c_handler = logging.StreamHandler()
+debug = int(float(os.environ.get('PITEMPLOG_DEBUG', '0')))
+if debug > 0:
+    c_handler.setLevel(logging.INFO)
+    if debug > 1:
+        c_handler.setLevel(logging.DEBUG)
+log.addHandler(c_handler)

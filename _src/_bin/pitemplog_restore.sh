@@ -18,6 +18,6 @@ mysql)
   sudo service cron start
   ;;
 config)
-  /usr/bin/scp ${username}@${backup_host}:backup/${restoredate}*_${h}_config.json  /var/www/conf/config.json
+  /usr/bin/scp ${username}@${backup_host}:backup/${restoredate}*_${h}_config.json  /var/www/html/conf/config.json
   ;;
 esac

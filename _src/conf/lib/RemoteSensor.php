@@ -32,7 +32,7 @@ class RemoteSensor extends LocalSensor {
 		}
 	}
 	public function set_exturl($val) {
-		$this->exturl = $this->filter_url($val, 'exturl');
+		$this->exturl = filter_var( $val, FILTER_SANITIZE_URL );
 	}
 	public function set_extname(string $val) {
 		$this->extname = $this->filter_default( $val, 'extname', "/^[a-zA-Z0-9_:\- ]*$/" );

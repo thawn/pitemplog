@@ -5,6 +5,7 @@ services:
     restart: unless-stopped
     volumes:
       - ../build:/usr/local/share/templog
+      - ./src:/usr/local/share/templog_tests
     environment:
       - TZ=Europe/Berlin
       - DB_HOST=mariadb
@@ -45,11 +46,35 @@ services:
   mariadb:
     image: mariadb:10.3
     restart: unless-stopped
-    volumes:
-    - /tmp/testing/datadir:/var/lib/mysql
     environment:
       - TZ=Europe/Berlin
       - MYSQL_DATABASE=temperatures
       - MYSQL_USER=temp
       - MYSQL_PASSWORD=temp
       - MYSQL_ROOT_PASSWORD=pitemplog_mariadb_pw_pls_change
+#     volumes:
+#     - /tmp/testing/datadir:/var/lib/mysql
+#
+#   selenium-hub:
+#     image: selenium/hub:3.141.59-neon
+#     container_name: selenium-hub
+#     ports:
+#       - "4444:4444"
+#   chrome:
+#     image: selenium/node-chrome:3.141.59-neon
+#     volumes:
+#       - /dev/shm:/dev/shm
+#     depends_on:
+#       - selenium-hub
+#     environment:
+#       - HUB_HOST=selenium-hub
+#       - HUB_PORT=4444
+#   firefox:
+#     image: selenium/node-firefox:3.141.59-neon
+#     volumes:
+#       - /dev/shm:/dev/shm
+#     depends_on:
+#       - selenium-hub
+#     environment:
+#       - HUB_HOST=selenium-hub
+#       - HUB_PORT=4444

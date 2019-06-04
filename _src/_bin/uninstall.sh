@@ -1,12 +1,13 @@
 #!/bin/bash
+www_dir=/var/www/html
 sudo crontab -r
 sudo -u pi crontab -r
 /usr/local/share/templog/_data/uninstall_pages.py
 sudo rm -r /usr/local/share/templog
-sudo rm -r /var/www/assets
-sudo rm -r /var/www/conf
-sudo rm -r /var/www/data.php
-sudo rm -r /var/www/index.html
+sudo rm -r "${www_dir}"/assets
+sudo rm -r "${www_dir}"/conf
+sudo rm -r "${www_dir}"/data.php
+sudo rm -r "${www_dir}"/index.html
 sudo rm /etc/apache2/sites-enabled/0000-templog.conf
 sudo rm /etc/apache2/sites-available/templog.conf
 sudo service apache2 restart

@@ -2,37 +2,32 @@
 
 namespace Pitemplog\Conf;
 
-class Autoloader {
-	public static function register() {
-		spl_autoload_register( function ($class) {
-			$prefix = 'Pitemplog\\Conf\\';
-			$len = strlen( $prefix );
-			if (strncmp( $prefix, $class, $len ) !== 0) {
-				return false;
-			}
-			$relative_class = substr( $class, $len );
-
-			$file = str_replace( '\\', DIRECTORY_SEPARATOR, $relative_class ) . '.php';
-			if (file_exists( $file )) {
-				require $file;
-				return true;
-			}
-			$dir = dirname( $file );
-			$file = strtolower( $dir ) . DIRECTORY_SEPARATOR . basename( $file );
-			if (file_exists( $file )) {
-				require $file;
-				return true;
-			}
-			$libfile = strtolower($dir) . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . basename( $file );
-			if (file_exists( $libfile )) {
-				require $libfile;
-				return true;
-			}
-			return false;
-		} );
+spl_autoload_register( function ($class) {
+	$prefix = 'Pitemplog\\Conf\\';
+	$len = strlen( $prefix );
+	if (strncmp( $prefix, $class, $len ) !== 0) {
+		return false;
 	}
-}
-Autoloader::register();
+	$relative_class = substr( $class, $len );
+
+	$file = str_replace( '\\', DIRECTORY_SEPARATOR, $relative_class ) . '.php';
+	if (file_exists( $file )) {
+		require $file;
+		return true;
+	}
+	$dir = dirname( $file );
+	$file = strtolower( $dir ) . DIRECTORY_SEPARATOR . basename( $file );
+	if (file_exists( $file )) {
+		require $file;
+		return true;
+	}
+	$libfile = strtolower( $dir ) . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . basename( $file );
+	if (file_exists( $libfile )) {
+		require $libfile;
+		return true;
+	}
+	return false;
+} );
 header( 'content-type: application/json; charset=utf-8' );
 /*
  * variable definitions and helper functions
@@ -183,6 +178,7 @@ if (isset( $_GET['action'] )) {
 			if ($conf->delete_sensor( $_POST['sensor'] )) {
 				$response->sensor = $_POST['sensor'];
 			}
+			break;
 		case 'create_pages' :
 			$conf->create_pages( $response );
 			break;
@@ -199,7 +195,12 @@ if (isset( $_GET['action'] )) {
 			$conf->receive_push_config( $_POST );
 			break;
 		default :
-			abortWithError( 'Error: unknown action:', $_GET['action'] );
+			$response->abort( 'Error: unknown action:', $_GET['action'] );
+	/**
+	 *
+	 * @todo: disable and delete push servers
+	 * @todo: directly configure table that receives push data (instead of receiving the pushed configuration)
+	 */
 	}
 }
 $response->finish();

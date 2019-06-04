@@ -215,8 +215,9 @@ These packages are required on the system that deploys the logging system and we
 ## Configuration<a name="config"></a>
 1. In a browser enter the ip address or the hostname of the raspi
 1. If this is the first time that you contact the raspi, you will be redirected to the configuration page. If you are not redirected, click on "Configuration" in the top right corner.
-1. On the configuration page you can configure the database (if you used the default database this will already work) and any attached or remote sensors. Remote sensors can be other raspi setups or you can write a plugin for scraping information from the web frontend of other sensors (an example for a mibi sensor is included).
+1. On the configuration page you can configure the sensors and any attached or remote sensors. Remote sensors can be other raspi setups or you can write a plugin for scraping information from the web frontend of other sensors (an example for a mibi sensor is included).
 1. Once you are done with the configuration hit "Save"
+1. In case you would like to change the database configuration: this is done via the environment variables `DB_HOST` (hostname of the database server), `DB_DB` (name of the database), `DB_USER` (a user that has access to the database) and `DB_PW` (the users database password). 
 
 ### Configuration Screenshot
 ![Database and Sensor Configuration](doc/Database and Sensor Configuration.png)

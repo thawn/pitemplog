@@ -1,0 +1,83 @@
+{
+	"database": {
+		"aggregateTables": [
+			"_5min",
+			"_15min",
+			"_60min"
+		],
+		"dbtest": "OK"
+	},
+	"local_sensors": {
+		"11481": {
+			"sensor": "11481",
+			"calibration": "0",
+			"name": "Error Sensor",
+			"table": "error",
+			"category": "LOCAL",
+			"confirmed": "",
+			"enabled": "true",
+			"comment": "",
+			"tabletest": "OK"
+		},
+		"15089": {
+			"sensor": "15089",
+			"calibration": "0",
+			"name": "Test Sensor 1",
+			"table": "temp1",
+			"category": "LOCAL",
+			"confirmed": "",
+			"enabled": "true",
+			"comment": "",
+			"tabletest": "OK"
+		},
+		"16807": {
+			"sensor": "16807",
+			"calibration": "0",
+			"name": "28-0000063774fb",
+			"table": "temp3",
+			"category": "LOCAL",
+			"confirmed": "",
+			"enabled": "true",
+			"comment": "",
+			"tabletest": "OK"
+		}
+	},
+	"remote_sensors": [],
+	"all_sensors": [
+		{
+			"sensor": "11481",
+			"calibration": "0",
+			"name": "Error Sensor",
+			"table": "error",
+			"category": "LOCAL",
+			"confirmed": "",
+			"enabled": "true",
+			"comment": "",
+			"tabletest": "OK"
+		},
+		{
+			"sensor": "15089",
+			"calibration": "0",
+			"name": "Test Sensor 1",
+			"table": "temp1",
+			"category": "LOCAL",
+			"confirmed": "",
+			"enabled": "true",
+			"comment": "",
+			"tabletest": "OK"
+		},
+		{
+			"sensor": "16807",
+			"calibration": "0",
+			"name": "28-0000063774fb",
+			"table": "temp3",
+			"category": "LOCAL",
+			"confirmed": "",
+			"enabled": "true",
+			"comment": "",
+			"tabletest": "OK"
+		}
+	],
+	"push_servers": [],
+	"version": "2.0"
+}

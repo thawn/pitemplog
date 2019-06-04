@@ -12,10 +12,6 @@ $db = $_ENV['DB_DB'] ?: "temperatures";
 $table = "";
 $user = $_ENV['DB_USER'] ?: "temp";
 $pw = $_ENV['DB_PW'] ?: "temp";
-/**
- *
- * @todo get database configuration from config file
- */
 $aggregate = "_5min";
 if ($_GET) {
 	// print_r($_GET);
@@ -45,10 +41,6 @@ if ($_GET) {
 		}
 	}
 	if (isset( $_GET["config"] ) && $_GET["config"] == "get") {
-		/**
-		 *
-		 * @todo return config only for internal sensors
-		 */
 		$config_file = "conf/config.json";
 		if (file_exists( $config_file )) {
 			$conf = json_decode( file_get_contents( $config_file ), true );
@@ -69,37 +61,32 @@ if ($_GET) {
 		}
 	}
 	if (isset( $_GET["action"] )) {
-		class Autoloader {
-			public static function register() {
-				spl_autoload_register( function ($class) {
-					$prefix = 'Pitemplog\\';
-					$len = strlen( $prefix );
-					if (strncmp( $prefix, $class, $len ) !== 0) {
-						return false;
-					}
-					$relative_class = substr( $class, $len );
-
-					$file = str_replace( '\\', DIRECTORY_SEPARATOR, $relative_class ) . '.php';
-					if (file_exists( $file )) {
-						require $file;
-						return true;
-					}
-					$dir = dirname( $file );
-					$file = strtolower( $dir ) . DIRECTORY_SEPARATOR . basename( $file );
-					if (file_exists( $file )) {
-						require $file;
-						return true;
-					}
-					$libfile = strtolower( $dir ) . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . basename( $file );
-					if (file_exists( $libfile )) {
-						require $libfile;
-						return true;
-					}
-					return false;
-				} );
+		spl_autoload_register( function ($class) {
+			$prefix = 'Pitemplog\\';
+			$len = strlen( $prefix );
+			if (strncmp( $prefix, $class, $len ) !== 0) {
+				return false;
 			}
-		}
-		Autoloader::register();
+			$relative_class = substr( $class, $len );
+
+			$file = str_replace( '\\', DIRECTORY_SEPARATOR, $relative_class ) . '.php';
+			if (file_exists( $file )) {
+				require $file;
+				return true;
+			}
+			$dir = dirname( $file );
+			$file = strtolower( $dir ) . DIRECTORY_SEPARATOR . basename( $file );
+			if (file_exists( $file )) {
+				require $file;
+				return true;
+			}
+			$libfile = strtolower( $dir ) . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . basename( $file );
+			if (file_exists( $libfile )) {
+				require $libfile;
+				return true;
+			}
+			return false;
+		} );
 		$response = new Conf\ResponseClass();
 		$conf = new Conf\ConfigClass( $response, 'conf/config.json' );
 		switch ($_GET['action']) {
@@ -107,7 +94,7 @@ if ($_GET) {
 				$conf->receive_push_config( $_POST );
 				break;
 			case 'receive_push_temperatures' :
-				$conf->save_pushed_data( json_decode( $_POST['data'], TRUE) );
+				$conf->save_pushed_data( json_decode( $_POST['data'], TRUE ) );
 				break;
 		}
 		$response->finish();
@@ -127,11 +114,13 @@ try {
 	) );
 
 	if (isset( $_GET["table"] )) {
-		$result = [];
+		$result = [ ];
 		// Fetch the data and print it out as JSON
 		foreach ( $dbh->query( 'SELECT FROM_UNIXTIME(time),temp FROM ' . $table . ' WHERE time BETWEEN ' . $starttime . ' AND ' . $endtime . ' ORDER BY time ASC' ) as $row ) {
-			$result[] = ['time' => $row['FROM_UNIXTIME(time)'],
-			'temp' => $row['temp']];
+			$result[] = [ 
+					'time' => $row['FROM_UNIXTIME(time)'],
+					'temp' => $row['temp']
+			];
 		}
 		echo json_encode( $result );
 	}

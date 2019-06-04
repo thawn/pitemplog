@@ -4,8 +4,8 @@ echo "Installing into: $target_dir"
 echo "Local sensors: $LOCAL_SENSORS"
 mkdir -p "$target_dir"
 chown pi:pi "$target_dir"
-chown pi:pi /var/www
-chmod a+rwx /var/www
+#chown pi:pi /var/www/html
+#chmod a+rwx /var/www/html
 chmod a+x "${target_dir}"_bin/*.{sh,py}
 chmod u+x "${target_dir}"_sbin/*.sh
 chmod a+w "${target_dir}"

@@ -1,0 +1,2 @@
+DROP DATABASE IF EXISTS temperatures;
+CREATE DATABASE temperatures;
