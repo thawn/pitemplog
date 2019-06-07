@@ -14,6 +14,7 @@ class RemoteSensor extends LocalSensor {
 	public $extuser = '';
 	public $extpw = '';
 	public $extparser = 'none';
+	public $apikey = '';
 	public $push = '';
 	protected $parsers = [ ];
 	public function __construct(ResponseClass $response, DBHandler $database, array $data = []) {
@@ -51,6 +52,9 @@ class RemoteSensor extends LocalSensor {
 		if (! empty( $this->extparser ) && $this->extparser != 'none' && array_search( $this->extparser, $this->parsers ) === false) {
 			$this->response->abort( 'There is an error in your configuration: The file for the parser: ' . $parsed . ' does not exist. These are the parsers that I know:', $this->parsers );
 		}
+	}
+	public function set_apikey(string $val) {
+		$this->apikey = $this->filter_default( $val, 'apikey', "#^[a-zA-Z0-9/+=]{8,76}$#", 'must be base64 encoded and 8-76 characters long. Copy and paste the api key from the configuration interface of the target server');
 	}
 	public function set_push(string $val) {
 		$this->push = $val === 'true' ? 'true' : '';

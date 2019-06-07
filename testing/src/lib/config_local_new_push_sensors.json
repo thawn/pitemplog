@@ -44,6 +44,7 @@
 	},
 	"remote_sensors": {
 		"newsensor": {
+			"apikey": "qG6vwBT5MQKQ2yRXqjMdJ6fuu/PsxXD9Sw52EfAQq1Q=",
 			"exturl": "http://example.com",
 			"exttable": "newtable",
 			"extname": "New push",
@@ -64,6 +65,7 @@
 	},
 	"all_sensors": {
 		"newsensor": {
+			"apikey": "qG6vwBT5MQKQ2yRXqjMdJ6fuu/PsxXD9Sw52EfAQq1Q=",
 			"exturl": "http://example.com",
 			"exttable": "newtable",
 			"extname": "New push",

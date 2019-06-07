@@ -114,6 +114,11 @@ title: Database and Sensor Configuration
 				</h5>
 			</div>
 			<div class="col-sm-3">
+				<h5>
+					<span class="text-danger">*</span>Api key:
+				</h5>
+			</div>
+			<div class="col-sm-3">
 				<h5>Action:</h5>
 			</div>
 		</div>
@@ -180,13 +185,13 @@ title: Database and Sensor Configuration
 			<form id="newPushServerForm">
 				<div class="col-sm-3">
 					<div class="form-group">
-						<label for="url"><span class="text-danger">*</span>URL:</label> <input id="newExtURL" class="form-control"
+						<label for="url"><span class="text-danger">*</span>URL:</label> <input class="form-control"
 							name="url" placeholder="http://pitemplog/data.php" value="http://pitemplog/data.php" type="text">
 					</div>
 				</div>
 				<div class="col-sm-3">
 					<div class="form-group ">
-						<label for="name"><span class="text-danger">*</span>Name:</label> <input id="newExtName" class="form-control"
+						<label for="name"><span class="text-danger">*</span>Name:</label> <input class="form-control"
 							name="name" placeholder="Enter a name for the server." value="" type="text">
 					</div>
 				</div>
@@ -194,7 +199,7 @@ title: Database and Sensor Configuration
 				<div class="col-sm-2">
 					<div class="form-group ">
 						<label for="user"><span class="text-danger">*</span>Username:</label> <input
-							id="newExtUsername" class="form-control" name="user" placeholder="username" value="" type="text">
+							class="form-control" name="user" placeholder="username" value="" type="text">
 					</div>
 				</div>
 				<div class="col-sm-2">
@@ -207,7 +212,7 @@ title: Database and Sensor Configuration
 				<div class="col-sm-3">
 					<div class="form-group">
 						<label for="push-external-btn">Action: </label><br>
-						<button type="submit" name="push-external-btn" id="pushExternal" class="btn btn-primary" data-loading-text="Loading...">
+						<button type="submit" name="push-external-btn" id="pushExternal" class="btn btn-info" data-loading-text="Loading...">
 							<span class="glyphicon glyphicon-cloud-upload"></span> Upload configuration to central server
 						</button>
 					</div>
@@ -341,7 +346,7 @@ title: Database and Sensor Configuration
 				</div>
 				<div class="col-sm-2">
 					<div class="form-group">
-						<label class="visible-xs" for="db-save-btn">Action:<br></label>
+						<label class="visible-xs" for="save-btn">Action:<br></label>
 						<button name="save-btn" type="submit" class="btn btn-primary" data-toggle="tooltip"
 							title="Save the configuration for this sensor.">
 							<span class="glyphicon glyphicon-save"></span>
@@ -365,15 +370,21 @@ title: Database and Sensor Configuration
 			<div class="row small-gutter">
 				<div class="col-sm-3">
 					<div class="form-group">
-						<label class="visible-xs" for="url"><span class="text-danger">*</span>URL:</label> <input
-							class="form-control" name="url" placeholder="http://pitemplog/data.php"
+						<label class="visible-xs" for="url"><span class="text-danger">*</span>URL:</label> <input class="form-control"
+							name="url" placeholder="http://pitemplog/data.php"
 							value="" type="text">
 					</div>
 				</div>
 				<div class="col-sm-3">
 					<div class="form-group ">
-						<label class="visible-xs" for="name"><span class="text-danger">*</span>Name:</label> <input
-							class="form-control" name="name" placeholder="Enter a name for the external server" value="" type="text">
+						<label class="visible-xs" for="name"><span class="text-danger">*</span>Name:</label> <input class="form-control"
+							name="name" placeholder="Enter a name for the external server" value="" type="text">
+					</div>
+				</div>
+				<div class="col-sm-3">
+					<div class="form-group ">
+						<label class="visible-xs" for="apikey"><span class="text-danger">*</span>Api key:</label> <input class="form-control" 
+							name="apikey" placeholder="Please copy and paste the api key from the target server's configuration page" value="" type="text">
 					</div>
 				</div>
 				<!-- 
@@ -392,9 +403,18 @@ title: Database and Sensor Configuration
 				 -->
 				<div class="col-sm-3">
 					<div class="form-group">
-						<label class="visible-xs" for="push-external-btn">Action: </label>
-						<button name="push-external-btn" type="submit" class="btn btn-primary" data-loading-text="Loading...">
-							<span class="glyphicon glyphicon-refresh"></span> Update configuration on central server
+						<label class="visible-xs" for="save-btn">Action: </label>
+						<button name="save-btn" type="submit" class="btn btn-primary" data-toggle="tooltip"
+							title="Save the configuration for this push server.">
+							<span class="glyphicon glyphicon-save"></span>
+						</button>
+						<button name="push-external-btn" type="submit" class="btn btn-info" data-toggle="tooltip"
+							title="Update the sensor configuration on the server. IMPORTANT: This will cause the server to change the API key, therefore, you need to copy and paste the new api key from the server config page.">
+							<span class="glyphicon glyphicon-refresh"></span>
+						</button>
+						<button name="delete-server-btn" class="btn btn-danger" data-toggle="tooltip"
+							title="Stop pushing data to this server.">
+							<span class="glyphicon glyphicon-remove"></span>
 						</button>
 					</div>
 				</div>

@@ -246,8 +246,7 @@ class TestPartitionDatabase(TestResetAggregate):
         query = query % (self.pi.database['db'], table_name)
         with self.pi.dbh as cur:
             cur.execute(query)
-            num_part = len(cur.fetchall())
-        return num_part == 28
+            return len(cur.fetchall()) > 20
 
     def test_table(self):
         execute_with_args(self.executable, ["", self.table])
@@ -300,10 +299,13 @@ class TestConfAPI(APIBaseClass):
         self.remote_working_sensor = "1692"
         self.push_sensor = "1692"
         self.push_sensor2 = "13159"
+        self.local_table = 'temp1'
         self.merge_table = "temp4"
         self.editable_sensor_fields = ['name', 'table', 'category', 'comment']
         self.local_server = {u"url": u"http://pitemplog/data.php", u"name": u"Pitemplog"}
         self.external_server = {u"url": u"http://pitemplogext/data.php", u"name": u"Pitemplogext"}
+        self.external_server_apikey = {u"url": u"http://pitemplogext/data.php",
+                                       "apikey": "qG6vwBT5MQKQ2yRXqjMdJ6fuu/PsxXD9Sw52EfAQq1Q=", u"name": u"Pitemplogext"}
         self.maxDiff = None
 
     def test_get_db_config(self):
@@ -454,14 +456,22 @@ class TestConfAPI(APIBaseClass):
                          'external_config did not match local sensors')
 
     def test_push_config(self):
-        reset_conf_database(config_file=None, sql_file='lib/db_local_sensors_no_partitions.sql')
+        reset_conf_database(config_file=None, sql_file='lib/create_database.sql')
         result = self._post_api('push_config', self.external_server)
+        self._assert_config_pushed(result)
+
+    def test_save_new_push_server(self):
+        reset_conf_database(config_file=None, sql_file='lib/create_database.sql')
+        result = self._post_api('save_push_server', self.external_server_apikey)
+        self._assert_config_pushed(result)
+
+    def test_save_push_server(self):
+        reset_conf_database(config_file='lib/config_push_servers_no_apikey.json', sql_file=None)
+        result = self._post_api('save_push_server', self.external_server_apikey)
         self._assert_success(result)
         updated_config = pitemplog.PiTempLogConf()
         self.assertEqual(updated_config.push_servers[self.external_server["url"]]
-                         ["url"], self.external_server["url"], 'stored and pushed urls do not match')
-        self.assertEqual(updated_config.push_servers[self.external_server["url"]]["name"],
-                         self.external_server["name"], 'stored and pushed names do not match')
+                         ["apikey"], self.external_server_apikey["apikey"], 'apikey was not saved')
 
     def test_receive_push_config(self):
         source_config, config = self._set_up_receive_push()
@@ -473,10 +483,13 @@ class TestConfAPI(APIBaseClass):
         for sensor, config in remote_sensors.items():
             with self.subTest(sensor=sensor, config=json.dumps(config)):
                 self._assert_page_created(config)
-                self.assertTrue(table_exists(config["table"], updated_config.dbh), 'table for push sensor was not created')
+                self.assertTrue(table_exists(config["table"], updated_config.dbh),
+                                'table for push sensor was not created')
                 self.assertEqual(config.pop("push"), "true",
                                  'push not set to "true" for sensor "{sensor}"'.format(sensor=sensor))
                 config[u"push"] = u""  # tweaking value for easier comparison later
+                self.assertNotEqual(config.pop("apikey"), '', 'no api key was generated')
+                config[u"apikey"] = u""
         self.assertEqual(remote_sensors, source_config.remote_sensors,
                          'remote_sensors did not match pushed configuration')
 
@@ -497,6 +510,13 @@ class TestConfAPI(APIBaseClass):
                          collision_table + '_01', 'first table collision was not handled correctly')
         self.assertEqual(updated_config.remote_sensors[self.push_sensor2]["table"],
                          collision_table + '_02', 'second table collision was not handled correctly')
+        
+    def test_delete_push_server(self):
+        reset_conf_database(config_file='lib/config_push_servers_no_apikey.json', sql_file=None)
+        result = self._post_api('delete_push_server', self.external_server_apikey)
+        self._assert_success(result)
+        updated_config = pitemplog.PiTempLogConf()
+        self.assertNotIn(self.external_server_apikey["url"], updated_config.push_servers, 'failed to delete push server')
 
     def test_unknown_action(self):
         result = self._post_api('unknown_action', {})
@@ -538,6 +558,17 @@ class TestConfAPI(APIBaseClass):
             category=sensor_data["category"], filename=pitemplog.get_sensor_page_filename(sensor_data["table"]))), 'source html page not found')
         self.assertTrue(os.path.isfile('/var/www/html/{category}/{date}/{table}-temperatures.html'.format(
             category=sensor_data["category"], date=datetime.date.today().strftime('%Y/%m/%d'), table=sensor_data["table"]).lower()), 'final html page not found')
+        
+    def _assert_config_pushed(self, result):
+        self._assert_success(result)
+        self.assertTrue(len(result["push_servers"]) == 1, 'api returned more than one sensor after pushing just one sensor')
+        updated_config = pitemplog.PiTempLogConf()
+        self.assertEqual(updated_config.push_servers[self.external_server["url"]]
+                         ["url"], self.external_server["url"], 'stored and pushed urls do not match')
+        self.assertEqual(updated_config.push_servers[self.external_server["url"]]["name"],
+                         self.external_server["name"], 'stored and pushed names do not match')
+        updated_config.db_open()
+        self.assertTrue(table_exists(self.local_table, updated_config.dbh), 'remote server failed to create table %s' % self.local_table)
 
 
 class TestDataAPI(APIBaseClass):
@@ -555,7 +586,8 @@ class TestDataAPI(APIBaseClass):
                                           "exttable": "newtable"}
                             }
         self.now = int(time.time())
-        self.test_data = {"sensor": ["newsensor"], "temp": [23.15], 'time': [int(time.time())]}
+        self.test_data = {"sensor": ["newsensor"], "temp": [23.15], 'time': [
+            int(time.time())], "apikey": "qG6vwBT5MQKQ2yRXqjMdJ6fuu/PsxXD9Sw52EfAQq1Q="}
 
     def test_gettemp(self):
         self.assertEqual(self._gettemp(self.working_sensor), pitemplog.get_sensor_temperature(
@@ -607,7 +639,8 @@ class TestDataAPI(APIBaseClass):
                             sql_file='lib/db_local_new_push_sensors.sql')
         self.pi = pitemplog.PiTempLogConf()
         self.pi.db_open()
-        self._post_api("receive_push_temperatures", {'data': json.dumps(self.test_data)})
+        result = self._post_api("receive_push_temperatures", {'data': json.dumps(self.test_data)})
+        self._assert_success(result)
         self.assertTrue(int(latest_timestamp('newtable', self.pi.dbh)[0]) >= self.now,
                         'api failed to write pushed data to database')
 
@@ -618,9 +651,23 @@ class TestDataAPI(APIBaseClass):
         self.pi.db_open()
         local_data = self.test_data.copy()
         local_data["sensor"] = ["15089"]
-        self._post_api("receive_push_temperatures", {'data': json.dumps(local_data)})
+        result = self._post_api("receive_push_temperatures", {'data': json.dumps(local_data)})
+        self._assert_success(result)
         self.assertFalse(int(latest_timestamp('temp1', self.pi.dbh)[0]) >= self.now,
-                         'api failed to write pushed data to database')
+                         'api wrote pushed data to database of local sensor')
+
+    def test_receive_push_temperatures_wrong_api_key(self):
+        reset_conf_database(config_file='lib/config_local_new_push_sensors.json',
+                            sql_file='lib/db_local_new_push_sensors.sql')
+        self.pi = pitemplog.PiTempLogConf()
+        self.pi.db_open()
+        data_wrong_apikey = self.test_data.copy()
+        data_wrong_apikey["apikey"] = "this/is/wrong="
+        result = self._post_api("receive_push_temperatures", {'data': json.dumps(data_wrong_apikey)})
+        self._assert_success(result)
+        self.assertRegex(result["remote_sensor_error"][data_wrong_apikey["sensor"][0]]["apikey"], "Wrong apikey",
+                         'api did not respond with the correct error message')
+        self.assertEqual(latest_timestamp('newtable', self.pi.dbh), None, 'api wrote pushed data despite wrong api key')
 
     def _gettemp(self, sensor):
         return float(self._get_api('gettemp=' + sensor))

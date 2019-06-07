@@ -44,9 +44,10 @@
 	},
 	"remote_sensors": {
 		"1692": {
-			"exturl": "http://pitemplogext/data.php",
+			"apikey": "",
+			"exturl": "http://pitemplogfoo/data.php",
 			"exttable": "temp4",
-			"extname": "Pitemplogext",
+			"extname": "Pitemplogfoo",
 			"extuser": "",
 			"extpw": "",
 			"extparser": "none",
@@ -62,9 +63,10 @@
 			"tabletest": "OK"
 		},
 		"13159": {
-			"exturl": "http://pitemplogext/data.php",
+			"apikey": "",
+			"exturl": "http://pitemplogfoo/data.php",
 			"exttable": "temp5",
-			"extname": "Pitemplogext",
+			"extname": "Pitemplogfoo",
 			"extuser": "",
 			"extpw": "",
 			"extparser": "none",
@@ -80,9 +82,10 @@
 			"tabletest": "OK"
 		},
 		"27588": {
-			"exturl": "http://pitemplogext/data.php",
+			"apikey": "",
+			"exturl": "http://pitemplogfoo/data.php",
 			"exttable": "temp6",
-			"extname": "Pitemplogext",
+			"extname": "Pitemplogfoo",
 			"extuser": "",
 			"extpw": "",
 			"extparser": "none",
@@ -100,9 +103,10 @@
 	},
 	"all_sensors": [
 		{
-			"exturl": "http://pitemplogext/data.php",
+			"apikey": "",
+			"exturl": "http://pitemplogfoo/data.php",
 			"exttable": "temp4",
-			"extname": "Pitemplogext",
+			"extname": "Pitemplogfoo",
 			"extuser": "",
 			"extpw": "",
 			"extparser": "none",
@@ -118,9 +122,10 @@
 			"tabletest": "OK"
 		},
 		{
-			"exturl": "http://pitemplogext/data.php",
+			"apikey": "",
+			"exturl": "http://pitemplogfoo/data.php",
 			"exttable": "temp5",
-			"extname": "Pitemplogext",
+			"extname": "Pitemplogfoo",
 			"extuser": "",
 			"extpw": "",
 			"extparser": "none",
@@ -136,9 +141,10 @@
 			"tabletest": "OK"
 		},
 		{
-			"exturl": "http://pitemplogext/data.php",
+			"apikey": "",
+			"exturl": "http://pitemplogfoo/data.php",
 			"exttable": "temp6",
-			"extname": "Pitemplogext",
+			"extname": "Pitemplogfoo",
 			"extuser": "",
 			"extpw": "",
 			"extparser": "none",

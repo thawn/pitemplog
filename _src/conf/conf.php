@@ -191,6 +191,18 @@ if (isset( $_GET['action'] )) {
 		case 'push_config' :
 			$conf->push_config( $_POST );
 			break;
+		case 'save_push_server' :
+			if ($conf->push_servers[$_POST["url"]]) {
+				$conf->save_push_server( $_POST );
+			} else {
+				$conf->push_config( $_POST );
+			}
+			break;
+		case 'delete_push_server' :
+			if ($conf->delete_push_server( $_POST['url'] )) {
+				$response->push_server = $_POST['url'];
+			}
+			break;
 		case 'receive_push_config' :
 			$conf->receive_push_config( $_POST );
 			break;

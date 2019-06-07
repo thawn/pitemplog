@@ -202,8 +202,8 @@ class LocalSensor extends AutoAssignProp {
 		$table = $table_in ?? $this->table;
 		if (! empty( $table )) {
 			try {
-				$answer = $this->database->query( 'SELECT 1 from `' . $table . '`' );
-				$result = $answer !== FALSE;
+				$answer = $this->database->query( "SHOW TABLES LIKE '$table'" )->fetchAll();
+				$result = !empty($answer);
 			} catch ( PDOException $e ) {
 				$this->response->logger( 'Caught error when looking for table: ' . $table, $e, 3 );
 				$result = FALSE;

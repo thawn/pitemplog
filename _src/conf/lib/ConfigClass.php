@@ -230,7 +230,7 @@ class ConfigClass {
 			$build_conf = escapeshellarg( '/usr/local/share/templog/_data/config.json' );
 			$diff = escapeshellcmd( '/usr/bin/diff -q ' . $build_conf . ' ' . $local_conf );
 			$diff_output = shell_exec( $diff );
-			$this->response->logger( 'Difference between old and new configuration:', $diff_output, 3 );
+			$this->response->logger( 'Checking for difference between old and new configuration:', $diff_output, 3 );
 			if (! empty( $diff_output )) {
 				$this->response->logger( 'Configuration saved successfully.', FALSE, 1 );
 				$this->response->config_changed = TRUE;
@@ -278,7 +278,7 @@ class ConfigClass {
 			$state = $enabled ? 'true' : 'false';
 			$this->{$sensor_type}[$sensor]->enabled = $state;
 			$this->write_config( TRUE );
-			$this->response->logger( ($enabled? 'Enabled' : 'Disabled') . ' sensor: ' . $sensor, $this->{$sensor_type}[$sensor]);
+			$this->response->logger( ($enabled ? 'Enabled' : 'Disabled') . ' sensor: ' . $sensor, $this->{$sensor_type}[$sensor] );
 			$this->response->{$sensor_type}[$sensor] = $this->{$sensor_type}[$sensor];
 		}
 	}
@@ -290,18 +290,7 @@ class ConfigClass {
 	 * @return boolean
 	 */
 	public function delete_sensor(string $sensor) {
-		$deleted = FALSE;
-		$this->response->logger( 'Attempting to delete remote sensor: ' . $sensor, $this->remote_sensors[$sensor] );
-		if ($this->remote_sensors[$sensor]) {
-			unset( $this->remote_sensors[$sensor] );
-			$this->populate_all_sensors();
-			$this->write_config( TRUE );
-			if ($response->config_changed) {
-				$this->response->logger( 'Deleted: ' . $sensor, FALSE );
-			}
-			$deleted = TRUE;
-		}
-		return $deleted;
+		return $this->delete_element( $sensor, 'remote_sensors' );
 	}
 
 	/**
@@ -335,10 +324,20 @@ class ConfigClass {
 	 *
 	 * @param array $data
 	 */
-	public function add_push_server(array $data) {
-		$this->response->logger( 'Adding push server: ', $data, 3 );
+	public function save_push_server(array $data) {
+		$this->response->logger( 'Saving push server: ', $data, 3 );
 		$this->push_servers[$data['url']] = new PushServer( $this->response, $data );
 		$this->write_config();
+	}
+	
+	/**
+	 * Delete a push server.
+	 * 
+	 * @param string $url
+	 * @return boolean
+	 */
+	public function delete_push_server(string $url) {
+		return $this->delete_element( $url, 'push_servers' );
 	}
 
 	/**
@@ -348,7 +347,7 @@ class ConfigClass {
 	 */
 	public function push_config(array $server_data) {
 		if (! isset( $server_data['url'] )) {
-			$this->response->abort( 'Could not process sensor without an url: ', $server_data );
+			$this->response->abort( 'Could not process server without an url: ', $server_data );
 		}
 		$ch = curl_init();
 		curl_setopt( $ch, CURLOPT_HEADER, 0 );
@@ -378,9 +377,10 @@ class ConfigClass {
 			}
 			$this->response->logger( sprintf( 'Received answer from: %s ', $push_url ), $result, 3 );
 			if ($result['status'] === 'success') {
+				$server_data["apikey"] = ""; // the api key will change on the server every time we update it, so the user needs to copy and paste it again
 				$this->response->logger( 'Saving server data:', $server_data, 3 );
-				$this->add_push_server( $server_data );
-				$this->response->push_servers = $this->push_servers;
+				$this->save_push_server( $server_data );
+				$this->response->push_servers[$server_data["url"]] = $server_data;
 			} else {
 				$this->response->abort( 'Could not push configuration to: ' . $server_data['url'], $result );
 			}
@@ -405,6 +405,7 @@ class ConfigClass {
 				'exttable'
 		];
 		$config_changed = FALSE;
+		$apikey = $this->generate_api_key();
 		foreach ( $data as $conf ) {
 			$fields_ok = TRUE;
 			if (isset( $conf['sensor'] )) {
@@ -427,6 +428,7 @@ class ConfigClass {
 					$conf['table'] = sprintf( '%s_%02d', $table_name, $counter ++ );
 				}
 				$conf['push'] = 'true';
+				$conf['apikey'] = $apikey;
 				$this->save_sensor_config( $conf, FALSE );
 				if (! $this->remote_sensors[$conf['sensor']]->has_error()) {
 					$config_changed = TRUE;
@@ -439,16 +441,19 @@ class ConfigClass {
 			$this->response->logger( 'Saved push sensors:', $data );
 		}
 	}
+
+	/**
+	 * Save data received through the push data api.
+	 *
+	 * @param array $data
+	 */
 	public function save_pushed_data(array $data) {
 		$this->database->open_connection();
 		$this->database->begin();
 		$this->response->logger( 'Received push data:', $data );
 		try {
 			foreach ( $data['sensor'] as $key => $sensor ) {
-				/**
-				 * @todo: check api key
-				 */
-				if ($this->remote_sensors[strval( $sensor )]->push == 'true') {
+				if ($this->remote_sensors[strval( $sensor )]->push == 'true' && $this->remote_sensors[strval( $sensor )]->apikey === $data['apikey']) {
 					$sql = sprintf( 'INSERT INTO `%s`(time,temp) VALUES (?,?)', $this->remote_sensors[strval( $sensor )]->table );
 					$sth = $this->database->prepare( $sql );
 					$sth->execute( [ 
@@ -456,6 +461,12 @@ class ConfigClass {
 							$data['temp'][$key]
 					] );
 					$sth = NULL;
+				} else {
+					if ($this->remote_sensors[strval( $sensor )]->push == 'true') {
+						$this->response->remote_sensor_error[strval( $sensor )]["apikey"] = sprintf( 'Wrong apikey: "%s"', $data['apikey'] );
+					} else {
+						$this->response->remote_sensor_error[strval( $sensor )]["push"] = 'Failed to push data into a sensor that is not configured as push sensor.';
+					}
 				}
 			}
 			$this->database->commit();
@@ -482,6 +493,39 @@ class ConfigClass {
 			$sensors[$sensor]['exttable'] = $sensors[$sensor]['table'];
 		}
 		return $sensors;
+	}
+
+	/**
+	 * Generate a random base64 encoded api key.
+	 *
+	 * @return string
+	 */
+	protected function generate_api_key() {
+		return base64_encode( random_bytes( 18 ) );
+	}
+
+	/**
+	 * Delete an element from the configuration.
+	 *
+	 * @param string $id:
+	 *        	element id
+	 * @param string $kind:
+	 *        	property name from which the element should be deleted
+	 * @return boolean whether or not the element was deleted
+	 */
+	protected function delete_element(string $id, string $kind) {
+		$deleted = FALSE;
+		$this->response->logger( sprintf( 'Attempting to delete %s: %s', $kind, $id ), $this->{$kind}[$id] );
+		if ($this->{$kind}[$id]) {
+			unset( $this->{$kind}[$id] );
+			$this->populate_all_sensors();
+			$this->write_config( TRUE );
+			if ($response->config_changed) {
+				$this->response->logger( 'Deleted: ' . $id, FALSE );
+			}
+			$deleted = TRUE;
+		}
+		return $deleted;
 	}
 }
 ?>

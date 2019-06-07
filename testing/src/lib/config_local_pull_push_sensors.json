@@ -44,6 +44,7 @@
 	},
 	"remote_sensors": {
 		"1692": {
+			"apikey": "",
 			"exturl": "http://pitemplogext/data.php",
 			"exttable": "temp4",
 			"extname": "Pitemplogext",
@@ -62,6 +63,7 @@
 			"tabletest": "OK"
 		},
 		"13159": {
+			"apikey": "",
 			"exturl": "http://pitemplogext/data.php",
 			"exttable": "temp5",
 			"extname": "Pitemplogext",
@@ -80,6 +82,7 @@
 			"tabletest": "OK"
 		},
 		"27588": {
+			"apikey": "",
 			"exturl": "http://pitemplogext/data.php",
 			"exttable": "temp6",
 			"extname": "Pitemplogext",
@@ -98,6 +101,7 @@
 			"tabletest": "OK"
 		},
 		"14836": {
+			"apikey": "qG6vwBT5MQKQ2yRXqjMdJ6fuu/PsxXD9Sw52EfAQq1Q=",
 			"exturl": "http://localhost:8082",
 			"exttable": "temp8",
 			"extname": "Pushed data: 81a16159d663",
@@ -116,6 +120,7 @@
 			"tabletest": "OK"
 		},
 		"19345": {
+			"apikey": "qG6vwBT5MQKQ2yRXqjMdJ6fuu/PsxXD9Sw52EfAQq1Q=",
 			"exturl": "http://localhost:8082",
 			"exttable": "temp9",
 			"extname": "Pushed data: 81a16159d663",
@@ -134,6 +139,7 @@
 			"tabletest": "OK"
 		},
 		"7319": {
+			"apikey": "qG6vwBT5MQKQ2yRXqjMdJ6fuu/PsxXD9Sw52EfAQq1Q=",
 			"exturl": "http://localhost:8082",
 			"exttable": "temp7",
 			"extname": "Pushed data: 81a16159d663",

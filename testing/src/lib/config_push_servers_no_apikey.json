@@ -80,7 +80,7 @@
 	],
 	"push_servers": {
 		"http://pitemplogext/data.php": {
-			"apikey": "qG6vwBT5MQKQ2yRXqjMdJ6fuu/PsxXD9Sw52EfAQq1Q=",
+			"apikey": "",
 			"url": "http://pitemplogext/data.php",
 			"name": "Pitemplogext",
 			"user": "",

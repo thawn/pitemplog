@@ -12,6 +12,7 @@ class PushServer extends AutoAssignProp {
 	public $name = '';
 	public $user = '';
 	public $pw = '';
+	public $apikey = '';
 	public function __construct(ResponseClass $response, array $data = []) {
 		parent::__construct( $response );
 		$this->init_props( $data );
@@ -27,6 +28,9 @@ class PushServer extends AutoAssignProp {
 	}
 	public function set_pw(string $val) {
 		$this->pw = filter_var( $val, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_BACKTICK );
+	}
+	public function set_apikey(string $val) {
+		$this->apikey = filter_var( $val, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_BACKTICK );
 	}
 	public function set_error(string $prop, string $message) {
 		$this->has_error = TRUE;

@@ -115,8 +115,8 @@ var insertSensor = function (sensor_data, error_data) {
     }
     var $id = insertElement('#' + parent_id, sensor_data, error_data);
     var id = $id.attr('id');
-    $id.find('button, input, .input-group-addon>.glyphicon-refresh').data(
-            'item-id', id);
+    $id.find('button, input, .input-group-addon>.glyphicon')
+            .data('item-id', id);
     $id.find('[data-toggle="tooltip"]').tooltip();
     $id.find('.sensor-form').submit(function (event) {
         saveSensorConfig($(this));
@@ -128,11 +128,7 @@ var insertSensor = function (sensor_data, error_data) {
     if (!$id.find('[name="table"]').val()) {
         setButtonStatus($id.find('[name="status-btn"]'), 'unsaved', 'sensor');
     }
-    if (sensor_data['push'] === 'true') {
-        $id.find('[name="temperature"]').parents('.col-sm-2').first().hide();
-        $('#' + url2ID(sensor_data['exturl'])).find('div.row').first()
-                .children('.col-sm-2').first().hide();
-    } else {
+    if (sensor_data['push'] !== 'true') {
         $id.find('[name="temperature"]').val(getTemperature($id));
         $id.find('.input-group-addon>.glyphicon-refresh').click(function () {
             $id = $('#' + $(this).data('item-id'));
@@ -163,6 +159,38 @@ var insertElement = function (target, data, error_data) {
     if (data.exturl) {
         addHiddenFields($('#' + id), $('#newExternalForm'));
     }
+    if (data['push'] === 'true') {
+        $('#' + id)
+                .find('[name="temperature"]')
+                .parents('.col-sm-2')
+                .first()
+                .html(
+                        '<div class="form-group ">'
+                                + '<label class="visible-xs" for="apikey">Api key:</label> '
+                                + '<div class="input-group"><span class="input-group-addon copy-apikey" data-item-id="'
+                                + id
+                                + '" data-toggle="tooltip" title="Copy api key to clipboard"><span class="glyphicon glyphicon-copy"></span></span> '
+                                + '<input type="text" class="form-control copy-apikey" data-item-id="'
+                                + id
+                                + '" name="apikey" readonly value="" data-toggle="tooltip"'
+                                + 'title="Copy this api key to the configuration of the sensor box that pushes the data to this server. The data will only be logged if it is pushed together with the correct api key.">'
+                                + '</div></div>').tooltip();
+        $('#' + id).find('.copy-apikey').click(
+                function () {
+                    $id = $('#' + $(this).data('item-id')).find(
+                            '[name="apikey"]');
+                    var textArea = document.createElement("textarea");
+                    textArea.value = $id.val();
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    $id.attr('data-original-title', 'Copied to clipboard')
+                            .tooltip("show");
+                });
+        $('#' + url2ID(data['exturl'])).find('div.row').first().children(
+                '.col-sm-2').first().html('<h5>Api key:</h5>');
+    }
     var $id = fillInElement(id, data, error_data);
     return $id;
 };
@@ -192,6 +220,7 @@ var fillInElement = function (id, data, error_data) {
     } else {
         $id.find('input').prop('disabled', false);
         $id.find('input[name="temperature"]').prop('disabled', true);
+        $id.find('input.copy-apikey').prop('readonly', true);
         $id.find('button[name="delete-btn"]').hide();
         $id.find('button[name="save-btn"]').show();
         $id.find('button[name="disable-btn"]').html(
@@ -342,8 +371,8 @@ var setButtonStatus = function ($button, success, item) {
     } else {
         $button.removeClass(removeAllBtnClass).addClass('btn-danger');
         $button.html('<span class="glyphicon glyphicon-warning-sign"></span>');
-        $button.attr('data-original-title', 'Error: Cannot connect to the '
-                + item + '.');
+        $button.attr('data-original-title', 'There is an error in your ' + item
+                + ' configuration.');
     }
 };
 
@@ -433,7 +462,7 @@ var extractFormData = function ($form) {
             config[field] = $(this).val();
         }
     });
-    return config
+    return config;
 }
 
 var saveEverything = function () {
@@ -443,15 +472,16 @@ var saveEverything = function () {
     };
     $('form').each(
             function () {
+                var config;
                 if ($(this).find('[name="table"]').val()) {
-                    var config = extractFormData($(this));
+                    config = extractFormData($(this));
                     var sensor = config.sensor;
                     conf.all_sensors[sensor] = config;
                 }
                 if ($(this).find('[name="url"]').val()
                         && this.id !== 'newExternalForm'
                         && this.id !== 'newPushServerForm') {
-                    var config = extractFormData($(this));
+                    config = extractFormData($(this));
                     var url = config.url;
                     conf.push_servers[url] = config;
                 }
@@ -544,7 +574,7 @@ var getExternalConfig = function ($form) {
      */
     var $button = $('#getExternal');
     var name = $form.find('input[name="name"]').val();
-    var url = $form.find('input[name="url"]').val()
+    var url = $form.find('input[name="url"]').val();
     setButtonStatus($button, 'loading', 'sensor');
     postData(
             'get_external',
@@ -577,11 +607,12 @@ var getExternalConfig = function ($form) {
 var insertPushServers = function (push_servers, push_server_errors, refresh) {
     for ( var url in push_servers) {
         var error;
+        var $id;
         if (push_server_errors) {
             error = push_server_errors[url];
         }
         if (refresh) {
-            var $id = fillInElement($('[value="' + url + '"]').parents('form')
+            $id = fillInElement($('[value="' + url + '"]').parents('form')
                     .first().parent().attr('id'), push_servers[url], error);
         } else {
             var id = 'el' + elementCount;
@@ -591,32 +622,102 @@ var insertPushServers = function (push_servers, push_server_errors, refresh) {
             newElement.style.display = 'none';
             $('#push_servers').append(newElement);
             elementCount++;
-            var $id = fillInElement(id, push_servers[url], error);
+            $id = fillInElement(id, push_servers[url], error);
             $id.find('.push-server-form').submit(function (event) {
-                pushConfig2Server($(this), true);
+                savePushServerConfig($(this));
                 event.preventDefault();
             });
+            $id.find('button[name="push-external-btn"]')
+                    .click(
+                            function (event) {
+                                pushConfig2Server($(this).parents('form')
+                                        .first(), true);
+                                event.preventDefault();
+                            });
+            $id
+                    .find('button[name="delete-server-btn"]')
+                    .click(
+                            function (event) {
+                                var $id = $(this).parents('form').parent();
+                                var answer = confirm('This will cause the box to stop pushing data to the server and delete the server from the configuration file. Do you want to proceed?');
+                                if (answer == true) {
+                                    setButtonStatus(
+                                            $id
+                                                    .find('button[name="delete-server-btn"]'),
+                                            'loading', 'server');
+                                    postData(
+                                            'delete_push_server',
+                                            'url='
+                                                    + $id.find('[name="url"]')
+                                                            .val(),
+                                            function (data) {
+                                                if (data.push_server) {
+                                                    $id.remove();
+                                                    if ($('#push_servers')
+                                                            .find('[id^=el]').length < 1) {
+                                                        $('#push_servers')
+                                                                .hide();
+                                                    }
+                                                }
+                                            });
+                                }
+                                event.preventDefault();
+                            });
         }
         $id.find('h3.sensor-title').html(
                 'External Server: ' + push_servers[url]['name']);
         $id.find('button[name="push-external-btn"]').removeClass('btn-default')
                 .addClass('btn-primary').html(
-                        '<span class="glyphicon glyphicon-refresh"></span>'
-                                + ' Update configuration on central server');
+                        '<span class="glyphicon glyphicon-refresh"></span>');
+        $id.find('[data-toggle="tooltip"]').tooltip();
     }
     $('#push_servers').slideDown(100);
 };
 
 var pushConfig2Server = function ($form, refresh) {
-    postData('push_config', $form.serialize(), function (data) {
-        insertPushServers(data.push_servers, data.push_server_errors, refresh);
-        $('#newPushServer').hide();
+    alert('The server will create a new api key. After successfully copying the configuration to the server, the servers configuration page will open so that you can copy and paste the api key.');
+    var $button = $form.find('button[name="push-external-btn"]');
+    setButtonStatus($button, 'loading', 'server');
+    $form.find('input[name="apikey"]').val('');
+    postData(
+            'push_config',
+            $form.serialize(),
+            function (data) {
+                insertPushServers(data.push_servers, data.push_server_errors,
+                        refresh);
+                $('#newPushServer').hide();
+                $form
+                        .find('button[name="push-external-btn"]')
+                        .removeClass('btn-default')
+                        .addClass('btn-info')
+                        .attr(
+                                'data-original-title',
+                                'Update the sensor configuration on the server. IMPORTANT: This will cause the server to change the API key, therefore, you need to copy and paste the new api key from the server config page.');
+                $('#newPushServer')
+                        .find('button[name="push-external-btn"]')
+                        .html(
+                                '<span class="glyphicon glyphicon-cloud-upload"></span> Upload configuration to central server');
+                window.open($form.find('input[name="url"]').val().replace(
+                        'data.php', 'conf/'), '_blank');
+            });
+};
+
+var savePushServerConfig = function ($form) {
+    var $button = $form.find('button[name="save-btn"]');
+    setButtonStatus($button, 'loading', 'server');
+    postData('save_push_server', $form.serialize(), function (data) {
+        insertPushServers(data.push_servers, data.push_server_errors, true);
+        $form.find('button[name="save-btn"]').removeClass('btn-default')
+                .addClass('btn-primary').html(
+                        '<span class="glyphicon glyphicon-save"></span>').attr(
+                        'data-original-title',
+                        'Save the configuration for this push server.');
     });
 };
 
 var url2Name = function ($form, input) {
     var result = '';
-    var match
+    var match;
     if (!$form.find('input[name="name"]').val()) {
         if (match = input.value
                 .match(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\n\?\=]+)/im)) {
@@ -636,7 +737,7 @@ $(function () {
     $('#db-check-btn').click(checkDBConnection);
     $('#saveEverythingButton').click(function (event) {
         setButtonStatus($(this), 'loading');
-        $(this).addClass('btn-lg')
+        $(this).addClass('btn-lg');
         saveEverything();
         event.preventDefault();
     });
@@ -654,11 +755,13 @@ $(function () {
     $('#addPushServer').click(function () {
         $('#newPushServer').show();
     });
-    $('#newPushServerForm').submit(function (event) {
-        setButtonStatus($(this).find('button[name="push-external-btn"]'), 'loading');
-        pushConfig2Server($(this), false);
-        event.preventDefault();
-    });
+    $('#newPushServerForm').submit(
+            function (event) {
+                setButtonStatus($(this)
+                        .find('button[name="push-external-btn"]'), 'loading');
+                pushConfig2Server($(this), false);
+                event.preventDefault();
+            });
     $('#newPushServerForm').find('input[name="url"]').change(function () {
         url2Name($('#newPushServerForm'), this);
     });
