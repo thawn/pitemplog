@@ -473,7 +473,8 @@ var saveEverything = function () {
     $('form').each(
             function () {
                 var config;
-                if ($(this).find('[name="table"]').val()) {
+                if ($(this).find('[name="table"]').val()
+                        && this.id !== 'newReceiveDataConfigForm') {
                     config = extractFormData($(this));
                     var sensor = config.sensor;
                     conf.all_sensors[sensor] = config;
@@ -518,8 +519,17 @@ var deleteSensor = function (event) {
         postData('delete_sensor',
                 'sensor=' + $id.find('[name="sensor"]').val(), function (data) {
                     if (data.sensor) {
-                        $('[value="' + data.sensor + '"]').parents('form')
-                                .parent().remove();
+                        var $row = $('[value="' + data.sensor + '"]').parents(
+                                'form').parent();
+                        var exturl = $row.find('input[name="exturl"]').val();
+                        var parent_id = url2ID(exturl);
+                        $row.remove();
+                        if ($('#' + parent_id).find('[id^=el]').length < 1) {
+                            $(parent_id).remove();
+                        }
+                        if ($('#remote_sensors').find('[id^=el]').length < 1) {
+                            $('#remote_sensors').hide();
+                        }
                     }
                 });
     }
@@ -539,8 +549,8 @@ var addExternalSensorGroup = function (name, url) {
     newElement.id = url2ID(url);
     $(newElement).find('h3').html(name);
     $(newElement).find('p').html(url);
-    $('#external_sensors').append(newElement);
-    $('#external_sensors').slideDown(100);
+    $('#remote_sensors').append(newElement);
+    $('#remote_sensors').slideDown(100);
     /**
      * @todo: make external sensor re-configurable
      */
@@ -685,7 +695,7 @@ var pushConfig2Server = function ($form, refresh) {
             function (data) {
                 insertPushServers(data.push_servers, data.push_server_errors,
                         refresh);
-                $('#newPushServer').hide();
+                $('#newExternal').hide();
                 $form
                         .find('button[name="push-external-btn"]')
                         .removeClass('btn-default')
@@ -693,7 +703,7 @@ var pushConfig2Server = function ($form, refresh) {
                         .attr(
                                 'data-original-title',
                                 'Update the sensor configuration on the server. IMPORTANT: This will cause the server to change the API key, therefore, you need to copy and paste the new api key from the server config page.');
-                $('#newPushServer')
+                $('#newPushServerForm')
                         .find('button[name="push-external-btn"]')
                         .html(
                                 '<span class="glyphicon glyphicon-cloud-upload"></span> Upload configuration to central server');
@@ -714,6 +724,21 @@ var savePushServerConfig = function ($form) {
                         'Save the configuration for this push server.');
     });
 };
+
+var addNewPushSensor = function ($form) {
+    /**
+     * saves the database configuration
+     * 
+     * @param: $form: jQuery object representing the database configuration form
+     */
+    var $button = $form.find('button[name="status-btn"]');
+    setButtonStatus($button, 'loading', 'sensor');
+    var sensor = $form.find('input[name="sensor"]').val();
+    postData('add_new_push_sensor', $form.serialize(), function (data) {
+        loopThroughSensors(data.remote_sensors, data.remote_sensor_error);
+        $('#closeExternal').click();
+    });
+}
 
 var url2Name = function ($form, input) {
     var result = '';
@@ -744,6 +769,7 @@ $(function () {
     $('input').change(validateInput);
     $('#addExternal').click(function () {
         $('#newExternal').show();
+        $('#addExternal').hide();
     });
     $('#newExternalForm').submit(function (event) {
         getExternalConfig($(this));
@@ -752,8 +778,9 @@ $(function () {
     $('#newExternalForm').find('input[name="url"]').change(function () {
         url2Name($('#newExternalForm'), this);
     });
-    $('#addPushServer').click(function () {
-        $('#newPushServer').show();
+    $('#closeExternal').click(function () {
+        $('#newExternal').hide();
+        $('#addExternal').show();
     });
     $('#newPushServerForm').submit(
             function (event) {
@@ -765,4 +792,11 @@ $(function () {
     $('#newPushServerForm').find('input[name="url"]').change(function () {
         url2Name($('#newPushServerForm'), this);
     });
+    $('#newReceiveDataConfigForm').submit(
+            function (event) {
+                $(this).find('input[name="exttable"]').val(
+                        $(this).find('input[name="table"]').val());
+                addNewPushSensor($(this));
+                event.preventDefault();
+            });
 });
