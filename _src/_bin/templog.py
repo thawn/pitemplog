@@ -68,8 +68,12 @@ def get_xml_temperatures(url, username, pw):
 
 
 def push_temperature(conf, data):
-    post_data = {'data': json.dumps(data)}
-    request = urllib_request.Request("%s?action=receive_push_temperatures" % conf['url'], urlencode(post_data).encode())
+    data["apikey"] = conf["apikey"]
+    post_data = {"data": json.dumps(data)}
+    url = "%s?action=receive_push_temperatures" % conf["url"]
+    pitemplog.log.debug('contacting url: %s with data: \n' % url)
+    pitemplog.log.debug(pformat(post_data))
+    request = urllib_request.Request(url, urlencode(post_data).encode())
     result = urllib_request.urlopen(request).read().decode()
     try:
         json_result = json.loads(result)
@@ -77,6 +81,10 @@ def push_temperature(conf, data):
             pitemplog.log.warning('Api error: \n')
             pitemplog.log.warning(json_result.pop("log"))
             pitemplog.log.warning(pformat(json_result))
+        else:
+            pitemplog.log.debug('result: \n')
+            pitemplog.log.debug(json_result.pop("log"))
+            pitemplog.log.debug(pformat(json_result))
     except ValueError:
         pitemplog.log.warning('Api error: \n' + result)
 
