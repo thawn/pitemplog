@@ -280,5 +280,6 @@ In case you would like to change the database configuration: this is done via th
 
  - [ ] Write selenium tests.
  - [ ] Add support for vibration sensors
+ - [ ] Add support for LoRaWAN sensors
 
 
