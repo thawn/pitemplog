@@ -6,6 +6,9 @@ import pitemplog
 
 
 def partition_table(unused, database, table, extension):
+    if not table:
+        pitemplog.log.warning("Table is empty! Nothing done.")
+        return
     table_name = table + extension
     pitemplog.log.info(str(datetime.datetime.now()) + " Partitioning: %s" % table_name )
     lock = pitemplog.LockTable(table_name)

@@ -11,6 +11,9 @@ def reset_table(unused, database, table, extension):
     if not extension:
         pitemplog.log.warning("Extension is empty, refusing to reset main table! Nothing done.")
         return
+    if not table:
+        pitemplog.log.warning("Table is empty! Nothing done.")
+        return
     # create the lock file
     lock = pitemplog.LockTable(table_name)
     with lock:
