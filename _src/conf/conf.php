@@ -206,6 +206,9 @@ if (isset( $_GET['action'] )) {
 		case 'receive_push_config' :
 			$conf->receive_push_config( $_POST );
 			break;
+		case 'add_new_push_sensor' :
+			$conf->add_new_push_sensor( $_POST );
+			break;
 		default :
 			$response->abort( 'Error: unknown action:', $_GET['action'] );
 	/**
