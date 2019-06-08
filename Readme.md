@@ -270,7 +270,7 @@ In case you would like to change the database configuration: this is done via th
 
 ## ToDo
 
- - [ ] Write selenium and python tests.
+ - [ ] Write selenium tests.
  - [ ] Add support for vibration sensors
 
 
