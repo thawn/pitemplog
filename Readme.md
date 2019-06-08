@@ -223,8 +223,13 @@ Just add a name, a database table and a category to each sensor and hit the save
 
 Now the raspi will start logging data from each sensor every minute.
 
+#### Screenshot
+![Database and Sensor Configuration](doc/Database and Sensor Configuration.png)
+
 ### External sources/targets
 There are three ways to exchange data with external sources/targets:
+
+![External Source/Target Configuration](doc/external_source_target_config.png)
 
 #### Fetch data:
 The server will actively fetch data from an external source every minute. The external source can be another pitemplog box or any source providing a web interface or api. In the latter case, you need to provide a parser that scrapes the data from the external source. An example parser for mibi sensors (mibi.php) is provided in the parsers directory.
@@ -246,6 +251,8 @@ The server will passively wait for input from an external source. In order to be
 
 To configure receiving data, configure the source url (or unique id of source), the source name, the sensor id (must be unique and start with "custom-"), name, table and category. Once you are done, an api key will be automatically generated and you need to copy that to the sender in order to prevent anyone from pushing data to the server.
 
+![Receive Push Configuration](doc/push_config.png)
+
 The external source must provide the data to "http://pitemplog.domain/data.php" in the following structure (all arrays must be of the same length):
 <dl>
 	<dt>"apikey":<dt>
@@ -258,6 +265,7 @@ The external source must provide the data to "http://pitemplog.domain/data.php" 
 	<dd>[array of floating point temperatures in ˚C]</dd>
 </dl>
 
+
 ### Database
 In case you would like to change the database configuration: this is done via the environment variables:
 * `DB_HOST` (hostname of the database server)
@@ -265,8 +273,6 @@ In case you would like to change the database configuration: this is done via th
 * `DB_USER` (a user that has access to the database)
 * `DB_PW` (the users database password). 
 
-### Configuration Screenshot
-![Database and Sensor Configuration](doc/Database and Sensor Configuration.png)
 
 ## ToDo
 
