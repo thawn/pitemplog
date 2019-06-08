@@ -213,11 +213,44 @@ These packages are required on the system that deploys the logging system and we
 * jekyll
 
 ## Configuration<a name="config"></a>
-1. In a browser enter the ip address or the hostname of the raspi
-1. If this is the first time that you contact the raspi, you will be redirected to the configuration page. If you are not redirected, click on "Configuration" in the top right corner.
-1. On the configuration page you can configure the sensors and any attached or remote sensors. Remote sensors can be other raspi setups or you can write a plugin for scraping information from the web frontend of other sensors (an example for a mibi sensor is included).
-1. Once you are done with the configuration hit "Save"
-1. In case you would like to change the database configuration: this is done via the environment variables `DB_HOST` (hostname of the database server), `DB_DB` (name of the database), `DB_USER` (a user that has access to the database) and `DB_PW` (the users database password). 
+* In a browser enter the ip address or the hostname of the raspi
+* If this is the first time that you contact the raspi, you will be redirected to the configuration page. If you are not redirected, click on "Configuration" in the top right corner.
+
+### Local sensors
+If there are sensors attached directly to the raspi, there will be empty configuration fields for each sensor.
+
+Just add a name, a database table and a category to each sensor and hit the save button for each senosr (or just press enter while the cursor is in a configuration field) or hit "Save entire configuration".
+
+Now the raspi will start logging data from each sensor every minute.
+
+### External sources
+External sources can be other raspi setups or you can write a plugin for scraping information from the web frontend of other sensors (an example for a mibi sensor is included).
+
+@ToDo: describe configuration of external sources
+The external source must provide the data to 
+				"{{ site.baseurl }}/data.php" in the following structure (all arrays must be of the same length):
+<dl>
+	<dt>"apikey":<dt>
+	<dd>"api key from the server config page"</dd>
+	<dt>"sensor":</dt>
+	<dd>[array of sensor id strings]</dd>
+	<dt>"time":</dt>
+	<dd>[array of 10 digit unix timestamps]</dd>
+	<dt>"temp":</dt>
+	<dd>[array of floating point temperatures in ˚C]</dd>
+</dl>
+
+### Remote configuration of central server
+If your push source is a pitemplog box, then it is easier to push the local configuration from that box onto the server.
+
+@ToDo: describe how step by step
+
+### Database
+In case you would like to change the database configuration: this is done via the environment variables:
+* `DB_HOST` (hostname of the database server)
+* `DB_DB` (name of the database)
+* `DB_USER` (a user that has access to the database)
+* `DB_PW` (the users database password). 
 
 ### Configuration Screenshot
 ![Database and Sensor Configuration](doc/Database and Sensor Configuration.png)
