@@ -229,8 +229,6 @@ Now the raspi will start logging data from each sensor every minute.
 ### External sources/targets
 There are three ways to exchange data with external sources/targets:
 
-![External Source/Target Configuration](doc/external_source_target_config.png)
-
 #### Fetch data:
 The server will actively fetch data from an external source every minute. The external source can be another pitemplog box or any source providing a web interface or api. In the latter case, you need to provide a parser that scrapes the data from the external source. An example parser for mibi sensors (mibi.php) is provided in the parsers directory.
 
@@ -264,6 +262,9 @@ The external source must provide the data to "http://pitemplog.domain/data.php" 
 	<dt>"temp":</dt>
 	<dd>[array of floating point temperatures in ˚C]</dd>
 </dl>
+
+#### Screenshot
+![External Source/Target Configuration](doc/external_source_target_config.png)
 
 
 ### Database
