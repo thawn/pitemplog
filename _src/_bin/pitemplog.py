@@ -17,6 +17,7 @@ class LockTable:
     def __enter__(self, *unused):
         with open(self.lock_file, 'a'):
             os.utime(self.lock_file, None)
+        os.chmod(self.lock_file, 0o666)
         return self
 
     def __exit__(self, *unused):

@@ -48,6 +48,7 @@ def aggregate_table(unused, database, table, extension):
             tmp_file = open(last_sync_file, 'w')
             tmp_file.write(last_time)
             tmp_file.close()
+            os.chmod(last_sync_file, 0o666)
             # delete the last database entry because it is not guaranteed to be in sync with the rest of the values:
             query = "DELETE FROM `%s`" % table_name + where_clause + " ORDER BY time DESC LIMIT 1"
             with database as cur:
