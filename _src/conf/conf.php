@@ -127,7 +127,11 @@ function save_everything($response, $conf, $data) {
 	}
 	if ($data['push_servers']) {
 		foreach ( $data['push_servers'] as $server ) {
-			$conf->push_config( $server );
+			if ($conf->push_servers[$server["url"]]) {
+				$conf->save_push_server( $server );
+			} else {
+				$conf->push_config( $server );
+			}
 		}
 	}
 	$conf->write_config( TRUE );
