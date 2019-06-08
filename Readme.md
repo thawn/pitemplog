@@ -249,6 +249,7 @@ The server will passively wait for input from an external source. In order to be
 
 To configure receiving data, configure the source url (or unique id of source), the source name, the sensor id (must be unique and start with "custom-"), name, table and category. Once you are done, an api key will be automatically generated and you need to copy that to the sender in order to prevent anyone from pushing data to the server.
 
+##### Screenshot:
 ![Receive Push Configuration](doc/push_config.png)
 
 The external source must provide the data to "http://pitemplog.domain/data.php" in the following structure (all arrays must be of the same length):
