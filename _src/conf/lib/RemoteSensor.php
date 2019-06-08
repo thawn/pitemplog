@@ -54,7 +54,7 @@ class RemoteSensor extends LocalSensor {
 		}
 	}
 	public function set_apikey(string $val) {
-		$this->apikey = $this->filter_default( $val, 'apikey', "#^[a-zA-Z0-9/+=]{8,76}$#", 'must be base64 encoded and 8-76 characters long. Copy and paste the api key from the configuration interface of the target server');
+		$this->apikey = $this->filter_default( $val, 'apikey', "#^[a-zA-Z0-9/+= ]{8,76}$#", 'must be base64 encoded and 8-76 characters long. Copy and paste the api key from the configuration interface of the target server');
 	}
 	public function set_push(string $val) {
 		$this->push = $val === 'true' ? 'true' : '';
