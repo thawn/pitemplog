@@ -86,61 +86,6 @@ class ConfigClass {
 	}
 
 	/**
-	 * Get the array in which the configuration for a certain sensor is stored.
-	 *
-	 * @param string $sensor
-	 * @return string
-	 */
-	public function get_sensor_type(string $sensor) {
-		if (array_key_exists( $sensor, $this->local_sensors )) {
-			return 'local_sensors';
-		} elseif (array_key_exists( $sensor, $this->remote_sensors )) {
-			return 'remote_sensors';
-		} else {
-			return '';
-		}
-	}
-
-	/**
-	 * Check if a table is used by any other sensor.
-	 *
-	 * @param string $table:
-	 * @param string $target_sensor:
-	 * @return boolean
-	 */
-	public function is_table_used(string $table, string $target_sensor) {
-		$used = FALSE;
-		if ($table) {
-			$this->response->logger( sprintf( 'Checking whether table %s is already used by a sensor other than %s.', $table, $target_sensor ), $conf, 3 );
-			foreach ( array_merge( $this->remote_sensors, $this->local_sensors ) as $sensor ) {
-				if ($sensor->sensor !== $target_sensor && $table === $sensor->table) {
-					$used = TRUE;
-					$this->response->logger( sprintf( 'The table %s is already used by sensor: %s. We cannot use it for sensor: %s', $table, $sensor->sensor, $target_sensor ), FALSE, 0 );
-				}
-			}
-		}
-		return $used;
-	}
-
-	/**
-	 * Add a sensor to the respective array config property.
-	 *
-	 * @param array $data
-	 * @param string $type
-	 */
-	protected function add_sensor(array $data, string $type = 'local') {
-		$sensor_type = $type . '_sensors';
-		if (isset( $this->{$sensor_type}[$data['sensor']] )) {
-			$this->response->logger( 'Updating sensor with data:', $data, 3 );
-			$this->{$sensor_type}[$data['sensor']]->update_config( $data );
-		} else {
-			$this->response->logger( 'Loading sensor with data:', $data, 3 );
-			$class_name = __NAMESPACE__ . '\\' . ucfirst( $type ) . 'Sensor';
-			$this->{$sensor_type}[$data['sensor']] = new $class_name( $this->response, $this->database, $data );
-		}
-	}
-
-	/**
 	 * Update sensor configuration and save the configuration to file.
 	 * Run commands processing the database if necessary.
 	 *
@@ -175,98 +120,6 @@ class ConfigClass {
 	}
 
 	/**
-	 * Merge local and remote sensors into one array.
-	 */
-	protected function populate_all_sensors() {
-		$this->all_sensors = array_merge( $this->remote_sensors, $this->local_sensors );
-	}
-
-	/**
-	 * upgrade configuration of an older version to the current version
-	 *
-	 * @param array $conf
-	 */
-	protected function upgrade_config(array $conf) {
-		if (! isset( $conf['version'] )) { // import legacy configuration file
-			foreach ( $conf as $config ) {
-				if (! $sensor == 'database') {
-					if (isset( $config['exturl'] )) {
-						$this->add_sensor( $config, 'remote' );
-					} else {
-						$this->add_sensor( $config, 'local' );
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * import a configuration array
-	 *
-	 * @param array $data
-	 */
-	protected function import_data(array $data) {
-		foreach ( $data['local_sensors'] as $sensor ) {
-			$this->add_sensor( $sensor, 'local' );
-		}
-		foreach ( $data['remote_sensors'] as $sensor ) {
-			$this->add_sensor( $sensor, 'remote' );
-		}
-		foreach ( $data['push_servers'] as $server ) {
-			$this->push_servers[$server['url']] = new PushServer( $this->response, $server );
-		}
-	}
-
-	/**
-	 * Save changes to config file.
-	 * Also checks if there are changes and pages need to be rebuilt.
-	 */
-	public function write_config(bool $create_pages = FALSE) {
-		$this->response->logger( 'Attempting to write configuration to: ' . $this->config_file, $this, 3 );
-		if (is_writable( $this->config_file )) {
-			file_put_contents( $this->config_file, json_encode( $this, JSON_UNESCAPED_SLASHES ), LOCK_EX );
-			$this->config_changed = FALSE;
-			$local_conf = escapeshellarg( $this->config_file );
-			$build_conf = escapeshellarg( '/usr/local/share/templog/_data/config.json' );
-			$diff = escapeshellcmd( '/usr/bin/diff -q ' . $build_conf . ' ' . $local_conf );
-			$diff_output = shell_exec( $diff );
-			$this->response->logger( 'Checking for difference between old and new configuration:', $diff_output, 3 );
-			if (! empty( $diff_output )) {
-				$this->response->logger( 'Configuration saved successfully.', FALSE, 1 );
-				$this->response->config_changed = TRUE;
-				if ($create_pages) {
-					$this->create_pages();
-				}
-			}
-		} else {
-			$this->response->abort( 'ERROR: Permission denied. Cannot write to config file:', (getcwd()) . '/' . $this->config_file );
-		}
-	}
-
-	/**
-	 * Load/create configuration for all sensors.
-	 *
-	 * @param array $conf
-	 * @return array
-	 */
-	protected function populate_local_sensors() {
-		// look for available temperature sensors
-		$sensors = [ ];
-		if (file_exists( $this->sensordir )) {
-			$dirs = scandir( $this->sensordir );
-			$this->response->logger( 'Sensor directories in' . $this->sensordir . ':', $dirs, 3 );
-			foreach ( $dirs as $sensor ) {
-				if ($sensor != '.' && $sensor != '..' && $sensor != 'w1_bus_master1' && ! isset( $this->local_sensors[$sensor] )) {
-					$this->local_sensors[$sensor] = new LocalSensor( $this->response, $this->database, [ 
-							'sensor' => $sensor
-					] );
-					$this->config_changed = TRUE;
-				}
-			}
-		}
-	}
-
-	/**
 	 * En- or disable a specific sensor.
 	 *
 	 * @param string $sensor
@@ -294,32 +147,6 @@ class ConfigClass {
 	}
 
 	/**
-	 * Run commands that were stored in the command queue.
-	 */
-	public function run_commands() {
-		foreach ( $this->commands as $command ) {
-			$output = shell_exec( $command );
-			$this->response->logger( 'Executed command: ' . $command, $output );
-		}
-	}
-
-	/**
-	 * execute commands that create the html pages and update the website.
-	 */
-	public function create_pages() {
-		$this->response->logger( 'Attempting to create pages:', FALSE, 3 );
-		$create_pages = escapeshellcmd( '/usr/local/share/templog/_data/create_pages.py' );
-		$create_pages .= ' 2>&1';
-		$create_output = shell_exec( $create_pages );
-		$this->response->logger( 'Created pages:', $create_output, 1 );
-		$jekyll = escapeshellcmd( 'jekyll build' );
-		$cd = escapeshellcmd( 'cd /usr/local/share/templog/' );
-		$jekyllcmd = $cd . '&&' . $jekyll . ' 2>&1';
-		$jekyll_ouptut = shell_exec( $jekyllcmd );
-		$this->response->logger( 'Updated Site:', $jekyll_ouptut, 1 );
-	}
-
-	/**
 	 * Add/update a push server.
 	 *
 	 * @param array $data
@@ -329,10 +156,10 @@ class ConfigClass {
 		$this->push_servers[$data['url']] = new PushServer( $this->response, $data );
 		$this->write_config();
 	}
-	
+
 	/**
 	 * Delete a push server.
-	 * 
+	 *
 	 * @param string $url
 	 * @return boolean
 	 */
@@ -358,12 +185,11 @@ class ConfigClass {
 		}
 		curl_setopt( $ch, CURLOPT_URL, $push_url );
 		curl_setopt( $ch, CURLOPT_POST, 1 );
+		$updated_server_data = $server_data;
+		$updated_server_data['url'] = 'http://' . $_SERVER['HTTP_HOST'];
+		$updated_server_data['name'] = 'Pushed data: ' . gethostname();
 		$local_sensor_config = json_decode( json_encode( $this->local_sensors ), TRUE );
-		$local_sensor_config = ConfigClass::local_2_remote( $local_sensor_config, $server_data );
-		foreach ( $local_sensor_config as $sensor => $conf ) {
-			$local_sensor_config[$sensor]['exturl'] = 'http://' . $_SERVER['HTTP_HOST'];
-			$local_sensor_config[$sensor]['extname'] = 'Pushed data: ' . gethostname();
-		}
+		$local_sensor_config = ConfigClass::local_2_remote( $local_sensor_config, $updated_server_data );
 		$this->response->logger( 'Merged sensor config:', $local_sensor_config, 3 );
 		$this->response->logger( 'Urlencoded sensor config:', http_build_query( $local_sensor_config ), 3 );
 		curl_setopt( $ch, CURLOPT_POSTFIELDS, http_build_query( $local_sensor_config ) );
@@ -401,8 +227,7 @@ class ConfigClass {
 				'name',
 				'category',
 				'exturl',
-				'extname',
-				'exttable'
+				'extname'
 		];
 		$config_changed = FALSE;
 		$apikey = $this->generate_api_key();
@@ -475,6 +300,76 @@ class ConfigClass {
 			$this->response->abort( 'Caught error trying to save pushed data: ' . $e->getMessage() );
 		}
 	}
+	/**
+	 * Add a new push sensor.
+	 * 
+	 * @param array $data
+	 */
+	public function add_new_push_sensor(array $data) {
+		if ($data["sensor"]) {
+			if (! $this->remote_sensors[strval( $data["sensor"] )]) {
+				$sensor = array (
+						strval( $data["sensor"] ) => $data
+				);
+				$this->receive_push_config( $sensor );
+			} else {
+				$this->response->remote_sensor_error[strval( $data["sensor"] )]["sensor"] = sprintf('Another sensor with the id: "%s" already exists. Please choose a different ID.', $data["sensor"]);
+			}
+		} else {
+			$this->response->abort( 'Cannot save sensor without an id: ', $data );
+		}
+	}
+	/**
+	 * Save changes to config file.
+	 * Also checks if there are changes and pages need to be rebuilt.
+	 */
+	public function write_config(bool $create_pages = FALSE) {
+		$this->response->logger( 'Attempting to write configuration to: ' . $this->config_file, $this, 3 );
+		if (is_writable( $this->config_file )) {
+			file_put_contents( $this->config_file, json_encode( $this, JSON_UNESCAPED_SLASHES ), LOCK_EX );
+			$this->config_changed = FALSE;
+			$local_conf = escapeshellarg( $this->config_file );
+			$build_conf = escapeshellarg( '/usr/local/share/templog/_data/config.json' );
+			$diff = escapeshellcmd( '/usr/bin/diff -q ' . $build_conf . ' ' . $local_conf );
+			$diff_output = shell_exec( $diff );
+			$this->response->logger( 'Checking for difference between old and new configuration:', $diff_output, 3 );
+			if (! empty( $diff_output )) {
+				$this->response->logger( 'Configuration saved successfully.', FALSE, 1 );
+				$this->response->config_changed = TRUE;
+				if ($create_pages) {
+					$this->create_pages();
+				}
+			}
+		} else {
+			$this->response->abort( 'ERROR: Permission denied. Cannot write to config file:', (getcwd()) . '/' . $this->config_file );
+		}
+	}
+
+	/**
+	 * Run commands that were stored in the command queue.
+	 */
+	public function run_commands() {
+		foreach ( $this->commands as $command ) {
+			$output = shell_exec( $command );
+			$this->response->logger( 'Executed command: ' . $command, $output );
+		}
+	}
+
+	/**
+	 * execute commands that create the html pages and update the website.
+	 */
+	public function create_pages() {
+		$this->response->logger( 'Attempting to create pages:', FALSE, 3 );
+		$create_pages = escapeshellcmd( '/usr/local/share/templog/_data/create_pages.py' );
+		$create_pages .= ' 2>&1';
+		$create_output = shell_exec( $create_pages );
+		$this->response->logger( 'Created pages:', $create_output, 1 );
+		$jekyll = escapeshellcmd( 'jekyll build' );
+		$cd = escapeshellcmd( 'cd /usr/local/share/templog/' );
+		$jekyllcmd = $cd . '&&' . $jekyll . ' 2>&1';
+		$jekyll_ouptut = shell_exec( $jekyllcmd );
+		$this->response->logger( 'Updated Site:', $jekyll_ouptut, 1 );
+	}
 
 	/**
 	 * Convert local sensor configuration into remote sensor configuration by merging the sensor
@@ -493,6 +388,61 @@ class ConfigClass {
 			$sensors[$sensor]['exttable'] = $sensors[$sensor]['table'];
 		}
 		return $sensors;
+	}
+
+	/**
+	 * Get the array in which the configuration for a certain sensor is stored.
+	 *
+	 * @param string $sensor
+	 * @return string
+	 */
+	public function get_sensor_type(string $sensor) {
+		if (array_key_exists( $sensor, $this->local_sensors )) {
+			return 'local_sensors';
+		} elseif (array_key_exists( $sensor, $this->remote_sensors )) {
+			return 'remote_sensors';
+		} else {
+			return '';
+		}
+	}
+
+	/**
+	 * Check if a table is used by any other sensor.
+	 *
+	 * @param string $table:
+	 * @param string $target_sensor:
+	 * @return boolean
+	 */
+	public function is_table_used(string $table, string $target_sensor) {
+		$used = FALSE;
+		if ($table) {
+			$this->response->logger( sprintf( 'Checking whether table %s is already used by a sensor other than %s.', $table, $target_sensor ), $conf, 3 );
+			foreach ( array_merge( $this->remote_sensors, $this->local_sensors ) as $sensor ) {
+				if ($sensor->sensor !== $target_sensor && $table === $sensor->table) {
+					$used = TRUE;
+					$this->response->logger( sprintf( 'The table %s is already used by sensor: %s. We cannot use it for sensor: %s', $table, $sensor->sensor, $target_sensor ), FALSE, 0 );
+				}
+			}
+		}
+		return $used;
+	}
+
+	/**
+	 * Add a sensor to the respective array config property.
+	 *
+	 * @param array $data
+	 * @param string $type
+	 */
+	protected function add_sensor(array $data, string $type = 'local') {
+		$sensor_type = $type . '_sensors';
+		if (isset( $this->{$sensor_type}[$data['sensor']] )) {
+			$this->response->logger( 'Updating sensor with data:', $data, 3 );
+			$this->{$sensor_type}[$data['sensor']]->update_config( $data );
+		} else {
+			$this->response->logger( 'Loading sensor with data:', $data, 3 );
+			$class_name = __NAMESPACE__ . '\\' . ucfirst( $type ) . 'Sensor';
+			$this->{$sensor_type}[$data['sensor']] = new $class_name( $this->response, $this->database, $data );
+		}
 	}
 
 	/**
@@ -526,6 +476,72 @@ class ConfigClass {
 			$deleted = TRUE;
 		}
 		return $deleted;
+	}
+
+	/**
+	 * Merge local and remote sensors into one array.
+	 */
+	protected function populate_all_sensors() {
+		$this->all_sensors = array_merge( $this->remote_sensors, $this->local_sensors );
+	}
+
+	/**
+	 * upgrade configuration of an older version to the current version
+	 *
+	 * @param array $conf
+	 */
+	protected function upgrade_config(array $conf) {
+		if (! isset( $conf['version'] )) { // import legacy configuration file
+			foreach ( $conf as $config ) {
+				if (! $sensor == 'database') {
+					if (isset( $config['exturl'] )) {
+						$this->add_sensor( $config, 'remote' );
+					} else {
+						$this->add_sensor( $config, 'local' );
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * import a configuration array
+	 *
+	 * @param array $data
+	 */
+	protected function import_data(array $data) {
+		foreach ( $data['local_sensors'] as $sensor ) {
+			$this->add_sensor( $sensor, 'local' );
+		}
+		foreach ( $data['remote_sensors'] as $sensor ) {
+			$this->add_sensor( $sensor, 'remote' );
+		}
+		foreach ( $data['push_servers'] as $server ) {
+			$this->push_servers[$server['url']] = new PushServer( $this->response, $server );
+		}
+	}
+
+	/**
+	 * Load/create configuration for all sensors.
+	 *
+	 * @param array $conf
+	 * @return array
+	 */
+	protected function populate_local_sensors() {
+		// look for available temperature sensors
+		$sensors = [ ];
+		if (file_exists( $this->sensordir )) {
+			$dirs = scandir( $this->sensordir );
+			$this->response->logger( 'Sensor directories in' . $this->sensordir . ':', $dirs, 3 );
+			foreach ( $dirs as $sensor ) {
+				if ($sensor != '.' && $sensor != '..' && $sensor != 'w1_bus_master1' && ! isset( $this->local_sensors[$sensor] )) {
+					$this->local_sensors[$sensor] = new LocalSensor( $this->response, $this->database, [ 
+							'sensor' => $sensor
+					] );
+					$this->config_changed = TRUE;
+				}
+			}
+		}
 	}
 }
 ?>
