@@ -27,23 +27,23 @@ Jump directly to:
 ## Screen shots
 
 ### Overview Page for Multiple Sensors
-![Overview Page for Multiple Sensors](doc/Overview page.png)
+![Overview Page for Multiple Sensors](doc/Overview_page.png)
 
 ### Frontend Desktop
-![Frontend Desktop](doc/Example Screen.png)
+![Frontend Desktop](doc/Example_Screen.png)
 
 ### Frontend Mobile
-![Frontend Mobile](doc/Example mobile.png)
+![Frontend Mobile](doc/Example_mobile.png)
 
 ### Frontend Tablet
-![Frontend Tablet](doc/Example Tablet.png)
+![Frontend Tablet](doc/Example_Tablet.png)
 
 see also the [configuration screenshot](#configuration-screenshot).
 
 ## Hardware setup<a name="hardware"></a>
 ### Material
 
-![parts](doc/parts overview.jpg)
+![parts](doc/parts_overview.jpg)
 
 * Raspberrypi 2 or 3 Model B
 * SD card with at least 2GB capacity
@@ -88,18 +88,18 @@ randomly disappear. See [here for recommendations on setting up large sensor net
 Check out the [picture of the final assembly](#final-assembly).
 
 #### Connect to Raspi
-![connect to raspi](doc/connect to raspi.jpg)
+![connect to raspi](doc/connect_to_raspi.jpg)
 
 #### Sensor Pinout
-![sensor pinout](doc/sensor pinout.png)
+![sensor pinout](doc/sensor_pinout.png)
 
 Note: In the front view of the sensor (left) the pins are facing towards you.
 
 #### Assembled Sensor
-![assembled sensor](doc/assembled sensor.jpg)
+![assembled sensor](doc/assembled_sensor.jpg)
 
 #### Final Assembly
-![final assembly](doc/final assembly.jpg)
+![final assembly](doc/final_assembly.jpg)
 
 ## Installation
 Jump directly to:
@@ -224,7 +224,7 @@ Just add a name, a database table and a category to each sensor and hit the save
 Now the raspi will start logging data from each sensor every minute.
 
 #### Screenshot
-![Database and Sensor Configuration](doc/Database and Sensor Configuration.png)
+![Database and Sensor Configuration](doc/Database_and_Sensor_Configuration.png)
 
 ### External sources/targets
 There are three ways to exchange data with external sources/targets:
