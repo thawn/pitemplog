@@ -26,23 +26,23 @@ Jump directly to:
 ## Screen shots
 
 ### Overview Page for Multiple Sensors
-![Overview Page for Multiple Sensors](https://gitlab.com/Thawn/pitemplog/raw/master/doc/Overview%20page.png =500x)
+![Overview Page for Multiple Sensors](https://gitlab.com/Thawn/pitemplog/raw/master/doc/Overview_page.png)
 
 ### Frontend Desktop
-![Frontend Desktop](https://gitlab.com/Thawn/pitemplog/raw/master/doc/Example%20Screen.png)
+![Frontend Desktop](https://gitlab.com/Thawn/pitemplog/raw/master/doc/Example_Screen.png)
 
 ### Frontend Mobile
-![Frontend Mobile](https://gitlab.com/Thawn/pitemplog/raw/master/doc/Example%20mobile.png)
+![Frontend Mobile](https://gitlab.com/Thawn/pitemplog/raw/master/doc/Example_mobile.png)
 
 ### Frontend Tablet
-![Frontend Tablet](https://gitlab.com/Thawn/pitemplog/raw/master/doc/Example%20Tablet.png)
+![Frontend Tablet](https://gitlab.com/Thawn/pitemplog/raw/master/doc/Example_Tablet.png)
 
 see also the [configuration screenshot](#configuration-screenshot).
 
 ## Hardware setup<a name="hardware"></a>
 ### Material
 
-![parts](https://gitlab.com/Thawn/pitemplog/raw/master/doc/parts%20overview.jpg)
+![parts](https://gitlab.com/Thawn/pitemplog/raw/master/doc/parts_overview.jpg)
 
 * Raspberrypi 2 or 3 Model B
 * SD card with at least 2GB capacity
@@ -87,18 +87,18 @@ randomly disappear. See [here for recommendations on setting up large sensor net
 Check out the [picture of the final assembly](#final-assembly).
 
 #### Connect to Raspi
-![connect to raspi](https://gitlab.com/Thawn/pitemplog/raw/master/doc/connect%20to%20raspi.jpg)
+![connect to raspi](https://gitlab.com/Thawn/pitemplog/raw/master/doc/connect_to_raspi.jpg)
 
 #### Sensor Pinout
-![sensor pinout](https://gitlab.com/Thawn/pitemplog/raw/master/doc/sensor%20pinout.png)
+![sensor pinout](https://gitlab.com/Thawn/pitemplog/raw/master/doc/sensor_pinout.png)
 
 Note: In the front view of the sensor (left) the pins are facing towards you.
 
 #### Assembled Sensor
-![assembled sensor](https://gitlab.com/Thawn/pitemplog/raw/master/doc/assembled%20sensor.jpg)
+![assembled sensor](https://gitlab.com/Thawn/pitemplog/raw/master/doc/assembled_sensor.jpg)
 
 #### Final Assembly
-![final assembly](https://gitlab.com/Thawn/pitemplog/raw/master/doc/final%20assembly.jpg)
+![final assembly](https://gitlab.com/Thawn/pitemplog/raw/master/doc/final_assembly.jpg)
 
 ## Configuration<a name="config"></a>
 * In a browser enter the ip address or the hostname of the raspi
@@ -112,7 +112,7 @@ Just add a name, a database table and a category to each sensor and hit the save
 Now the raspi will start logging data from each sensor every minute.
 
 #### Screenshot
-[Database and Sensor Configuration](https://gitlab.com/Thawn/pitemplog/raw/master/doc/Database%20and%20Sensor%20Configuration.png?inline=false)
+[Database and Sensor Configuration](https://gitlab.com/Thawn/pitemplog/raw/master/doc/Database_and_Sensor_Configuration.png?inline=false)
 
 ### External sources/targets
 There are three ways to exchange data with external sources/targets:
