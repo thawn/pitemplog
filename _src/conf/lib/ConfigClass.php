@@ -482,7 +482,7 @@ class ConfigClass {
 	 * Merge local and remote sensors into one array.
 	 */
 	protected function populate_all_sensors() {
-		$this->all_sensors = array_merge( $this->remote_sensors, $this->local_sensors );
+		$this->all_sensors = array_values(array_merge( $this->remote_sensors, $this->local_sensors ));
 	}
 
 	/**
