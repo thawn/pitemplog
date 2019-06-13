@@ -32,3 +32,4 @@ _site/
 dist/
 /vendor/
 htdocs_debug/ 
+*.pyc

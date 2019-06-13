@@ -248,6 +248,7 @@ class TestPartitionDatabase(TestResetAggregate):
         self.executable = '/usr/local/bin/partition_database.py'
         self.sql_file = 'lib/db_local_sensors_no_partitions.sql'
         self.unaffected_table = 'temp1'
+        self.another_table = 'temp3'
 
     def is_success(self, table_name, *unused):
         query = "SELECT `PARTITION_ORDINAL_POSITION` FROM information_schema.partitions "
@@ -260,9 +261,20 @@ class TestPartitionDatabase(TestResetAggregate):
     def test_table(self):
         execute_with_args(self.executable, ["", self.table])
         self.assertTrue(self.is_success(self.table),
-                        'could not partition: %s' % self.table,)
+                        'could not partition: %s' % self.table)
         self.assertFalse(self.is_success(self.table + self.ext),
                          'partitioning was not table specific: %s' % self.table + self.ext)
+
+    def test_all_tables(self):
+        execute_with_args(self.executable, [])
+        self.assertTrue(self.is_success(self.table),
+                        'could not partition: %s' % self.table,)
+        self.assertTrue(self.is_success(self.another_table),
+                        'could not partition: %s' % self.another_table)
+        self.assertTrue(self.is_success(self.table + self.ext),
+                        'could not partition: %s' % (self.table + self.ext))
+        self.assertTrue(self.is_success(self.another_table + self.ext),
+                        'could not partition: %s' % (self.another_table + self.ext))
 
 
 class APIBaseClass(unittest.TestCase):
