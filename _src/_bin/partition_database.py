@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import datetime
+import sys
 #from pprint import pprint
 
 import pitemplog
@@ -28,7 +29,12 @@ def partition_table(unused, database, table, extension):
 
 def main():
     config = pitemplog.PiTempLogConf()
-    config.modify_tables(partition_table)
+    if len(sys.argv) < 2:
+        config.each_sensor_database(partition_table, "")
+        for ext in config.database["aggregateTables"]:
+            config.each_sensor_database(partition_table, ext)
+    else:
+        config.modify_tables(partition_table)
 
 
 if __name__ == "__main__":
