@@ -33,3 +33,4 @@ dist/
 /vendor/
 htdocs_debug/ 
 *.pyc
+testing/qemu/
