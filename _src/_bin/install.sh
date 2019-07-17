@@ -1,11 +1,10 @@
 #!/bin/bash
 target_dir=${INSTALL_DIR:-/usr/local/share/templog/}
+templog_user=${PT_USER:-pi}
 echo "Installing into: $target_dir"
 echo "Local sensors: $LOCAL_SENSORS"
 mkdir -p "$target_dir"
-chown pi:pi "$target_dir"
-#chown pi:pi /var/www/html
-#chmod a+rwx /var/www/html
+chown ${templog_user}:${templog_user} "$target_dir"
 chmod a+x "${target_dir}"_bin/*.{sh,py}
 chmod u+x "${target_dir}"_sbin/*.sh
 chmod a+w "${target_dir}"
@@ -34,9 +33,9 @@ echo "DB_PW=${DB_PW:-temp}" >> /tmp/crontab_env
 cat /tmp/crontab_env "${target_dir}"_sbin/crontab_root | crontab -
 cgroup=$(grep cpuset /proc/1/cgroup | cut -d ':' -f 3)
 if [ "${LOCAL_SENSORS:-yes}" == "no" ]; then
-  cat /tmp/crontab_env "${target_dir}"_bin/crontab_nosensors | crontab -u pi -
+  cat /tmp/crontab_env "${target_dir}"_bin/crontab_nosensors | crontab -u ${templog_user} -
 else
-  cat /tmp/crontab_env "${target_dir}"_bin/crontab | crontab -u pi -
+  cat /tmp/crontab_env "${target_dir}"_bin/crontab | crontab -u ${templog_user} -
 fi
 echo "Installation successful. (re)starting apache now."
 if [ "${cgroup#/docker}" == "$cgroup" ]; then
