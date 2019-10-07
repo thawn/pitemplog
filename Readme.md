@@ -252,7 +252,7 @@ To configure receiving data, configure the source url (or unique id of source), 
 ##### Screenshot:
 ![Receive Push Configuration](doc/push_config.png)
 
-The external source must provide the data to "http://pitemplog.domain/data.php" in the following structure (all arrays must be of the same length):
+The external source must provide the data urlencoded as JSON string in the POST variable called `data` to "http://pitemplog.domain/data.php?action=receive_push_temperatures". The JSON string must be in the following structure (all arrays must be of the same length):
 <dl>
 	<dt>"apikey":<dt>
 	<dd>"api key from the server config page"</dd>
@@ -263,6 +263,23 @@ The external source must provide the data to "http://pitemplog.domain/data.php" 
 	<dt>"temp":</dt>
 	<dd>[array of floating point temperatures in ˚C]</dd>
 </dl>
+for example, the POST data could look like this:
+
+    {'data': '{"apikey": "DiW+rI6qBSy+XR1HZUELBDs0", "sensor": ["custom-id_one", "custom-id_two"], "temp": [14.21, 3.114], "time": [1570460370, 1570460370]}'}
+
+example python 3 code:
+
+    import json
+    import urllib.request as urllib_request
+    from urllib.parse import urlencode
+    
+    data = {"apikey": "DiW+rI6qBSy+XR1HZUELBDs0", "sensor": ["custom-id_one", "custom-id_two"], "temp": [14.21, 3.114], "time": [1570460370, 1570460370]}
+    post_data = {"data": json.dumps(data)}
+    url = "http://pitemplog.domain/data.php?action=receive_push_temperatures"
+    request = urllib_request.Request(url, urlencode(post_data).encode())
+    result = urllib_request.urlopen(request).read().decode()
+
+   
 
 #### Screenshot
 ![External Source/Target Configuration](doc/external_source_target_config.png)
