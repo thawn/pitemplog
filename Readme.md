@@ -278,7 +278,10 @@ import json
 import urllib.request as urllib_request
 from urllib.parse import urlencode
 
-data = {"apikey": "DiW+rI6qBSy+XR1HZUELBDs0", "sensor": ["custom-id_one", "custom-id_two"], "temp": [14.21, 3.114], "time": [1570460370, 1570460370]}
+data = {"apikey": "DiW+rI6qBSy+XR1HZUELBDs0",
+        "sensor": ["custom-id_one", "custom-id_two"],
+        "temp": [14.21, 3.114],
+        "time": [1570460370, 1570460370]}
 post_data = {"data": json.dumps(data)}
 url = "http://pitemplog.domain/data.php?action=receive_push_temperatures"
 request = urllib_request.Request(url, urlencode(post_data).encode())
