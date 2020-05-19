@@ -245,7 +245,7 @@ After you have saved the configuration, you will be redirected to the remote ser
 
 
 #### Receive data:
-The server will passively wait for input from an external source. In order to be able to receive data, this server must be properly configured. If the external source is a pitemplog box, the configuration is done automatically by the sender (see "Send data" above). If you want to send data to this sever from a different source (i.e. an arduino sensor), then you can configure the sensor id, name, table and category here.
+The server will passively wait for input from an external source. In order to be able to receive data, this server must be properly configured. If the external source is a pitemplog box, the configuration is done automatically by the sender (see "Send data" above). If you want to send data to this sever from a different source (for example an arduino sensor), then you can configure the sensor id, name, table and category here.
 
 To configure receiving data, configure the source url (or unique id of source), the source name, the sensor id (must be unique and start with "custom-"), name, table and category. Once you are done, an api key will be automatically generated and you need to copy that to the sender in order to prevent anyone from pushing data to the server.
 
