@@ -125,7 +125,7 @@ Jump directly to:
 1. [Enable ssh](https://www.raspberrypi.org/documentation/remote-access/ssh/) by putting an empty file named `ssh` onto the boot partition of the sd card
 1. Insert the sd card into the raspberry pi and connect the power cable in order to start the raspi
 1. Figure out the IP address of the raspi either from your router's web interface or by connecting a monitor to the raspi. It will tell you it's ip address at bootup. With some routers you can also use the hostname `raspberrypi` to connect to the raspi.
-1. Log into the raspi via ssh: `ssh p@<ip address>`
+1. Log into the raspi via ssh: `ssh pi@<ip address>`
 1. add the following lines to `/boot/config.txt`:
 ```bash
 dtoverlay=w1-gpio,gpiopin=4,pullup=on
