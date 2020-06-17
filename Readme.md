@@ -114,7 +114,8 @@ Jump directly to:
 1. Flash the image files to the sd card for example using [etcher](https://etcher.io/).
 1. You may want to [enable ssh](https://www.raspberrypi.org/documentation/remote-access/ssh/) by putting a file named ssh on the boot partition. Don't forget to change the password using raspi-config after you boot up the raspi and ssh into it using the default username `pi` and password `raspberry`.
 1. Insert the sd card into the raspi.
-1. Connect the usb disk to the raspi.
+1. Connect the usb disk to the raspi. The USB disk must have at leas one partition. **Warning: The first partition on the USB disk will be overwritten.**
+1. Connect the raspi to the internet via LAN cable. Make sure the Raspi can reach a NTP time server to set the system time correctly. Otherwise mysql will complain and the server will not start.
 1. Connect a power cable to the raspi. The raspi will boot up and copy some files onto the usb disk. Do not power down the raspi or disconnect the usb disk until the green lights on the raspi and the activity lights on the usb disk stop blinking. **Warning!!! This will overwrite all data on the first partition of the usb disk!!!**
 1. See [Hardware setup](#hardware) for how to connect the temperature sensors
 1. See [Configuration](#config) for how to configure the web frontend and start logging data.
