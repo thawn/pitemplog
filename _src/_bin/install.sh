@@ -7,10 +7,17 @@ mkdir -p "$target_dir"
 chown ${templog_user}:${templog_user} "$target_dir"
 chmod a+x "${target_dir}"_bin/*.{sh,py}
 chmod u+x "${target_dir}"_sbin/*.sh
+chmod o-w "${target_dir}"_sbin/*
+chmod u+x "${target_dir}"_sbin/setup_timesyncd
 chmod a+w "${target_dir}"
 chmod a+w "${target_dir}"conf/config.json
 chmod a+w "${target_dir}"_data/config.json
 chmod a+x "${target_dir}"_data/*.py
+cp "${target_dir}"_sbin/setup_timesyncd /etc/init.d/
+wd=$( pwd )
+cd /etc/rc3.d
+ln -fs ../init.d/setup_templog_once S01setup_templog_once
+cd $wd
 cp "${target_dir}"_sbin/templog.conf /etc/apache2/sites-available/
 chown root:root /etc/apache2/sites-available/templog.conf
 rm -f /etc/apache2/sites-enabled/0000-templog.conf

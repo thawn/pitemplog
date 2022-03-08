@@ -1,0 +1,26 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          setup_timesyncd
+# Required-Start:
+# Required-Stop:
+# Default-Start: 3
+# Default-Stop:
+# Short-Description: Setup timesyncd on first boot.
+# Description:
+### END INIT INFO
+
+. /lib/lsb/init-functions
+
+case "$1" in
+  start)
+    log_daemon_msg "Starting setup_timesyncd"
+    if [ -s /boot/timesyncd.conf ]; then
+        mv /boot/timesyncd.conf /etc/systemd/
+    fi
+    log_end_msg $?
+    ;;
+  *)
+    echo "Usage: $0 start" >&2
+    exit 3
+    ;;
+esac
