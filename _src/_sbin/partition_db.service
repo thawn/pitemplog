@@ -3,4 +3,5 @@ Description=Partition databases
 
 [Service]
 Type=oneshot
+EnvironmentFile=/etc/systemd/system/partition_db.env
 ExecStart=/usr/local/sbin/pitemplog_partition_database.sh
