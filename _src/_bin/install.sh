@@ -37,7 +37,10 @@ echo "DB_HOST=${DB_HOST:-localhost}" > /tmp/crontab_env
 echo "DB_DB=${DB_DB:-temperatures}" >> /tmp/crontab_env
 echo "DB_USER=${DB_USER:-temp}" >> /tmp/crontab_env
 echo "DB_PW=${DB_PW:-temp}" >> /tmp/crontab_env
-cat /tmp/crontab_env "${target_dir}"_sbin/crontab_root | crontab -
+cp /tmp/crontab_env /etc/systemd/system/partition_db.env
+cp "${target_dir}"_sbin/*.timer /etc/systemd/system/
+cp "${target_dir}"_sbin/*.service /etc/systemd/system/
+systemctl enable /etc/systemd/system/partition_db.timer
 cgroup=$(grep cpuset /proc/1/cgroup | cut -d ':' -f 3)
 if [ "${LOCAL_SENSORS:-yes}" == "no" ]; then
   cat /tmp/crontab_env "${target_dir}"_bin/crontab_nosensors | crontab -u ${templog_user} -

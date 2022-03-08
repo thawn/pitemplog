@@ -1,0 +1,6 @@
+[Unit]
+Description=Partition databases
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/pitemplog_partition_database.sh

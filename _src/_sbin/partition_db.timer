@@ -1,0 +1,9 @@
+[Unit]
+Description=Partition databases
+
+[Timer]
+OnCalendar=*-1-1 4:00:00
+AccuracySec=1h
+
+[Install]
+WantedBy=timers.target
