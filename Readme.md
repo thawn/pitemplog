@@ -114,7 +114,8 @@ Jump directly to:
 1. Flash the image files to the sd card for example using [etcher](https://etcher.io/).
 1. You may want to [enable ssh](https://www.raspberrypi.org/documentation/remote-access/ssh/) by putting a file named ssh on the boot partition. Don't forget to change the password using raspi-config after you boot up the raspi and ssh into it using the default username `pi` and password `raspberry`.
 1. Insert the sd card into the raspi.
-1. Connect the usb disk to the raspi.
+1. Connect the usb disk to the raspi. The USB disk must have at leas one partition. **Warning: The first partition on the USB disk will be overwritten.**
+1. Connect the raspi to the internet via LAN cable. Make sure the Raspi can reach a NTP time server to set the system time correctly. Otherwise mysql will complain and the server will not start.
 1. Connect a power cable to the raspi. The raspi will boot up and copy some files onto the usb disk. Do not power down the raspi or disconnect the usb disk until the green lights on the raspi and the activity lights on the usb disk stop blinking. **Warning!!! This will overwrite all data on the first partition of the usb disk!!!**
 1. See [Hardware setup](#hardware) for how to connect the temperature sensors
 1. See [Configuration](#config) for how to configure the web frontend and start logging data.
@@ -125,7 +126,7 @@ Jump directly to:
 1. [Enable ssh](https://www.raspberrypi.org/documentation/remote-access/ssh/) by putting an empty file named `ssh` onto the boot partition of the sd card
 1. Insert the sd card into the raspberry pi and connect the power cable in order to start the raspi
 1. Figure out the IP address of the raspi either from your router's web interface or by connecting a monitor to the raspi. It will tell you it's ip address at bootup. With some routers you can also use the hostname `raspberrypi` to connect to the raspi.
-1. Log into the raspi via ssh: `ssh p@<ip address>`
+1. Log into the raspi via ssh: `ssh pi@<ip address>`
 1. add the following lines to `/boot/config.txt`:
 ```bash
 dtoverlay=w1-gpio,gpiopin=4,pullup=on
@@ -245,7 +246,7 @@ After you have saved the configuration, you will be redirected to the remote ser
 
 
 #### Receive data:
-The server will passively wait for input from an external source. In order to be able to receive data, this server must be properly configured. If the external source is a pitemplog box, the configuration is done automatically by the sender (see "Send data" above). If you want to send data to this sever from a different source (i.e. an arduino sensor), then you can configure the sensor id, name, table and category here.
+The server will passively wait for input from an external source. In order to be able to receive data, this server must be properly configured. If the external source is a pitemplog box, the configuration is done automatically by the sender (see "Send data" above). If you want to send data to this sever from a different source (for example an arduino sensor), then you can configure the sensor id, name, table and category here.
 
 To configure receiving data, configure the source url (or unique id of source), the source name, the sensor id (must be unique and start with "custom-"), name, table and category. Once you are done, an api key will be automatically generated and you need to copy that to the sender in order to prevent anyone from pushing data to the server.
 

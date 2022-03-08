@@ -14,7 +14,7 @@ fi
 case $1 in
 mysql)
   sudo service cron stop
-  /usr/bin/ssh -i /home/pi/.ssh/id_rsa diezlab@${target} "zcat backup/${restoredate}*_${h}_temperatures.sql.gz" | mysql -uroot -pmpi-cbg temperatures
+  /usr/bin/ssh -i /home/pi/.ssh/id_rsa ${username}@${backup_host} "zcat backup/${restoredate}*_${h}_temperatures.sql.gz" | mysql -u$DB_USER -p$DB_PW $DB_DB
   sudo service cron start
   ;;
 config)
