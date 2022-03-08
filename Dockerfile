@@ -1,12 +1,12 @@
-FROM php:7.2-apache
+FROM php:7.4-apache
 SHELL ["/bin/bash", "-c"]
 RUN set -x \
   && apt-get update \
-  && apt-get install -y python-mysqldb python-pip \
+  && apt-get install -y python3-mysqldb python3-pip \
   && apt-get install -y --no-install-recommends jekyll cron \
   && docker-php-ext-install pdo_mysql \
   && pip install pyyaml \
-  && apt-get remove -y --auto-remove python-pip \
+  && apt-get remove -y --auto-remove python3-pip \
   && rm -rf /var/lib/apt/lists/* \
   && rm -f /etc/apache2/sites-enabled/*.conf \
   && useradd -mUs /bin/bash pi \

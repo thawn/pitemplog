@@ -5,10 +5,10 @@ ENV SENSOR_DIR='/tmp/devices/' RAND=1 LOCAL_SENSORS=yes
 RUN set -x \ 
   && cat "${INSTALL_DIR}"_bin/make_testsensors.sh "${INSTALL_DIR}"_bin/install.sh > /usr/local/bin/pitemplog_entrypoint_test \
   && chmod a+x /usr/local/bin/pitemplog_entrypoint_test\
-  && pecl install xdebug-2.6.0 \
+  && pecl install xdebug-3.1.3 \
   && docker-php-ext-enable xdebug \
   && apt-get update \
-  && apt-get install -y mysql-client python-pip\
+  && apt-get install -y mariadb-client python3-pip\
   && pip install unittest2 mock
 
 COPY src "${INSTALL_DIR}"../templog_tests
