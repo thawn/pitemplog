@@ -12,6 +12,12 @@ module.exports = function (grunt) {
     serve: {
       cmd: 'jekyll serve --watch'
     },
+    permissions: {
+      cmd: [
+        'chmod a+x build/_bin/*.{sh,py}',
+        'chmod u+x build/_sbin/*.sh'
+      ].join('&&')
+    },
     deploy: {
       cmd: [
         'chmod a+x build/_bin/install.sh',
@@ -76,6 +82,9 @@ module.exports = function (grunt) {
     },
     docker_compose_test_down: {
       cmd: 'docker-compose -f ./testing/docker-compose.yml down -v &'
+    },
+    run_tests: {
+      cmd: 'sleep 10 && docker exec testing-pitemplog-1 python3 -m unittest pitemplog_tests.py -v'
     },
     uninstall: {
       cmd: [
