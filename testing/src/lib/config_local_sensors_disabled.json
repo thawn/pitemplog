@@ -8,8 +8,8 @@
 		"dbtest": "OK"
 	},
 	"local_sensors": {
-		"11481": {
-			"sensor": "11481",
+		"pitemplog_01": {
+			"sensor": "pitemplog_01",
 			"calibration": "0",
 			"name": "Error Sensor",
 			"table": "error",
@@ -19,8 +19,8 @@
 			"comment": "",
 			"tabletest": "OK"
 		},
-		"15089": {
-			"sensor": "15089",
+		"pitemplog_02": {
+			"sensor": "pitemplog_02",
 			"calibration": "0",
 			"name": "Test Sensor 1",
 			"table": "temp1",
@@ -30,8 +30,8 @@
 			"comment": "",
 			"tabletest": "OK"
 		},
-		"16807": {
-			"sensor": "16807",
+		"pitemplog_03": {
+			"sensor": "pitemplog_03",
 			"calibration": "0",
 			"name": "28-0000063774fb",
 			"table": "temp3",
@@ -45,7 +45,7 @@
 	"remote_sensors": [],
 	"all_sensors": [
 		{
-			"sensor": "11481",
+			"sensor": "pitemplog_01",
 			"calibration": "0",
 			"name": "Error Sensor",
 			"table": "error",
@@ -56,7 +56,7 @@
 			"tabletest": "OK"
 		},
 		{
-			"sensor": "15089",
+			"sensor": "pitemplog_02",
 			"calibration": "0",
 			"name": "Test Sensor 1",
 			"table": "temp1",
@@ -67,7 +67,7 @@
 			"tabletest": "OK"
 		},
 		{
-			"sensor": "16807",
+			"sensor": "pitemplog_03",
 			"calibration": "0",
 			"name": "28-0000063774fb",
 			"table": "temp3",

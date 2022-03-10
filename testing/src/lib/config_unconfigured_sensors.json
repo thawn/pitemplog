@@ -8,8 +8,8 @@
 		"dbtest": "OK"
 	},
 	"local_sensors": {
-		"11481": {
-			"sensor": "11481",
+		"pitemplog_01": {
+			"sensor": "pitemplog_01",
 			"calibration": "0",
 			"name": "",
 			"table": "",
@@ -19,8 +19,8 @@
 			"comment": "",
 			"tabletest": ""
 		},
-		"15089": {
-			"sensor": "15089",
+		"pitemplog_02": {
+			"sensor": "pitemplog_02",
 			"calibration": "0",
 			"name": "",
 			"table": "",
@@ -30,8 +30,8 @@
 			"comment": "",
 			"tabletest": ""
 		},
-		"16807": {
-			"sensor": "16807",
+		"pitemplog_03": {
+			"sensor": "pitemplog_03",
 			"calibration": "0",
 			"name": "",
 			"table": "",

@@ -8,8 +8,8 @@
 		"dbtest": "OK"
 	},
 	"local_sensors": {
-		"11481": {
-			"sensor": "11481",
+		"pitemplog_01": {
+			"sensor": "pitemplog_01",
 			"calibration": "0",
 			"name": "Error Sensor",
 			"table": "error",
@@ -19,8 +19,8 @@
 			"comment": "",
 			"tabletest": "OK"
 		},
-		"15089": {
-			"sensor": "15089",
+		"pitemplog_02": {
+			"sensor": "pitemplog_02",
 			"calibration": "0",
 			"name": "Test Sensor 1",
 			"table": "temp1",
@@ -30,8 +30,8 @@
 			"comment": "",
 			"tabletest": "OK"
 		},
-		"16807": {
-			"sensor": "16807",
+		"pitemplog_03": {
+			"sensor": "pitemplog_03",
 			"calibration": "0",
 			"name": "28-0000063774fb",
 			"table": "temp3",
@@ -43,26 +43,7 @@
 		}
 	},
 	"remote_sensors": {
-		"1692": {
-			"apikey": "",
-			"exturl": "http://pitemplogext/data.php",
-			"exttable": "temp4",
-			"extname": "Pitemplogext",
-			"extuser": "",
-			"extpw": "",
-			"extparser": "none",
-			"push": "",
-			"sensor": "1692",
-			"calibration": "0",
-			"name": "bla",
-			"table": "temp4",
-			"category": "PULL",
-			"confirmed": "",
-			"enabled": "true",
-			"comment": "",
-			"tabletest": "OK"
-		},
-		"13159": {
+		"pitemplogext_01": {
 			"apikey": "",
 			"exturl": "http://pitemplogext/data.php",
 			"exttable": "temp5",
@@ -71,9 +52,9 @@
 			"extpw": "",
 			"extparser": "none",
 			"push": "",
-			"sensor": "13159",
+			"sensor": "pitemplogext_01",
 			"calibration": "0",
-			"name": "blub error",
+			"name": "bla",
 			"table": "temp5",
 			"category": "PULL",
 			"confirmed": "",
@@ -81,7 +62,26 @@
 			"comment": "",
 			"tabletest": "OK"
 		},
-		"27588": {
+		"pitemplogext_02": {
+			"apikey": "",
+			"exturl": "http://pitemplogext/data.php",
+			"exttable": "temp4",
+			"extname": "Pitemplogext",
+			"extuser": "",
+			"extpw": "",
+			"extparser": "none",
+			"push": "",
+			"sensor": "pitemplogext_02",
+			"calibration": "0",
+			"name": "blub error",
+			"table": "temp4",
+			"category": "PULL",
+			"confirmed": "",
+			"enabled": "true",
+			"comment": "",
+			"tabletest": "OK"
+		},
+		"pitemplogext_03": {
 			"apikey": "",
 			"exturl": "http://pitemplogext/data.php",
 			"exttable": "temp6",
@@ -90,7 +90,7 @@
 			"extpw": "",
 			"extparser": "none",
 			"push": "",
-			"sensor": "27588",
+			"sensor": "pitemplogext_03",
 			"calibration": "0",
 			"name": "blubber",
 			"table": "temp6",
@@ -105,16 +105,16 @@
 		{
 			"apikey": "",
 			"exturl": "http://pitemplogext/data.php",
-			"exttable": "temp4",
+			"exttable": "temp5",
 			"extname": "Pitemplogext",
 			"extuser": "",
 			"extpw": "",
 			"extparser": "none",
 			"push": "",
-			"sensor": "1692",
+			"sensor": "pitemplogext_01",
 			"calibration": "0",
 			"name": "bla",
-			"table": "temp4",
+			"table": "temp5",
 			"category": "PULL",
 			"confirmed": "",
 			"enabled": "true",
@@ -124,16 +124,16 @@
 		{
 			"apikey": "",
 			"exturl": "http://pitemplogext/data.php",
-			"exttable": "temp5",
+			"exttable": "temp4",
 			"extname": "Pitemplogext",
 			"extuser": "",
 			"extpw": "",
 			"extparser": "none",
 			"push": "",
-			"sensor": "13159",
+			"sensor": "pitemplogext_02",
 			"calibration": "0",
 			"name": "blub error",
-			"table": "temp5",
+			"table": "temp4",
 			"category": "PULL",
 			"confirmed": "",
 			"enabled": "true",
@@ -149,7 +149,7 @@
 			"extpw": "",
 			"extparser": "none",
 			"push": "",
-			"sensor": "27588",
+			"sensor": "pitemplogext_03",
 			"calibration": "0",
 			"name": "blubber",
 			"table": "temp6",
@@ -160,7 +160,7 @@
 			"tabletest": "OK"
 		},
 		{
-			"sensor": "11481",
+			"sensor": "pitemplog_01",
 			"calibration": "0",
 			"name": "Error Sensor",
 			"table": "error",
@@ -171,7 +171,7 @@
 			"tabletest": "OK"
 		},
 		{
-			"sensor": "15089",
+			"sensor": "pitemplog_02",
 			"calibration": "0",
 			"name": "Test Sensor 1",
 			"table": "temp1",
@@ -182,7 +182,7 @@
 			"tabletest": "OK"
 		},
 		{
-			"sensor": "16807",
+			"sensor": "pitemplog_03",
 			"calibration": "0",
 			"name": "28-0000063774fb",
 			"table": "temp3",
