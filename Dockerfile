@@ -2,7 +2,7 @@ FROM php:7.4-apache
 SHELL ["/bin/bash", "-c"]
 RUN set -x \
   && apt-get update \
-  && apt-get install -y python3-mysqldb python3-pip \
+  && apt-get install -y systemd python3-mysqldb python3-pip \
   && apt-get install -y --no-install-recommends jekyll cron \
   && docker-php-ext-install pdo_mysql \
   && pip install pyyaml \
