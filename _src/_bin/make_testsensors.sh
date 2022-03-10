@@ -1,6 +1,6 @@
 #!/bin/bash
 RANDOM=$RAND
-declare -a directories=("$RANDOM" "$RANDOM" "$RANDOM" )
+declare -a directories=("${HOSTNAME}_03" "${HOSTNAME}_02" "${HOSTNAME}_01" )
 for sensor in "${directories[@]}"; do
 	sensordir=/tmp/devices/"$sensor"
 	mkdir -p "$sensordir"
