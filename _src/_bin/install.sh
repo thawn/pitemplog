@@ -25,14 +25,14 @@ ln -s /etc/apache2/sites-available/templog.conf /etc/apache2/sites-enabled/0000-
 if ! [ -e /usr/local/bin/jekyll ]; then
   ln -s /usr/bin/jekyll /usr/local/bin/jekyll
 fi
-cp "${target_dir}"_bin/pitemplog.py '/usr/local/lib/python2.7/dist-packages/'
-su - www-data -s /bin/bash -c "/usr/bin/python \"${target_dir}\"_data/create_pages.py"
+ln -s "${target_dir}"_bin/pitemplog.py '/usr/local/lib/python3.9/dist-packages/'
+su - www-data -s /bin/bash -c "/usr/bin/python3 \"${target_dir}\"_data/create_pages.py"
 su - www-data -s /bin/bash -c "/usr/local/bin/jekyll build --source \"${target_dir}\""
-cp "${target_dir}"_bin/*.py /usr/local/bin/
-cp "${target_dir}"_bin/pitemplog_backup.sh /usr/local/bin/
-cp "${target_dir}"_bin/pitemplog_restore.sh /usr/local/bin/
-cp "${target_dir}"_bin/pitemplog.conf /etc/
-cp "${target_dir}"_sbin/pitemplog_partition_database.sh /usr/local/sbin/
+ln -s "${target_dir}"_bin/*.py /usr/local/bin/
+ln -s "${target_dir}"_bin/pitemplog_backup.sh /usr/local/bin/
+ln -s "${target_dir}"_bin/pitemplog_restore.sh /usr/local/bin/
+ln -s "${target_dir}"_bin/pitemplog.conf /etc/
+ln -s "${target_dir}"_sbin/pitemplog_partition_database.sh /usr/local/sbin/
 echo "DB_HOST=${DB_HOST:-localhost}" > /tmp/crontab_env
 echo "DB_DB=${DB_DB:-temperatures}" >> /tmp/crontab_env
 echo "DB_USER=${DB_USER:-temp}" >> /tmp/crontab_env
@@ -48,7 +48,7 @@ else
   cat /tmp/crontab_env "${target_dir}"_bin/crontab | crontab -u ${templog_user} -
 fi
 echo "Installation successful. (re)starting apache now."
-if [ "${cgroup#/docker}" == "$cgroup" ]; then
+if [ ! -f /.dockerenv ]; then
   #make sure necessary environment variables are set
   sed -e 's/^/export /' /tmp/crontab_env > /etc/profile.d/pitemplog.sh
   #if we are not in a docker container, we restart the apache service
