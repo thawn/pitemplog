@@ -134,9 +134,9 @@ max_usb_current=1
 ```
 7. Configure at the following settings using `sudo raspi-config`:
    * password (`Change User Passowrd`; !!!this is important!!!)
-   * hostname (`Network Options`)
+   * hostname (`System Options`)
    * locale and timezone (`Localisation Options`)
-   * memory split (`Advanced Options->Memory Split->16`; this leaves more memory for the webserver and database)
+   * GPU memory (`Performance Options->GPU memory->16`; this leaves more memory for the webserver and database)
    * say yes when the program asks to reboot.
 1. Update the debian system: `sudo apt-get update && sudo apt-get dist-upgrade`
 1. Install required packages: `sudo apt-get install mysql-server php php-mysql php-curl python3-mysqldb python3-pip grunt npm git`
