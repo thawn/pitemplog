@@ -143,7 +143,16 @@ class ConfigClass {
 	 * @return boolean
 	 */
 	public function delete_sensor(string $sensor) {
-		return $this->delete_element( $sensor, 'remote_sensors' );
+		if ( ! $this->delete_element( $sensor, 'remote_sensors' ) ) {
+			// if the sensor is not a remote sensor, try to delete a local sensor that is notconnected
+			if (! file_exists( $this->sensordir . $sensor . "/w1_slave" )) {
+				return $this->delete_element( $sensor, 'remote_sensors' );
+			} else {
+				return FALSE;
+			}
+		} else {
+			return TRUE;
+		}
 	}
 
 	/**

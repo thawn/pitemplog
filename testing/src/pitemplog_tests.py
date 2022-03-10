@@ -435,6 +435,12 @@ class TestConfAPI(APIBaseClass):
         self._assert_success(result)
         self.assertIn(self.working_sensor, updated_config.local_sensors, 'local sensor should not have been deleted')
 
+    def test_delete_local_error_sensor(self):
+        result = self._post_api('delete_sensor', self.pi.local_sensors[self.error_sensor])
+        updated_config = pitemplog.PiTempLogConf()
+        self._assert_success(result)
+        self.assertIn(self.working_sensor, updated_config.local_sensors, 'local sensor with error was not deleted')
+
     def test_delete_remote_sensor(self):
         reset_conf_database(config_file='lib/config_local_pull_sensors.json', sql_file=None)
         self.pi = pitemplog.PiTempLogConf()

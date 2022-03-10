@@ -99,7 +99,10 @@ var getTemperature = function ($id) {
     });
     getData(getVars, function (data) {
         $id.find('input[name="temperature"]').val(data.temperature);
-    });
+        if (data.temperature == 'Error') {
+            $id.find('button[name="delete-btn"]').show();
+        }
+        });
 };
 
 var insertSensor = function (sensor_data, error_data) {
