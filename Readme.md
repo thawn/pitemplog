@@ -51,7 +51,7 @@ see also the [configuration screenshot](#configuration-screenshot).
 * One-wire digital thermometer(s): DS 18B20
 * 4.7K Ohm resistor
 * 3x jumper contacts (or 2x 2W 245 PSK plug)
-* min 2x 3-pin matching plug and socket (you'll need one more set than the number of sensors you want to connect, i.e for two sensors you need three, for three sensors four etc.)
+* min 2x 3-pin matching plug and socket (you'll need one more set than the number of sensors you want to connect, i.e for two sensors you need three, for three sensors four etc. In case you want the sensor cables to go off in two directions from a certain point, you also need 2 extra sockets and one extra plug for a Y-connector.)
 * Cable with three wires
 * soldering equipment
 * shrink-on tubing
