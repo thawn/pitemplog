@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 import time
 import json
 try:
@@ -40,9 +40,15 @@ def get_remote_temperature(conf, database, table):
 
 
 def save_temperature(conf, database, table, temperature):
-    temperature += float(conf["calibration"])
+    pitemplog.log.debug('save_temperature: Temperature before saving: {}'.format(temperature))
     timestamp = int(time.time())
-    query = "INSERT INTO `%s` (time, temp) VALUES (%d, %f)" % (table, timestamp, temperature)
+    try:
+        temperature += float(conf["calibration"])
+    except TypeError:
+        # if the temperature is not a float, we cannot insert it into the database, so we return right away.
+        return {"sensor": conf["sensor"], "time": timestamp, "temp": temperature}
+    query = "INSERT INTO `{}` (time, temp) VALUES ({}, {})".format(table, timestamp, temperature)
+    pitemplog.log.debug('save_temperature: Database qyery {}'.format(query))
     with database as cur:
         cur.execute(query)
     return {"sensor": conf["sensor"], "time": timestamp, "temp": temperature}
@@ -90,11 +96,11 @@ def push_temperature(conf, data):
 
 
 def main():
+    pitemplog.log.debug('starting templog\n')
     config = pitemplog.PiTempLogConf()
     lock = pitemplog.LockTable('templog')
     if not lock.is_locked():
         with lock:
-            config.db_open()
             temperature_data = config.each_local_sensor_database(get_local_temperature)
             config.each_push_server(push_temperature, temperature_data)
             config.each_remote_sensor_database(get_remote_temperature)

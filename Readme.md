@@ -139,9 +139,9 @@ max_usb_current=1
    * memory split (`Advanced Options->Memory Split->16`; this leaves more memory for the webserver and database)
    * say yes when the program asks to reboot.
 1. Update the debian system: `sudo apt-get update && sudo apt-get dist-upgrade`
-1. Install required packages: `sudo apt-get install mysql-server php php-mysql php-curl python-mysqldb python-pip grunt npm git`
+1. Install required packages: `sudo apt-get install mysql-server php php-mysql php-curl python3-mysqldb python3-pip grunt npm git`
 1. In Debian, jekyll depends on xdg-utils which in turn recommends to install the x-server, which in our case is totally unnecessary. Therefore we install jekyll with the *--no-install-recommends* option: `sudo apt-get install jekyll --no-install-recommends`
-1. Install PyYAML: `sudo pip install pyyaml`
+1. Install PyYAML: `sudo pip3 install pyyaml`
 1. Delete the symlink to the default apache configuration: `sudo rm /etc/apache2/sites-enabled/000-default.conf`
 1. Clone the git repository: `git clone --depth=1 https://gitlab.com/Thawn/pitemplog.git`
 1. Enter the source directory: `cd temperatures`
@@ -160,14 +160,14 @@ max_usb_current=1
 ### Lightweight installation (used for image creation)<a name="light"></a>
 In this case we deploy from a separate machine. That way, we don't need to install the [development dependencies](#devdeps) on the raspi.
 1. Follow the [manual installation instructions](#manual) until step 8.
-1. Instead of step 9 install only the [minimal dependencies](#deps): `sudo apt-get install mysql-server php php-mysql php-curl python-mysqldb python-pip`.
+1. Instead of step 9 install only the [minimal dependencies](#deps): `sudo apt-get install mysql-server php php-mysql php-curl python3-mysqldb python3-pip`.
 1. Continue to follow the manual installation until step 12.
-1. On your development machine install the [development dependencies](#devdeps). On a debian machine: `sudo apt-get install python-pip grunt npm git jekyll`.
+1. On your development machine install the [development dependencies](#devdeps). On a debian machine: `sudo apt-get install python3-pip grunt npm git jekyll`.
 1. Steps 13 - 15 are done on your development machine.
 1. Deploy the logger and web frontend by running the following on your development machine: `grunt deploy --host=<ip address or hostname of your raspi>`.
 1. Now continue ssh back into the raspi and continue there: `sudo mysql < /usr/local/share/templog/_bin/create_database.sql`.
 1. If you want to use an external harddisk (recommended!): `sudo /usr/local/share/templog/_sbin/setup_usb_storage.sh`. This will cause the raspi to format and set up an external harddisk the first time it is available during boot. On subsequent boots, the harddisk is not formatted but must be available otherwise the database will not run (because its data is stored on the harddisk).
-1. In order to save space, we uninstall pip: `sudo apt-get remove python-pip`.
+1. In order to save space, we uninstall pip: `sudo apt-get remove python3-pip`.
 1. Now we clean up unused packages and package files: `sudo apt-get autoremove && sudo apt-get clean`. With Raspbian Stretch Lite (2017-11-29) there was 1.4GiB used on the root partition of my raspi. The gzipped image will be considerably smaller (<500 MiB).
 1. The following steps can be skipped if you don't want to create an image:
    1. Make sure the filesystem is resized to fill the entire sd card at next reboot: `sudo /usr/local/share/templog/_sbin/resize_root.sh`

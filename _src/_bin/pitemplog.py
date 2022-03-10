@@ -34,11 +34,36 @@ class LockTable:
         return False
 
 
+class DBHandler:
+    '''
+    Wrapper for MySQLdb to enable syntax like:
+    with DBHandler as cursor:
+        <your code>
+    '''
+    def __init__(self, database):
+        self.dbh = MySQLdb.connect(
+            host=database["host"], user=database["user"], passwd=database["pw"], db=database["db"])
+
+    def __enter__(self, *unused):
+        self.cursor = self.dbh.cursor()
+        return self.cursor
+
+    def __exit__(self, *unused):
+        self.cursor.close()
+        self.commit()
+
+    def __del__(self):
+        self.dbh.close()
+
+    def commit(self):
+        self.dbh.commit()
+
+
 class PiTempLogConf:
     '''
     Read the pitemplog config file and perform operations on the database and sensors defined there.
 
-    Instance variables:
+    Public properties:
         debug: int debugging level
         database: dict database configuration (taken both from environment variables and the config file)
         dbh: database handle object
@@ -48,7 +73,6 @@ class PiTempLogConf:
         versio: string version number
 
     Public methods:
-        db_open
         db_commit
         db_close
         modify_tables apply a function to a specific table or all tables with an extension
@@ -103,18 +127,21 @@ class PiTempLogConf:
             self.version = config['version']
         except KeyError:
             self.version = '2.0'
+        self._dbh = None
         log.debug("processed config:\n" + pformat(self))
 
-    def db_open(self):
-        self.dbh = MySQLdb.connect(
-            host=self.database["host"], user=self.database["user"], passwd=self.database["pw"], db=self.database["db"])
+    @property
+    def dbh(self):
+        if self._dbh is None:
+            self._dbh = DBHandler(self.database)
+        return self._dbh
 
     def db_close(self):
         try:
-            self.dbh.close()
-            del self.dbh
+            del self._dbh
         except AttributeError:
             pass
+        self._dbh = None
 
     def modify_tables(self, function_handle, *args):
         '''
@@ -294,7 +321,7 @@ class PiTempLogConf:
             dict or None
         '''
         result = {}
-        for conf in getattr(self, attrname).itervalues():
+        for conf in getattr(self, attrname).values():
             try:
                 res = function_handle(conf, *args)
                 try:
@@ -326,11 +353,7 @@ class PiTempLogConf:
             dict or None
         '''
         if conf["enabled"] == "true":
-            try:
-                return function_handle(conf, self.dbh, conf["table"], *args)
-            except AttributeError:
-                self.db_open()
-                return function_handle(conf, self.dbh, conf["table"], *args)
+            return function_handle(conf, self.dbh, conf["table"], *args)
 
     def _force_table(self, conf, table, function_handle, *args):
         '''
@@ -348,11 +371,7 @@ class PiTempLogConf:
             dict or None
         '''
         if conf["table"] == table and conf["enabled"] == "true":
-            try:
-                return function_handle(conf, self.dbh, *args)
-            except AttributeError:
-                self.db_open()
-                return function_handle(conf, self.dbh, *args)
+            return function_handle(conf, self.dbh, *args)
 
     def __repr__(self):
         return pformat(vars(self), indent=4, width=1)
@@ -387,19 +406,18 @@ def calculate_partition_borders(database, table):
     Calculate partition borders for partitioning the mysql database tables. Partition borders will correspond to timestamps saturday at 24:00 h.
 
     Args:
-        database: string
+        database: MySQLdb database cursor
         table: string
     Returns:
-        cur: database cursor
         now: int unix timestamp for current time
         one_year: int number of seconds in one year
         two_weeks: int number of seconds in two weeks
         cur_interval: int unix timestamp corresponding to the first saturday in
     '''
-    cur = database.cursor()
-    query = "SELECT time FROM " + table + " ORDER BY time ASC LIMIT 1"
-    cur.execute(query)
-    rows = cur.fetchall()
+    with database as cur:
+        query = "SELECT time FROM " + table + " ORDER BY time ASC LIMIT 1"
+        cur.execute(query)
+        rows = cur.fetchall()
     now = int(time.time())
     if not rows:
         first_time = now
@@ -426,10 +444,13 @@ def get_sensor_dir():
 
 
 def get_sensor_temperature(sensor):
-    with open(get_sensor_dir() + sensor + "/w1_slave") as tfile:
-        text = tfile.read()
-        temperature_data = text.split('=')[-1]
-        return float(temperature_data) / 1000
+    try:
+        with open(get_sensor_dir() + sensor + "/w1_slave") as tfile:
+            text = tfile.read()
+            temperature_data = text.split('=')[-1]
+            return float(temperature_data) / 1000
+    except FileNotFoundError:
+        return 'Error'
 
 
 def get_sensor_page_filename(table):

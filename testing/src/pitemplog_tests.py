@@ -6,6 +6,7 @@ try:
     from unittest.mock import patch
 except ImportError:
     from mock import patch
+from distutils.log import error
 import sys
 import pitemplog
 import MySQLdb
@@ -14,6 +15,7 @@ import os
 import stat
 import glob
 import json
+import warnings
 try:
     import urllib.request as urllib_request  # for python 3
     from urllib.parse import quote
@@ -24,7 +26,6 @@ except ImportError:
     from urllib import quote
 from contextlib import closing
 from pprint import pprint
-
 
 class TestTableLocking(unittest.TestCase):
     def setUp(self):
@@ -79,42 +80,46 @@ class TestPiTempLogConfEach(unittest.TestCase):
         self.assertEqual(len(result['sensor']), 9, 'number of returned sensor ids is wrong')
 
     def test_each_local_sensor_database(self):
-        def test_fun(unused, dbh, unused1): return {'database': isinstance(dbh, MySQLdb.connections.Connection)}
+        def test_fun(unused, dbh, unused1): return {'database': isinstance(dbh, pitemplog.DBHandler)}
         pi = pitemplog.PiTempLogConf('lib/config_local_sensors.json')
         result = pi.each_local_sensor_database(test_fun)
         self.assertEqual(len(result['database']), 3, 'number of returned sensor ids is wrong')
-        for cnctn in result['database']:
-            self.assertTrue(cnctn, 'not a database connection')
+        for i, cnctn in enumerate(result['database']):
+            with self.subTest(i=i):
+                self.assertTrue(cnctn, 'not a database connection')
 
     def test_each_remote_sensor_database(self):
-        def test_fun(unused, dbh, unused1): return {'database': isinstance(dbh, MySQLdb.connections.Connection)}
+        def test_fun(unused, dbh, unused1): return {'database': isinstance(dbh, pitemplog.DBHandler)}
         pi = pitemplog.PiTempLogConf('lib/config_local_pull_sensors.json')
         result = pi.each_remote_sensor_database(test_fun)
         self.assertEqual(len(result['database']), 3, 'number of returned sensor ids is wrong')
-        for cnctn in result['database']:
-            self.assertTrue(cnctn, 'not a database connection')
+        for i, cnctn in enumerate(result['database']):
+            with self.subTest(i=i):
+                self.assertTrue(cnctn, 'not a database connection')
 
     def test_each_sensor_database(self):
-        def test_fun(unused, dbh, unused1): return {'database': isinstance(dbh, MySQLdb.connections.Connection)}
+        def test_fun(unused, dbh, unused1): return {'database': isinstance(dbh, pitemplog.DBHandler)}
         pi = pitemplog.PiTempLogConf('lib/config_local_pull_sensors.json')
         result = pi.each_sensor_database(test_fun)
         self.assertEqual(len(result['database']), 6, 'number of returned sensor ids is wrong')
-        for cnctn in result['database']:
-            self.assertTrue(cnctn, 'not a database connection')
+        for i, cnctn in enumerate(result['database']):
+            with self.subTest(i=i):
+                self.assertTrue(cnctn, 'not a database connection')
 
     def test_each_sensor_table(self):
-        def test_fun(unused, dbh): return {'database': isinstance(dbh, MySQLdb.connections.Connection)}
+        def test_fun(unused, dbh): return {'database': isinstance(dbh, pitemplog.DBHandler)}
         pi = pitemplog.PiTempLogConf('lib/config_local_pull_sensors.json')
         result = pi.each_sensor_table('temp3', test_fun)
         self.assertEqual(len(result['database']), 1, 'number of returned sensor ids is wrong')
-        for cnctn in result['database']:
-            self.assertTrue(cnctn, 'not a database connection')
+        for i, cnctn in enumerate(result['database']):
+            with self.subTest(i=i):
+                self.assertTrue(cnctn, 'not a database connection')
 
     def test_each_push_server(self):
         def test_fun(conf): return {'url': conf['url']}
         pi = pitemplog.PiTempLogConf('lib/config_push_servers.json')
         result = pi.each_push_server(test_fun)
-        self.assertEqual(len(result['url']), 1, 'number of returned urls is wrong')
+        self.assertEqual(result['url'][0], 'http://pitemplogext/data.php', 'returned url is wrong')
 
 
 class TestPiTempLogConfDb(unittest.TestCase):
@@ -125,13 +130,13 @@ class TestPiTempLogConfDb(unittest.TestCase):
         self.pi.db_close()
 
     def test_db_open(self):
-        self.pi.db_open()
-        self.assertTrue(isinstance(self.pi.dbh, MySQLdb.connections.Connection), 'could not connect to database')
+        self.assertTrue(isinstance(self.pi.dbh, pitemplog.DBHandler), 'could not connect to database')
+        self.assertTrue(isinstance(self.pi.dbh.dbh, MySQLdb.connections.Connection), 'could not connect to database')
 
     def test_db_close(self):
-        self.pi.db_open()
+        self.pi.dbh
         self.pi.db_close()
-        self.assertFalse(hasattr(self.pi, 'dbh'), 'could not close database connection')
+        self.assertIsNone(self.pi._dbh, 'could not close database connection')
 
     def test_get_timespan(self):
         self.assertEqual(self.pi.get_timespan('_5min'), 300, 'wrong timespan for _5min')
@@ -152,7 +157,6 @@ class TestTemplog(unittest.TestCase):
         reset_conf_database(config_file='lib/config_local_pull_sensors.json',
                             sql_file='lib/db_local_pull_sensors.sql')
         self.pi = pitemplog.PiTempLogConf()
-        self.pi.db_open()
         self.now = int(time.time())
         execute_source_file('/usr/local/bin/templog.py')
 
@@ -162,7 +166,7 @@ class TestTemplog(unittest.TestCase):
     def test_templog_local(self):
         for table in self.local_tables:
             with self.subTest(local_table=table):
-                self.assertTrue(int(latest_timestamp(table, self.pi.dbh)[0]) >= self.now,
+                self.assertTrue(int(latest_timestamp(table, self.pi.dbh)) >= self.now,
                                 'templog.py failed to add data to database')
 
     def test_templog_local_error(self):
@@ -174,7 +178,7 @@ class TestTemplog(unittest.TestCase):
     def test_templog_remote(self):
         for table in self.remote_tables:
             with self.subTest(remote_table=table):
-                self.assertTrue(int(latest_timestamp(table, self.pi.dbh)[0]) >= self.now,
+                self.assertTrue(int(latest_timestamp(table, self.pi.dbh)) >= self.now,
                                 'templog.py failed to add data to database')
 
     def test_templog_remote_error(self):
@@ -204,7 +208,7 @@ class TestResetAggregate(unittest.TestCase):
     def setUp(self):
         cleanup_tmp()
         reset_conf_database(config_file=self.config_file, sql_file=self.sql_file)
-        db_set_up(self)
+        self.pi = pitemplog.PiTempLogConf()
 
     def tearDown(self):
         db_tear_down(self)
@@ -314,12 +318,12 @@ class TestConfAPI(APIBaseClass):
     @classmethod
     def setUpClass(self):
         self.url = 'http://pitemplog/conf/conf.php'
-        self.error_sensor = "11481"
-        self.working_sensor = "15089"
-        self.other_working_sensor = "16807"
-        self.remote_working_sensor = "1692"
-        self.push_sensor = "1692"
-        self.push_sensor2 = "13159"
+        self.error_sensor = "pitemplog_01"
+        self.working_sensor = "pitemplog_02"
+        self.other_working_sensor = "pitemplog_03"
+        self.remote_working_sensor = "pitemplogext_02"
+        self.push_sensor = "pitemplogext_02"
+        self.push_sensor2 = "pitemplogext_03"
         self.local_table = 'temp1'
         self.merge_table = "temp4"
         self.editable_sensor_fields = ['name', 'table', 'category', 'comment']
@@ -333,7 +337,7 @@ class TestConfAPI(APIBaseClass):
         result = json.loads(self._get_api('db_config'))
         self._assert_success(result)
         self.assertEqual(result["db_config"]["dbtest"], "OK", 'dbtest was not OK')
-        self.assertEqual(result["db_config"]["aggregateTables"].values().sort(),
+        self.assertEqual(list(result["db_config"]["aggregateTables"].values()).sort(),
                          self.pi.database["aggregateTables"].sort(), 'aggregate table configuration was not equal')
 
     def test_get_local_sensors(self):
@@ -355,7 +359,7 @@ class TestConfAPI(APIBaseClass):
     def test_get_temperature(self):
         result = json.loads(self._get_api('temperature=' + self.working_sensor))
         self._assert_success(result)
-        self.assertEqual(float(result["temperature"][:5]), pitemplog.get_sensor_temperature(
+        self.assertEqual(float(result["temperature"][:6]), pitemplog.get_sensor_temperature(
             self.working_sensor), 'got different temperatures')
 
     def test_edit_sensor(self):
@@ -507,7 +511,6 @@ class TestConfAPI(APIBaseClass):
         result = self._post_api('receive_push_config', config)
         self._assert_success(result)
         updated_config = pitemplog.PiTempLogConf()
-        updated_config.db_open()
         remote_sensors = updated_config.remote_sensors.copy()
         for sensor, config in remote_sensors.items():
             with self.subTest(sensor=sensor, config=json.dumps(config)):
@@ -552,7 +555,6 @@ class TestConfAPI(APIBaseClass):
         updated_config.remote_sensors["newsensor"]["apikey"] = ""
         self.assertEqual(updated_config.remote_sensors["newsensor"],
                          new_push_sensor_conf.remote_sensors["newsensor"], 'pushed config and saved config differ')
-        self.pi.db_open()
         self.assertTrue(table_exists(
             new_push_sensor_conf.remote_sensors["newsensor"]["table"], self.pi.dbh), 'table was not created')
 
@@ -563,7 +565,6 @@ class TestConfAPI(APIBaseClass):
         self._assert_success(result)
         updated_config = pitemplog.PiTempLogConf()
         self.assertEqual(self.pi.remote_sensors, updated_config.remote_sensors, 'push sensor was changed')
-        self.pi.db_open()
         self.assertFalse(table_exists(
             self.pi.remote_sensors["newsensor"]["table"], self.pi.dbh), 'table should not habe been created')
 
@@ -584,7 +585,6 @@ class TestConfAPI(APIBaseClass):
 
     def _set_up_sensor_edit(self, sql_file='lib/db_local_sensors_no_partitions.sql'):
         reset_conf_database(config_file=None, sql_file=sql_file)
-        self.pi.db_open()
         sensor_data_old = self.pi.local_sensors[self.working_sensor].copy()
         sensor_data_new = self.pi.local_sensors[self.working_sensor].copy()
         sensor_data_new["table_old"] = sensor_data_new["table"]
@@ -617,7 +617,6 @@ class TestConfAPI(APIBaseClass):
                          ["url"], self.external_server["url"], 'stored and pushed urls do not match')
         self.assertEqual(updated_config.push_servers[self.external_server["url"]]["name"],
                          self.external_server["name"], 'stored and pushed names do not match')
-        updated_config.db_open()
         self.assertTrue(table_exists(self.local_table, updated_config.dbh),
                         'remote server failed to create table %s' % self.local_table)
 
@@ -626,8 +625,8 @@ class TestDataAPI(APIBaseClass):
     @classmethod
     def setUpClass(self):
         self.url = 'http://pitemplog/data.php'
-        self.error_sensor = "11481"
-        self.working_sensor = "15089"
+        self.error_sensor = "pitemplog_01"
+        self.working_sensor = "pitemplog_02"
         self.test_config = {"newsensor": {"table": "newtable",
                                           "sensor": "newsensor",
                                           "name": "New Sensor",
@@ -658,7 +657,6 @@ class TestDataAPI(APIBaseClass):
                          ["sensor"], 'data.php did not answer with the proper remote_sensor data')
         new_conf = pitemplog.PiTempLogConf()
         self.assertIn("newsensor", new_conf.remote_sensors, 'newsensor did not appear in updated configuration')
-        new_conf.db_open()
         self.assertTrue(table_exists(self.test_config["newsensor"]["table"], new_conf.dbh),
                         'table "%s" not found in database' % self.test_config["newsensor"]["table"])
 
@@ -677,7 +675,6 @@ class TestDataAPI(APIBaseClass):
                     new_conf = pitemplog.PiTempLogConf()
                     self.assertNotIn("newsensor", new_conf.remote_sensors,
                                      'newsensor should not appear in updated configuration')
-                    new_conf.db_open()
                     self.assertFalse(table_exists(self.test_config["newsensor"]["table"], new_conf.dbh),
                                      'table "%s" was found in database' % self.test_config["newsensor"]["table"])
                 else:
@@ -688,29 +685,26 @@ class TestDataAPI(APIBaseClass):
         reset_conf_database(config_file='lib/config_local_new_push_sensors.json',
                             sql_file='lib/db_local_new_push_sensors.sql')
         self.pi = pitemplog.PiTempLogConf()
-        self.pi.db_open()
         result = self._post_api("receive_push_temperatures", {'data': json.dumps(self.test_data)})
         self._assert_success(result)
-        self.assertTrue(int(latest_timestamp('newtable', self.pi.dbh)[0]) >= self.now,
+        self.assertTrue(int(latest_timestamp('newtable', self.pi.dbh)) >= self.now,
                         'api failed to write pushed data to database')
 
     def test_receive_push_temperatures_local_sensor(self):
         reset_conf_database(config_file='lib/config_local_new_push_sensors.json',
                             sql_file='lib/db_local_new_push_sensors.sql')
         self.pi = pitemplog.PiTempLogConf()
-        self.pi.db_open()
         local_data = self.test_data.copy()
-        local_data["sensor"] = ["15089"]
+        local_data["sensor"] = ["pitemplog_02"]
         result = self._post_api("receive_push_temperatures", {'data': json.dumps(local_data)})
         self._assert_success(result)
-        self.assertFalse(int(latest_timestamp('temp1', self.pi.dbh)[0]) >= self.now,
+        self.assertFalse(int(latest_timestamp('temp1', self.pi.dbh)) >= self.now,
                          'api wrote pushed data to database of local sensor')
 
     def test_receive_push_temperatures_wrong_api_key(self):
         reset_conf_database(config_file='lib/config_local_new_push_sensors.json',
                             sql_file='lib/db_local_new_push_sensors.sql')
         self.pi = pitemplog.PiTempLogConf()
-        self.pi.db_open()
         data_wrong_apikey = self.test_data.copy()
         data_wrong_apikey["apikey"] = "this/is/wrong="
         result = self._post_api("receive_push_temperatures", {'data': json.dumps(data_wrong_apikey)})
@@ -732,9 +726,10 @@ def apply_sql_file(sql_file):
     pi = pitemplog.PiTempLogConf('lib/config_no_sensors.json')
     from subprocess import Popen, PIPE
     process = Popen(['mysql', pi.database['db'], '-h',  pi.database['host'], '-u' + pi.database['user'],
-                     '-p' + pi.database['pw']], stdout=PIPE, stdin=PIPE)
+                     '-p' + pi.database['pw']], stdout=PIPE, stdin=PIPE, encoding='utf8')
     output = process.communicate('source ' + sql_file)[0]
-    print(output)
+    pi.dbh.commit()
+    pi.db_close()
 
 
 def table_exists(table, dbh):
@@ -748,7 +743,11 @@ def latest_timestamp(table, dbh):
     with dbh as cursor:
         query = "SELECT time FROM `%s` ORDER BY time DESC LIMIT 1" % table
         cursor.execute(query)
-        return cursor.fetchone()
+        res = cursor.fetchone()
+        try:
+            return res[0]
+        except TypeError:
+            return res
 
 
 def reset_conf_database(config_file='lib/config.json', sql_file='lib/create_database.sql'):
@@ -760,13 +759,9 @@ def reset_conf_database(config_file='lib/config.json', sql_file='lib/create_data
         apply_sql_file(sql_file)
 
 
-def db_set_up(self):
-    self.pi = pitemplog.PiTempLogConf()
-    self.pi.db_open()
-
-
 def db_tear_down(self):
     self.pi.db_close()
+    del self.pi
     reset_conf_database()
     cleanup_tmp()
 
@@ -817,4 +812,4 @@ def recursive_urlencode(d):
                 pairs.append(new_pair)
         return pairs
 
-    return '&'.join(recursion(d))
+    return ('&'.join(recursion(d))).encode('utf-8')

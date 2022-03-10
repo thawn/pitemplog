@@ -360,7 +360,7 @@ class ConfigClass {
 	 */
 	public function create_pages() {
 		$this->response->logger( 'Attempting to create pages:', FALSE, 3 );
-		$create_pages = escapeshellcmd( '/usr/bin/python /usr/local/share/templog/_data/create_pages.py' );
+		$create_pages = escapeshellcmd( '/usr/bin/python3 /usr/local/share/templog/_data/create_pages.py' );
 		$create_pages .= ' 2>&1';
 		$create_output = shell_exec( $create_pages );
 		$this->response->logger( 'Created pages:', $create_output, 1 );
