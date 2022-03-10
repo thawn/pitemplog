@@ -524,7 +524,6 @@ class ConfigClass {
 	/**
 	 * Load/create configuration for all sensors.
 	 *
-	 * @param array $conf
 	 * @return array
 	 */
 	protected function populate_local_sensors() {
