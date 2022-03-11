@@ -41,7 +41,8 @@ echo "DB_PW=${DB_PW:-temp}" >> /tmp/crontab_env
 cp /tmp/crontab_env /etc/systemd/system/partition_db.env
 cp "${target_dir}"_sbin/*.timer /etc/systemd/system/
 cp "${target_dir}"_sbin/*.service /etc/systemd/system/
-systemctl enable /etc/systemd/system/partition_db.timer
+systemctl enable partition_db.timer
+systemctl start partition_db.timer
 cgroup=$(grep cpuset /proc/1/cgroup | cut -d ':' -f 3)
 if [ "${LOCAL_SENSORS:-yes}" == "no" ]; then
   cat /tmp/crontab_env "${target_dir}"_bin/crontab_nosensors | crontab -u ${templog_user} -
