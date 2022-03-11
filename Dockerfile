@@ -2,11 +2,11 @@ FROM php:7.4-apache
 SHELL ["/bin/bash", "-c"]
 RUN set -x \
   && apt-get update \
-  && apt-get install -y systemd python3-mysqldb python3-pip \
+  && apt-get -y dist-upgrade \
+  && apt-get install -y systemd python3-mysqldb python3-yaml \
   && apt-get install -y --no-install-recommends jekyll cron \
+  && apt-get clean \
   && docker-php-ext-install pdo_mysql \
-  && pip install pyyaml \
-  && apt-get remove -y --auto-remove python3-pip \
   && rm -rf /var/lib/apt/lists/* \
   && rm -f /etc/apache2/sites-enabled/*.conf \
   && useradd -mUs /bin/bash pi \
