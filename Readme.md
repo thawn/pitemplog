@@ -172,20 +172,20 @@ In this case we deploy from a separate machine. That way, we don't need to insta
    1. Make sure the filesystem is resized to fill the entire sd card at next reboot: `sudo /usr/local/share/templog/_sbin/resize_root.sh`
    1. Enable setup_timesyncd so that you can place a timesyncd.conf file on the boot partition in order to configure a ntp server that you can reach behind a firewall `sudo update-rc.d setup_timesyncd defaults` . This circumverns problems with mysql when you flash an old image and there is no ntp server available behind your firewall.
    1. Disable ssh: `sudo update-rc.d ssh disable`.
+   1. Shutdown the raspi: `sudo poweroff`.
+   1. Connect the sd card to your development machine.
+   1. Shrink the ext4 partition to ~3500MB using gparted (to reduce the time needed for zeroing the free space).
+   1. Mount the root partition of the SD card and cd to the mount point in a terminal.
    1. Overwrite free space with zeros to reduce the image file size later:
       ```bash
-      sudo -s
-      dd if=/dev/zero of=zero.small.file bs=1024 count=102400
+      sudo dd if=/dev/zero of=zero.small.file bs=1024 count=102400
       cat /dev/zero > zero.file
       sync
       rm zero.small.file
       rm zero.file
       ```
-   1. Shutdown the raspi: `sudo poweroff`.
-   1. Connect the sd card to your development machine.
    1. Shrink the ext4 partition to ~2800MB using gparted (to allow installation on a 4GB sd card).
-   1. Identify the sd card with `parted -l`
-   1. Create an image (important: use the sd card device not the partition. i.e. use /dev/sdc and not /dev/sdc1): `sudo dd if=<sd card device> bs=1m count=3000 | gzip > raspi-templog.img.gz`.
+   1. Create an image (important: use the sd card device not the partition. i.e. use /dev/sdc and not /dev/sdc1): `sudo dd if=<sd card device> bs=1M count=3000 | gzip > raspi-templog.img.gz`.
 
 ### Updating an image with fresh source code
 This only works on a linux development machine (I am using an Ubuntu virtualBox image).
