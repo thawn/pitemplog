@@ -113,10 +113,21 @@ Jump directly to:
 1. Download the image from [the tags page](https://gitlab.com/Thawn/pitemplog/tags).
 1. Flash the image files to the sd card for example using [etcher](https://etcher.io/).
 1. You may want to [enable ssh](https://www.raspberrypi.org/documentation/remote-access/ssh/) by putting a file named ssh on the boot partition. Don't forget to change the password using raspi-config after you boot up the raspi and ssh into it using the default username `pi` and password `raspberry`.
+1. Highly recommended incase you are behind a firewall that blocks `debian.pool.ntp.org`: place a file named `timesyncd.conf` onto the boot partition to configure a NTP server. See [timesyncd.conf.example](https://gitlab.com/Thawn/pitemplog/-/raw/master/timesyncd.conf.example?inline=false), or use this minimal example:
+   ```bash
+   [Time]
+   NTP=0.arch.pool.ntp.org
+   FallbackNTP=0.arch.pool.ntp.org 1.arch.pool.ntp.org 2.arch.pool.ntp.org 3.arch.pool.ntp.org
+   ```
 1. Insert the sd card into the raspi.
 1. Connect the usb disk to the raspi. The USB disk must have at leas one partition. **Warning: The first partition on the USB disk will be overwritten.**
 1. Connect the raspi to the internet via LAN cable. Make sure the Raspi can reach a NTP time server to set the system time correctly. Otherwise mysql will complain and the server will not start.
 1. Connect a power cable to the raspi. The raspi will boot up and copy some files onto the usb disk. Do not power down the raspi or disconnect the usb disk until the green lights on the raspi and the activity lights on the usb disk stop blinking. **Warning!!! This will overwrite all data on the first partition of the usb disk!!!**
+1. Log into the raspi via ssh (or use monitor and keyboard) using the username `pi` and the password `raspberry` and perform the following important tasks (**Warning: do not use `raspi-config` - ever - it will mess up the USB disk setup and prevent booting the raspi**):
+   ```bash
+   passwd
+   echo custom-hostname > /etc/hostname
+   ```
 1. See [Hardware setup](#hardware) for how to connect the temperature sensors
 1. See [Configuration](#config) for how to configure the web frontend and start logging data.
 1. Done!
