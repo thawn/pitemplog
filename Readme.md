@@ -162,7 +162,7 @@ In this case we deploy from a separate machine. That way, we don't need to insta
 1. Follow the [manual installation instructions](#manual) until step 8.
 1. Instead of step 9 install only the [minimal dependencies](#deps): `sudo apt-get install mariadb-server apache2 php php-mysql php-curl python3-mysqldb python3-yaml`.
 1. Continue to follow the manual installation until step 11.
-1. Now we clean up unused package files: `sudo apt-get clean`. With Raspberry Pi OS Lite Bullseye (2022-03-10) there was 1.7GiB used on the root partition of my raspi. The gzipped image will be considerably smaller (~500 MiB).
+1. Now we clean up unused package files: `sudo apt-get clean`. With Raspberry Pi OS Lite Bullseye (2022-03-10) there was 1.7GiB used on the root partition of my raspi. The gzipped image will be considerably smaller (~600 MiB).
 1. On your development machine install the [development dependencies](#devdeps). On a debian machine: `sudo apt-get install grunt npm git jekyll`.
 1. Steps 12 - 14 are done on your development machine.
 1. Deploy the logger and web frontend by running the following on your development machine: `grunt deploy --host=<ip address or hostname of your raspi>`.
