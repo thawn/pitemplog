@@ -14,7 +14,7 @@ services:
       - 8080:80
 
   mariadb:
-    image: mariadb:10.3
+    image: mariadb:10.5
     restart: unless-stopped
     volumes:
     - /tmp/testing/datadir:/var/lib/mysql
