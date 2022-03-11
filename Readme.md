@@ -162,6 +162,7 @@ In this case we deploy from a separate machine. That way, we don't need to insta
 1. Follow the [manual installation instructions](#manual) until step 8.
 1. Instead of step 9 install only the [minimal dependencies](#deps): `sudo apt-get install mariadb-server apache2 php php-mysql php-curl python3-mysqldb python3-yaml`.
 1. Continue to follow the manual installation until step 11.
+1. Now we clean up unused package files: `sudo apt-get clean`. With Raspberry Pi OS Lite Bullseye (2022-03-10) there was 1.7GiB used on the root partition of my raspi. The gzipped image will be considerably smaller (~500 MiB).
 1. On your development machine install the [development dependencies](#devdeps). On a debian machine: `sudo apt-get install grunt npm git jekyll`.
 1. Steps 12 - 14 are done on your development machine.
 1. Deploy the logger and web frontend by running the following on your development machine: `grunt deploy --host=<ip address or hostname of your raspi>`.
@@ -179,13 +180,22 @@ In this case we deploy from a separate machine. That way, we don't need to insta
    1. Overwrite free space with zeros to reduce the image file size later:
       ```bash
       sudo dd if=/dev/zero of=zero.small.file bs=1024 count=102400
-      cat /dev/zero > zero.file
-      sync
-      rm zero.small.file
-      rm zero.file
+      sudo dd if=/dev/zero of=zero.file bs=1024
+      sudo sync
+      sudo rm zero.small.file
+      sudo rm zero.file
+      sudo sync
       ```
    1. Shrink the ext4 partition to ~2800MB using gparted (to allow installation on a 4GB sd card).
+   1. Unmount the `boot` and `rootfs` partitions of the sd card.
    1. Create an image (important: use the sd card device not the partition. i.e. use /dev/sdc and not /dev/sdc1): `sudo dd if=<sd card device> bs=1M count=3000 | gzip > raspi-templog.img.gz`.
+   1. If you want to also create an image that does not rely on an usb disk do the following:
+      1. Mount the second partition of the sd card.
+      1. cd into the mount point
+         ```bash
+         sudo rm etc/init.d/setup_usb
+         sudo rm etc/rc3.d/S01setup_usb
+         ```
 
 ### Updating an image with fresh source code
 This only works on a linux development machine (I am using an Ubuntu virtualBox image).
@@ -199,7 +209,8 @@ These packages are required on the raspi for running the database and web fronte
 * php
 * mysql (with a database and a user that has full privileges for said database)
 * jekyll (>2.x)
-* python3-mysqldb (the debian package for [mysqlclient](https://github.com/PyMySQL/mysqlclient-python)
+* python3-mysqldb (the debian package for [mysqlclient](https://github.com/PyMySQL/mysqlclient-python))
+* python3-yaml (the debian package for [pyyaml](https://github.com/yaml/pyyaml))
 * php5-curl
 * php5-mysql
 
