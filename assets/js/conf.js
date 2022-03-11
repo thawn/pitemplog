@@ -525,13 +525,20 @@ var deleteSensor = function (event) {
                         var $row = $('[value="' + data.sensor + '"]').parents(
                                 'form').parent();
                         var exturl = $row.find('input[name="exturl"]').val();
-                        var parent_id = url2ID(exturl);
-                        $row.remove();
-                        if ($('#' + parent_id).find('[id^=el]').length < 1) {
-                            $(parent_id).remove();
-                        }
-                        if ($('#remote_sensors').find('[id^=el]').length < 1) {
-                            $('#remote_sensors').hide();
+                        if (exturl) {
+                            var parent_id = url2ID(exturl);
+                            $row.remove();
+                            if ($('#' + parent_id).find('[id^=el]').length < 1) {
+                                $(parent_id).remove();
+                            }
+                            if ($('#remote_sensors').find('[id^=el]').length < 1) {
+                                $('#remote_sensors').hide();
+                            }
+                        } else {
+                            $row.remove();
+                            if ($('#local_sensors').find('[id^=el]').length < 1) {
+                                $('#local_sensors').hide();
+                            }
                         }
                     }
                 });
