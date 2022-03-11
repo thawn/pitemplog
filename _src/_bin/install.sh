@@ -26,6 +26,7 @@ if ! [ -e /usr/local/bin/jekyll ]; then
   ln -s /usr/bin/jekyll /usr/local/bin/jekyll
 fi
 ln -s "${target_dir}"_bin/pitemplog.py '/usr/local/lib/python3.9/dist-packages/'
+chown -R www-data:www-data /var/www/html
 su - www-data -s /bin/bash -c "/usr/bin/python3 \"${target_dir}\"_data/create_pages.py"
 su - www-data -s /bin/bash -c "/usr/local/bin/jekyll build --source \"${target_dir}\""
 ln -s "${target_dir}"_bin/*.py /usr/local/bin/
