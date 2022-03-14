@@ -307,7 +307,7 @@ url = "http://pitemplog.domain/data.php?action=receive_push_temperatures"
 request = urllib_request.Request(url, urlencode(post_data).encode())
 result = urllib_request.urlopen(request).read().decode()
 ```
-  
+Note that the post data must be properly url encoded. otherwise ther will be problems with special characters such as the + in the api key.
 
 #### Screenshot
 ![External Source/Target Configuration](doc/external_source_target_config.png)
