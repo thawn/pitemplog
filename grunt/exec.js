@@ -81,7 +81,7 @@ module.exports = function (grunt) {
       ].join('&&')
     },
     docker_compose_test_down: {
-      cmd: 'docker-compose -f ./testing/docker-compose.yml down -v &'
+      cmd: 'docker-compose -f ./testing/docker-compose.yml down -v'
     },
     run_tests: {
       cmd: 'sleep 10 && docker exec testing-pitemplog-1 python3 -m unittest pitemplog_tests.py -v'
