@@ -64,7 +64,7 @@ add one large shrink-on tubing around to protect and keep the wires together.
    2. wire 2 (brown) to BCM4/GPIO4 (PIN 7)
    3. wire 3 (red) to 3.3V Power (PIN 1)
 2. Add the 4.7K Ohm resistor between 3.3V and BCM4/GPIO4 (PIN1 and PIN7) 
-3. Solder the wires of the cable to the thermometer (see [picture below](#sensor-pinout) Note: In the front view of the sensor (on the left of the image) the pins are facing towards you). In this example, the cable has white green and red wires. For example:
+3. Solder the wires of the cable to the thermometer (see [picture below](#sensor-pinout) Note: In the bottom view of the sensor (on the left of the image) the pins are facing towards you). In this example, the cable has white green and red wires. For example:
    1. white to pin 1: GND
    2. green to pin 2: DQ
    3. red to pin 3: V<sub>DD</sub>
@@ -114,7 +114,7 @@ Jump directly to:
 1. Flash the image files to the sd card for example using [etcher](https://etcher.io/).
 1. You may want to [enable ssh](https://www.raspberrypi.org/documentation/remote-access/ssh/) by putting a file named ssh on the boot partition. Don't forget to change the password using raspi-config after you boot up the raspi and ssh into it using the default username `pi` and password `raspberry`.
 1. Highly recommended incase you are behind a firewall that blocks `debian.pool.ntp.org`: place a file named `timesyncd.conf` onto the boot partition to configure a NTP server. See [timesyncd.conf.example](https://gitlab.com/Thawn/pitemplog/-/raw/master/timesyncd.conf.example?inline=false), or use this minimal example:
-   ```bash
+   ```
    [Time]
    NTP=0.arch.pool.ntp.org
    FallbackNTP=0.arch.pool.ntp.org 1.arch.pool.ntp.org 2.arch.pool.ntp.org 3.arch.pool.ntp.org
