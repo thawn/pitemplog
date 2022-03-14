@@ -93,7 +93,7 @@ Check out the [picture of the final assembly](#final-assembly).
 #### Sensor Pinout
 ![sensor pinout](doc/sensor_pinout.png)
 
-Note: In the front view of the sensor (left) the pins are facing towards you.
+Note: In the bottom view of the sensor (left) the pins are facing towards you.
 
 #### Assembled Sensor
 ![assembled sensor](doc/assembled_sensor.jpg)
