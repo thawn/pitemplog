@@ -126,7 +126,7 @@ Jump directly to:
 1. Log into the raspi via ssh (or use monitor and keyboard) using the username `pi` and the password `raspberry` and perform the following important tasks (**Warning: do not use `raspi-config` - ever - it will mess up the USB disk setup and prevent booting the raspi**):
    ```bash
    passwd
-   echo custom-hostname > /etc/hostname
+   echo custom-hostname | sudo tee /etc/hostname
    ```
 1. See [Hardware setup](#hardware) for how to connect the temperature sensors
 1. See [Configuration](#config) for how to configure the web frontend and start logging data.
