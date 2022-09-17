@@ -211,6 +211,7 @@ In this case we deploy from a separate machine. That way, we don't need to insta
          sudo rm etc/init.d/setup_usb
          sudo rm etc/rc3.d/S01setup_usb
          ```
+      1. create the image as described in step 11 above
 
 ### Updating an image with fresh source code
 This only works on a linux development machine (I am using an Ubuntu virtualBox image).
