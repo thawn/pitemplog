@@ -112,7 +112,7 @@ Jump directly to:
 ### Install from image
 1. Download the image from [the tags page](https://gitlab.com/Thawn/pitemplog/tags).
 1. Flash the image files to the sd card for example using [etcher](https://etcher.io/).
-1. You may want to [enable ssh](https://www.raspberrypi.org/documentation/remote-access/ssh/) by putting a file named ssh on the boot partition. Don't forget to change the password using raspi-config after you boot up the raspi and ssh into it using the default username `pi` and password `raspberry`.
+1. You may want to [enable ssh](https://www.raspberrypi.org/documentation/remote-access/ssh/) by putting a file named ssh on the boot partition. This enables you to ssh into the raspi using the default username `pi` and password `raspberry`.
 1. Highly recommended incase you are behind a firewall that blocks `debian.pool.ntp.org`: place a file named `timesyncd.conf` onto the boot partition to configure a NTP server. See [timesyncd.conf.example](https://gitlab.com/Thawn/pitemplog/-/raw/master/timesyncd.conf.example?inline=false), or use this minimal example:
    ```
    [Time]
@@ -135,6 +135,10 @@ Jump directly to:
 ### Manual installation<a name="manual"></a>
 1. [Download](https://www.raspberrypi.org/downloads/raspbian/) and [install](https://www.raspberrypi.org/documentation/installation/installing-images/README.md) `Raspberry Pi OS Lite` onto a micro sd card
 1. [Enable ssh](https://www.raspberrypi.org/documentation/remote-access/ssh/) by putting an empty file named `ssh` onto the boot partition of the sd card
+1. [configure a user](https://www.raspberrypi.com/documentation/computers/configuration.html#configuring-a-user) by putting a file `userconfig.txt` containing the following line (from [this answer on stackexchange](https://raspberrypi.stackexchange.com/a/138767/22972)) onto the boot partition of the sd card:
+   ```
+   pi:$6$wF8bI6zltPrb5zzM$JyeEHkWfAlys7Qws.TQT1GOXZfh.StOhNiR9gjWQ7mt840P.fulEdEdTAdMnQVhnFBg0ogmpPnc1s8.wfG8wG1
+   ```
 1. Insert the sd card into the raspberry pi and connect the power cable in order to start the raspi
 1. Figure out the IP address of the raspi either from your router's web interface or by connecting a monitor to the raspi. It will tell you it's ip address at bootup. With some routers you can also use the hostname `raspberrypi` to connect to the raspi.
 1. Log into the raspi via ssh: `ssh pi@<ip address>`. The Raspberry Pi OS default password is `raspberry`.
@@ -170,16 +174,16 @@ Jump directly to:
 
 ### Lightweight installation (used for image creation)<a name="light"></a>
 In this case we deploy from a separate machine. That way, we don't need to install the [development dependencies](#devdeps) on the raspi.
-1. Follow the [manual installation instructions](#manual) until step 8.
-1. Instead of step 9 install only the [minimal dependencies](#deps): `sudo apt-get install mariadb-server apache2 php php-mysql php-curl python3-mysqldb python3-yaml`.
-1. Continue to follow the manual installation until step 11.
+1. Follow the [manual installation instructions](#manual) until step 9.
+1. Instead of step 10 install only the [minimal dependencies](#deps): `sudo apt-get install mariadb-server apache2 php php-mysql php-curl python3-mysqldb python3-yaml`.
+1. Continue to follow the manual installation until step 12.
 1. Now we clean up unused package files: `sudo apt-get clean`. With Raspberry Pi OS Lite Bullseye (2022-03-10) there was 1.7GiB used on the root partition of my raspi. The gzipped image will be considerably smaller (~600 MiB).
 1. On your development machine install the [development dependencies](#devdeps). On a debian machine: `sudo apt-get install grunt npm git jekyll`.
-1. Steps 12 - 14 are done on your development machine.
+1. Steps 13 - 15 are done on your development machine.
 1. Deploy the logger and web frontend by running the following on your development machine: `grunt deploy --host=<ip address or hostname of your raspi>`.
 1. Now continue ssh back into the raspi and continue there: `sudo mysql < /usr/local/share/templog/_bin/create_database.sql`.
 1. If you want to use an external harddisk (recommended!): `sudo /usr/local/share/templog/_sbin/setup_usb_storage.sh`. This will cause the raspi to format and set up an external harddisk the first time it is available during boot. On subsequent boots, the harddisk is not formatted but must be available otherwise the database will not run (because its data is stored on the harddisk).
-1. Now we clean up unused package files: `sudo apt-get clean`. With Raspberry Pi OS Lite Bullseye (2022-03-10) there was 1.6GiB used on the root partition of my raspi. The gzipped image will be considerably smaller (<500 MiB).
+1. Now we clean up unused package files: `sudo apt-get clean`. With Raspberry Pi OS Lite Bullseye (2022-03-10) there was 1.6GiB used on the root partition of my raspi. The gzipped image will be considerably smaller (~600 MiB).
 1. The following steps can be skipped if you don't want to create an image:
    1. Make sure the filesystem is resized to fill the entire sd card at next reboot: `sudo /usr/local/share/templog/_sbin/resize_root.sh`
    1. Enable setup_timesyncd so that you can place a timesyncd.conf file on the boot partition in order to configure a ntp server that you can reach behind a firewall `sudo update-rc.d setup_timesyncd defaults` . This circumverns problems with mysql when you flash an old image and there is no ntp server available behind your firewall.
