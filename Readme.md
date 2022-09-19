@@ -110,7 +110,7 @@ Jump directly to:
 * [Dependencies](#deps)
 
 ### Install from image
-1. Download the image from [the tags page](https://gitlab.com/Thawn/pitemplog/tags).
+1. Download the image from [the releases page](https://gitlab.com/Thawn/pitemplog/-/releases).
 1. Flash the image files to the sd card for example using [etcher](https://etcher.io/).
 1. You may want to [enable ssh](https://www.raspberrypi.org/documentation/remote-access/ssh/) by putting a file named ssh on the boot partition. This enables you to ssh into the raspi using the default username `pi` and password `raspberry`.
 1. Highly recommended incase you are behind a firewall that blocks `debian.pool.ntp.org`: place a file named `timesyncd.conf` onto the boot partition to configure a NTP server. See [timesyncd.conf.example](https://gitlab.com/Thawn/pitemplog/-/raw/master/timesyncd.conf.example?inline=false), or use this minimal example:
