@@ -127,6 +127,7 @@ Jump directly to:
    ```bash
    passwd
    echo custom-hostname | sudo tee /etc/hostname
+   sudo sed -i 's/pitemplog/custom-hostname/g' /etc/hosts
    ```
 1. See [Hardware setup](#hardware) for how to connect the temperature sensors
 1. See [Configuration](#config) for how to configure the web frontend and start logging data.
