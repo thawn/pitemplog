@@ -14,7 +14,8 @@ module.exports = function (grunt) {
     },
     permissions: {
       cmd: [
-        'chmod a+x build/_bin/*.{sh,py}',
+        'chmod a+x build/_bin/*.sh',
+        'chmod a+x build/_bin/*.py',
         'chmod u+x build/_sbin/*.sh'
       ].join('&&')
     },
