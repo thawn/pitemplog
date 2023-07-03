@@ -63,7 +63,7 @@ add one large shrink-on tubing around to protect and keep the wires together.
    1. wire 1 (black) to ground (PIN9 on the [Raspi GPIO pins](https://pinout.xyz))
    2. wire 2 (brown) to BCM4/GPIO4 (PIN 7)
    3. wire 3 (red) to 3.3V Power (PIN 1)
-2. Add the 4.7K Ohm resistor between 3.3V and BCM4/GPIO4 (PIN1 and PIN7) 
+2. Add the 4.7K Ohm resistor between 3.3V and BCM4/GPIO4 (PIN1 and PIN7)
 3. Solder the wires of the cable to the thermometer (see [picture below](#sensor-pinout) Note: In the bottom view of the sensor (on the left of the image) the pins are facing towards you). In this example, the cable has white green and red wires. For example:
    1. white to pin 1: GND
    2. green to pin 2: DQ
@@ -75,7 +75,7 @@ add one large shrink-on tubing around to protect and keep the wires together.
 4. solder the wires of another plug parallel to the socket (see [picture below](#assembled-sensor)):
    1. black to pin 1
    2. brown to pin 2
-   2. red to pin 3 
+   2. red to pin 3
 
 Now you can connect many thermometers to the raspi as each thermometer will add
 its own plug such that all thermometers are connected in parallel.
@@ -134,24 +134,16 @@ Jump directly to:
 1. Done!
 
 ### Manual installation<a name="manual"></a>
-1. [Download](https://www.raspberrypi.org/downloads/raspbian/) and [install](https://www.raspberrypi.org/documentation/installation/installing-images/README.md) `Raspberry Pi OS Lite` onto a micro sd card
-1. [Enable ssh](https://www.raspberrypi.org/documentation/remote-access/ssh/) by putting an empty file named `ssh` onto the boot partition of the sd card
-1. [configure a user](https://www.raspberrypi.com/documentation/computers/configuration.html#configuring-a-user) by putting a file `userconfig.txt` containing the following line (from [this answer on stackexchange](https://raspberrypi.stackexchange.com/a/138767/22972)) onto the boot partition of the sd card:
-   ```
-   pi:$6$wF8bI6zltPrb5zzM$JyeEHkWfAlys7Qws.TQT1GOXZfh.StOhNiR9gjWQ7mt840P.fulEdEdTAdMnQVhnFBg0ogmpPnc1s8.wfG8wG1
-   ```
+1. [Download](https://www.raspberrypi.org/downloads/raspbian/) and install `Raspberry Pi OS Lite` onto a micro sd card using the Raspberry Pi Imager
+1. Before clicking write, open the settings by clicking the cogwheel icon. Change the following settings:
+   * Set hostname (e.g. `pitemplog`) 
+   * Enable ssh
+   * Set username and password
+   * Set locale
 1. Insert the sd card into the raspberry pi and connect the power cable in order to start the raspi
 1. Figure out the IP address of the raspi either from your router's web interface or by connecting a monitor to the raspi. It will tell you it's ip address at bootup. With some routers you can also use the hostname `raspberrypi` to connect to the raspi.
-1. Log into the raspi via ssh: `ssh pi@<ip address>`. The Raspberry Pi OS default password is `raspberry`.
-1. add the following lines to `/boot/config.txt`:
-   ```bash
-   dtoverlay=w1-gpio,gpiopin=4,pullup=on
-   max_usb_current=1
-   ```
+1. Log into the raspi via ssh using the username and password you set in the imager. For example: `ssh pi@<ip address>`. The pitemplog default password is `raspberry`.
 1. Configure at the following settings using `sudo raspi-config`:
-   * password (`Change User Passowrd`; !!!this is important!!!)
-   * hostname (`System Options`)
-   * locale and timezone (`Localisation Options`)
    * GPU memory (`Performance Options->GPU memory->16`; this leaves more memory for the webserver and database)
    * enable 1-wire bus (`Interface Options -> 1-Wire`)
    * say yes when the program asks to reboot.
@@ -175,12 +167,12 @@ Jump directly to:
 
 ### Lightweight installation (used for image creation)<a name="light"></a>
 In this case we deploy from a separate machine. That way, we don't need to install the [development dependencies](#devdeps) on the raspi.
-1. Follow the [manual installation instructions](#manual) until step 9.
-1. Instead of step 10 install only the [minimal dependencies](#deps): `sudo apt-get install mariadb-server apache2 php php-mysql php-curl python3-mysqldb python3-yaml`.
-1. Continue to follow the manual installation until step 12.
+1. Follow the [manual installation instructions](#manual) until step 7.
+1. Instead of step 8 install only the [minimal dependencies](#deps): `sudo apt-get install mariadb-server apache2 php php-mysql php-curl python3-mysqldb python3-yaml`.
+1. Continue to follow the manual installation until step 10.
 1. Now we clean up unused package files: `sudo apt-get clean`. With Raspberry Pi OS Lite Bullseye (2022-03-10) there was 1.7GiB used on the root partition of my raspi. The gzipped image will be considerably smaller (~600 MiB).
 1. On your development machine install the [development dependencies](#devdeps). On a debian machine: `sudo apt-get install grunt npm git jekyll`.
-1. Steps 13 - 15 are done on your development machine.
+1. Steps 11 - 13 are done on your development machine.
 1. Deploy the logger and web frontend by running the following on your development machine: `grunt deploy --host=<ip address or hostname of your raspi>`.
 1. Now continue ssh back into the raspi and continue there: `sudo mysql < /usr/local/share/templog/_bin/create_database.sql`.
 1. If you want to use an external harddisk (recommended!): `sudo /usr/local/share/templog/_sbin/setup_usb_storage.sh`. This will cause the raspi to format and set up an external harddisk the first time it is available during boot. On subsequent boots, the harddisk is not formatted but must be available otherwise the database will not run (because its data is stored on the harddisk).
@@ -324,7 +316,7 @@ In case you would like to change the database configuration: this is done via th
 * `DB_HOST` (hostname of the database server)
 * `DB_DB` (name of the database)
 * `DB_USER` (a user that has access to the database)
-* `DB_PW` (the users database password). 
+* `DB_PW` (the users database password).
 
 
 ## ToDo
