@@ -19,7 +19,7 @@ grunt docker_compose_test
 The testing docker container mounts the directory `testing/src` as a volume to `/usr/local/share/templog_tests` inside the container. This means that changes to `pitemplog_tests.py` take effect within the container immediately.
 the directory `build` is mounted to `/usr/local/share/templog`. This means that changes to all other source files take effect after compiling the web frontend with `grunt default`.
 
-Docker-compose sets up 3 test environments and one mysql database. The test environments are accessible via ports [8080](http://localhost:8080) (hostname within the docker environment: pitemplog), [8081](http://localhost:8081) (hostname within the docker environment: pitemplogext), [8082](http://localhost:8080) (hostname within the docker environment: pitemplogfoo). For each of these webservers, the [xdebug php extension](https://xdebug.org/) is active. Therefore, you can set breakpoints and peek into the php code at runtime.
+Docker-compose sets up 3 test environments and one mysql database. The test environments are accessible via ports [8080](http://localhost:8080) (hostname within the docker environment: pitemplog), [8081](http://localhost:8081) (hostname within the docker environment: pitemplogext), [8082](http://localhost:8082) (hostname within the docker environment: pitemplogfoo). For each of these webservers, the [xdebug php extension](https://xdebug.org/) is active. Therefore, you can set breakpoints and peek into the php code at runtime.
 
 You can run the unittests via `docker exec`:
 ```bash

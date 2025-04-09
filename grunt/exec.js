@@ -62,6 +62,7 @@ module.exports = function (grunt) {
     },
     docker: {
       cmd: [
+        'docker builder prune -f',
         'docker build -t pitemplog ./',
         'docker build -t pitemplog:test ./testing/'
       ].join('&&')

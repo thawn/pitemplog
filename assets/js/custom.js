@@ -44,13 +44,17 @@ function makeChart(theme, chartData, enableExport,pathToImg){
         "dataProvider": chartData,
         "valueAxes": [{
           "position": "left",
-          "title": "temperature (\xB0C)"
+          "title": "temperature (\xB0C)",
+          "minimum": -10,
+          "maximum": 100,
         }],
         "graphs": [{
           "fillAlphas": 0.4,
           "valueField": "temp"
         }],
         "chartScrollbar": {},
+        "valueScrollbar": {
+        },
         "chartCursor": {
           "categoryBalloonDateFormat": "JJ:NN, DD MMMM",
           "cursorPosition": "mouse",
@@ -73,6 +77,7 @@ function makeChart(theme, chartData, enableExport,pathToImg){
             "menu": [ "PNG", "SVG" ]
           } ]
         }};
+        chart.valueAxes[0].zoomToValues(0, 30);
         return chart
 }
 
