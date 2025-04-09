@@ -135,6 +135,7 @@
       }())
       }
       var chart{{ page.table }} = AmCharts.makeChart("chart{{ page.table }}", makeChart("none", chartData{{ page.table }}, true, pathToImg));
+      chart{{ page.table }}.addListener("dataUpdated", function () { zoomChart(0, 0, chart{{ page.table }}); });
 
       // this method is called when chart is first inited as we listen for "dataUpdated" event
       function zoomChart(start, end, chartObj) {
@@ -142,6 +143,9 @@
         //console.log(chartObj);
         if (start) {
           chartObj.zoomToDates(start, end);
+        }
+        if ('zoomToValues' in chartObj.valueAxes[0]) {
+          chartObj.valueAxes[0].zoomToValues(0, 30);
         }
       }
 

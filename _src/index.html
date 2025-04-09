@@ -87,6 +87,9 @@ title: Temperature overview
         if (start) {
           chartObj.zoomToDates(start, end);
         }
+        if ('zoomToValues' in chartObj.valueAxes[0]) {
+          chartObj.valueAxes[0].zoomToValues(0, 30);
+        }
       }
 
       $('#myCarousel').on('slid.bs.carousel', function(e){
