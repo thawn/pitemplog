@@ -77,7 +77,6 @@ function makeChart(theme, chartData, enableExport,pathToImg){
             "menu": [ "PNG", "SVG" ]
           } ]
         }};
-        chart.valueAxes[0].zoomToValues(0, 30);
         return chart
 }
 
