@@ -7,18 +7,18 @@ title: Temperature overview
     ================================================== -->
     <div id="myCarousel" class="carousel slide" data-ride="carousel">
       <!-- Indicators -->
-      <ol class="carousel-indicators">{% for sensor in site.data.config.all_sensors %}{% unless sensor.enabled == "false" %}
-        <li data-target="#myCarousel" data-slide-to="{{ forloop.index | minus: 1}}"{% if forloop.index == 1 %} class="active"{% endif %}></li>{% endunless %}{% endfor %}
+      <ol class="carousel-indicators">{% assign i = 0 %}{% for sensor in site.data.config.all_sensors %}{% unless sensor.enabled == "false" %}
+        <li data-target="#myCarousel" data-slide-to="{{ i }}"{% if i == 0 %} class="active"{% endif %}></li>{% assign i = i | plus:1 %}{% endunless %}{% endfor %}
       </ol>
-      <div class="carousel-inner" role="listbox">{% for sensor in site.data.config.all_sensors %}{% unless sensor.enabled == "false" %}
-        <div class="item{% if forloop.index == 1 %} active{% endif %}">
+      <div class="carousel-inner" role="listbox">{% assign n = 0 %}{% for sensor in site.data.config.all_sensors %}{% unless sensor.enabled == "false" %}
+        <div class="item{% if n == 0 %} active{% endif %}">
           <div class="container">
             <div id="dark{{ sensor.sensor }}" class="chartdiv carouselchart"></div>
             <div class="carousel-caption">
               <h1>{{ sensor.name }} <a class="btn btn-lg btn-info" href="{% for post in site.posts %}{% unless post.categories contains "archive" %}{% if post.table == sensor.table %}{{site.baseurl}}{{post.url}}{% endif %}{% endunless %}{% endfor %}" role="button">More data...</a></h1>
             </div>
           </div>
-        </div>{% endunless %}{% endfor %}
+        </div>{% assign n = n | plus:1 %}{% endunless %}{% endfor %}
       </div>
       <a class="left carousel-control" href="#myCarousel" role="button" data-slide="prev">
         <span class="glyphicon glyphicon-chevron-left"></span>
