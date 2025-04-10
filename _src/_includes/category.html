@@ -1,0 +1,94 @@
+    <!-- Carousel
+    ================================================== -->
+    <div id="myCarousel" class="carousel slide" data-ride="carousel">
+      <!-- Indicators -->
+      <ol class="carousel-indicators">{% assign i = 0 %}{% for sensor in site.data.config.all_sensors %}{% if sensor.category == page.category %}{% unless sensor.enabled == "false" %}
+        <li data-target="#myCarousel" data-slide-to="{{ i }}"{% if i == 0 %} class="active"{% endif %}></li>{% assign i = i | plus:1 %}{% endunless %}{% endif %}{% endfor %}
+      </ol>
+      <div class="carousel-inner" role="listbox">{% assign n = 0 %}{% for sensor in site.data.config.all_sensors %}{% if sensor.category == page.category %}{% unless sensor.enabled == "false" %}
+        <div class="item{% if n == 0 %} active{% endif %}">
+          <div class="container">
+            <div id="dark{{ sensor.sensor }}" class="chartdiv carouselchart"></div>
+            <div class="carousel-caption">
+              <h1>{{ sensor.name }} <a class="btn btn-lg btn-info" href="{% for post in site.posts %}{% unless post.categories contains "archive" %}{% if post.table == sensor.table %}{{site.baseurl}}{{post.url}}{% endif %}{% endunless %}{% endfor %}" role="button">More data...</a></h1>
+            </div>
+          </div>
+        </div>{% assign n = n | plus:1 %}{% endunless %}{% endif %}{% endfor %}
+      </div>
+      <a class="left carousel-control" href="#myCarousel" role="button" data-slide="prev">
+        <span class="glyphicon glyphicon-chevron-left"></span>
+        <span class="sr-only">Previous</span>
+      </a>
+      <a class="right carousel-control" href="#myCarousel" role="button" data-slide="next">
+        <span class="glyphicon glyphicon-chevron-right"></span>
+        <span class="sr-only">Next</span>
+      </a>
+    </div><!-- /.carousel -->
+
+<!--<span class="post-meta">{{ sensor.firsttime | date: "%b %-d, %Y; %T" }}</span>
+-->
+    <div class="container">
+      <div class="center-block">
+        <h1>{{ page.category }}</h1>
+        {% include chart-instructions.html %}
+      </div>
+      {% assign i = 0 %}{% for sensor in site.data.config.all_sensors %}{% if sensor.category == page.category %}{% unless sensor.enabled == "false" %}{% assign i = i | plus:1 %}
+      {% assign mod = i | modulo:2 %}{% if mod == 1 %}<div class="row bottom-buffer" style="border-bottom: 1px solid #ddd">{% endif %}
+        <!-- chart container -->
+        <div class="col-md-6">
+          <h3>{{ sensor.name }} today</h3>
+          <div id="{{ sensor.sensor }}" class="chartdiv"></div>
+          <button class="btn btn-primary text-md-small"
+                  onclick="exportToCsv('{{ sensor.table }}.csv',
+                                       chartData{{ sensor.table }}.slice(chart{{ sensor.table }}.start, chart{{ sensor.table }}.end))"
+                  data-toggle="tooltip" data-placement="top" title="Save the data shown in the graph above as CSV"
+                  >Save visible data as CSV</button>
+          
+          <a class="btn btn-info pull-right text-md-small"
+             href="{% assign counter = 0 %}{% for post in site.posts %}{% unless post.categories contains "archive" %}{% if post.table == sensor.table %}{% if counter == 0 %}{% assign counter = 1 %}{{site.baseurl}}{{post.url}}{% endif %}{% endif %}{% endunless %}{% endfor %}"
+             role="button"
+             >More data for {{ sensor.name }}...</a>
+        </div><!-- /.col-md-6 -->
+      {% assign mod = i | modulo:2 %}{% if mod == 0 %}</div><!-- /.row -->{% endif %}{% endunless %}{% endif %}{% if forloop.last %}{% assign mod = i | modulo:2 %}{% unless mod == 0 %}</div><!-- /.row -->{% endunless %}{% endif %}{% endfor %}
+    </div><!-- /.container -->
+    
+    {% include js.html %}
+    <!-- the chart code -->
+    <script>
+      // load the data
+      var end=new Date();
+      var pathToImg = "{{ site.baseurl }}/assets/img/amcharts/";
+      var start = new Date(end.getTime()-(3600000*3)); //show data for the last three hours in the carousel graphs
+      {% for sensor in site.data.config.all_sensors %}{% if sensor.category == page.category %}{% unless sensor.enabled == "false" %}
+      var chartData{{ sensor.table }} = AmCharts.loadJSON('{{ site.baseurl }}/data.php?table={{ sensor.table }}');
+      var chart{{ sensor.table }} = AmCharts.makeChart("{{ sensor.sensor }}", makeChart("none", chartData{{ sensor.table }}, true, pathToImg));
+      chart{{ sensor.table }}.addListener("dataUpdated", function(e){zoomChart(0,0,e.chart);});
+      // when we apply theme, the dataUpdated event is fired even before we add listener, so
+      // we need to call zoomChart here
+      zoomChart(0,0,chart{{ sensor.table }});
+      // this method is called when chart is first inited as we listen for "dataUpdated" event
+      var chartDark{{ sensor.table }} = AmCharts.makeChart("dark{{ sensor.sensor }}", makeChart("dark", chartData{{ sensor.table }}, false, pathToImg));
+      chartDark{{ sensor.table }}.addListener("dataUpdated", function(e){zoomChart(start, end, e.chart);});
+      // when we apply theme, the dataUpdated event is fired even before we add listener, so
+      // we need to call zoomChart here
+      zoomChart(start, end, chartDark{{ sensor.table }});
+      {% endunless %}{% endif %}{% endfor %}
+      // this method is called when chart is first inited as we listen for "dataUpdated" event
+      function zoomChart(start, end, chartObj) {
+        // different zoom methods can be used - zoomToIndexes, zoomToDates, zoomToCategoryValues
+        //console.log(chartObj);
+        if (start) {
+          chartObj.zoomToDates(start, end);
+        }
+        if ('zoomToValues' in chartObj.valueAxes[0]) {
+          chartObj.valueAxes[0].zoomToValues(0, 30);
+        }
+      }
+
+      $('#myCarousel').on('slid.bs.carousel', function(e){
+        //console.log($($(e.relatedTarget).find('.chartdiv'))[0].id);
+        {% for sensor in site.data.config.all_sensors %}{% if sensor.category == page.category %}{% unless sensor.enabled == "false" %}
+        chartDark{{ sensor.table }}.handleResize();{% endunless %}{% endif %}{% endfor %}
+      });
+
+    </script>
