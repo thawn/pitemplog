@@ -45,7 +45,7 @@
                   >Save visible data as CSV</button>
           
           <a class="btn btn-info pull-right text-md-small"
-             href="{% for post in site.posts %}{% unless post.categories contains "archive" %}{% if post.table == sensor.table %}{{site.baseurl}}{{post.url}}{% endif %}{% endunless %}{% endfor %}"
+             href="{% assign counter = 0 %}{% for post in site.posts %}{% unless post.categories contains "archive" %}{% if post.table == sensor.table %}{% if counter == 0 %}{% assign counter = 1 %}{{site.baseurl}}{{post.url}}{% endif %}{% endif %}{% endunless %}{% endfor %}"
              role="button"
              >More data for {{ sensor.name }}...</a>
         </div><!-- /.col-md-6 -->
