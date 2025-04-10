@@ -30,8 +30,8 @@
     <div class="container">
       <div class="center-block">
         <h1>{{ page.category }}</h1>
+        {% include chart-instructions.html %}
       </div>
-        <h2>{{ category[0] }}</h2>
       {% assign i = 0 %}{% for sensor in site.data.config.all_sensors %}{% if sensor.category == page.category %}{% unless sensor.enabled == "false" %}{% assign i = i | plus:1 %}
       {% assign mod = i | modulo:2 %}{% if mod == 1 %}<div class="row bottom-buffer" style="border-bottom: 1px solid #ddd">{% endif %}
         <!-- chart container -->
