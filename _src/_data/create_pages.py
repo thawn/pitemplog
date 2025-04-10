@@ -8,17 +8,28 @@ import yaml
 
 import pitemplog
 
+def ensure_dir(path):
+    if not os.path.exists(path):
+        pitemplog.log.info("making directory: " + path)
+        os.makedirs(path)
+
 
 def write_post(path, filename, title, table, category, content):
     full_path = os.path.abspath(os.path.join(path, filename))
-    if not(os.path.exists(path)):
-        pitemplog.log.info("making directory: " + path)
-        os.makedirs(path)
+    ensure_dir(path)
     pitemplog.log.info("Generating: " + full_path + '\n')
-    post = open(full_path, 'w')
-    post.write('---\nlayout: default\ntitle: "' + title + '"\ntable: ' +
-               table + '\ncategory: ' + category + '\n---\n' + content)
-    post.close()
+    with open(full_path, 'w') as post:
+        post.write('---\nlayout: default\ntitle: "' + title + '"\ntable: ' +
+                table + '\ncategory: ' + category + '\n---\n' + content)
+
+
+def write_category(path, category):
+    full_path = os.path.abspath(os.path.join(path, "index.html"))
+    ensure_dir(path)
+    content = '<script>var now=new Date();</script>\n{% include category.html %}\n'
+    pitemplog.log.info("Generating: " + full_path + '\n')
+    with open(full_path, 'w') as page:
+        page.write('---\nlayout: default\ntitle: "' + category + '"\ncategory: ' + category + '\n---\n' + content)
 
 
 def empty_folder(folder):
@@ -46,11 +57,13 @@ def delete_posts(conf, basepath):
 
 def create_sensor_pages(conf, basepath ):
     if conf["enabled"] == "true" and conf["table"]:
-        weekly_content = '{% assign time = page.date %}\n<script>var now=new Date({{ time | date: "%s" }}*1000);</script>\n{% include weekviewjs.html %}\n'
-        current_week_content = '{% assign time = site.time %}\n<script>var now=new Date();</script>\n{% include weekviewjs.html %}\n'
-        current_page_path = os.path.join(basepath, conf["category"], '_posts/')
+        current_week_content = '<script>var now=new Date();</script>\n{% include weekviewjs.html %}\n'
+        category_path = os.path.join(basepath, conf["category"])
+        current_page_path = os.path.join(category_path, '_posts/')
         filename = pitemplog.get_sensor_page_filename(conf["table"])
         write_post(current_page_path, filename, conf["name"], conf["table"], conf["category"], current_week_content)
+        if not(os.path.exists(os.path.join(category_path, "index.html"))):
+            write_category(category_path, conf["category"])
         os.system("chmod -R a+w '" + os.path.join(basepath, conf["category"]) + "'")
 
 
