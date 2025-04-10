@@ -44,6 +44,9 @@ def empty_folder(folder):
         pass
 
 def delete_category_path(conf, basepath):
+    if conf["category"] == "":
+        pitemplog.log.error("No category specified in config.json. Refusing to delete empty category.")
+        return
     category_path = os.path.join(basepath, conf["category"])
     if os.path.exists(category_path):
         pitemplog.log.info("Deleting: " + category_path)
