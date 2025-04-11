@@ -7,6 +7,7 @@
       <div class="row">
         <div class="col-md-9">
           <h1>{{ page.title }}: weekly overview</h1>
+          <div id="{{ page.table }}-latest"></div>
           <!-- chart container -->
           <div id="chart{{ page.table }}" class="chartdiv" style="height:500;"></div>
           <button class="btn btn-primary"
@@ -202,6 +203,13 @@
       if (navigator.userAgent.search("Safari") >= 0 && navigator.userAgent.search("Chrome") < 0) {
         $('.safari-only').addClass("small").removeClass("hidden")
       }
+
+      $.getJSON('{{ site.baseurl }}/data.php?table={{ page.table }}&latest=1&aggregate=_1min').done(function (data) {
+          if (data.length > 0) {
+            $('#{{ page.table }}-latest').html("<h4>Most recent temperature: " + data[0]["temp"] + " °C</h4>\n" +
+              "<p><small>Last updated: " + data[0]["time"] + "</small></p>");
+          };
+        });
     </script>
     
     <script>

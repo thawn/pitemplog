@@ -37,6 +37,7 @@
         <!-- chart container -->
         <div class="col-md-6">
           <h3>{{ sensor.name }} today</h3>
+          <div id="{{ sensor.table }}-latest"></div>
           <div id="{{ sensor.sensor }}" class="chartdiv"></div>
           <button class="btn btn-primary text-md-small"
                   onclick="exportToCsv('{{ sensor.table }}.csv',
@@ -84,6 +85,14 @@
           chartObj.valueAxes[0].zoomToValues(0, 30);
         }
       }
+      {% for sensor in site.data.config.all_sensors %}{% if sensor.category == page.category %}{% unless sensor.enabled == "false" %}
+      $.getJSON('{{ site.baseurl }}/data.php?table={{ sensor.table }}&latest=1&aggregate=_1min').done( function( data) {
+        if (data.length > 0) {
+          $('#{{ sensor.table }}-latest').html("<h4>Most recent temperature: " + data[0]["temp"] + " °C</h4>\n" +
+            "<p><small>Last updated: " + data[0]["time"] + "</small></p>");
+        };
+      });
+      {% endunless %}{% endif %}{% endfor %}
 
       $('#myCarousel').on('slid.bs.carousel', function(e){
         //console.log($($(e.relatedTarget).find('.chartdiv'))[0].id);
