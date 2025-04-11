@@ -115,13 +115,25 @@ try {
 
 	if (isset( $_GET["table"] )) {
 		$result = [ ];
-		// Fetch the data and print it out as JSON
-		foreach ( $dbh->query( 'SELECT FROM_UNIXTIME(time),temp FROM ' . $table . ' WHERE time BETWEEN ' . $starttime . ' AND ' . $endtime . ' ORDER BY time ASC' ) as $row ) {
-			$result[] = [ 
-					'time' => $row['FROM_UNIXTIME(time)'],
-					'temp' => $row['temp']
-			];
+		// Fetch the data
+		if (isset( $_GET["latest"] )) {
+			// get the latest temperature
+			foreach ( $dbh->query( 'SELECT FROM_UNIXTIME(time),temp FROM ' . $table . ' ORDER BY time DESC LIMIT 1' ) as $row ) {
+				$result[] = [ 
+						'time' => $row['FROM_UNIXTIME(time)'],
+						'temp' => $row['temp']
+				];
+			}
+		} else {
+			// get the temperatures between start and end time
+			foreach ( $dbh->query( 'SELECT FROM_UNIXTIME(time),temp FROM ' . $table . ' WHERE time BETWEEN ' . $starttime . ' AND ' . $endtime . ' ORDER BY time ASC' ) as $row ) {
+				$result[] = [ 
+						'time' => $row['FROM_UNIXTIME(time)'],
+						'temp' => $row['temp']
+				];
+			}
 		}
+		// print the result as JSON
 		echo json_encode( $result );
 	}
 	// Close the connection
