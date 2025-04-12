@@ -169,7 +169,7 @@ Jump directly to:
 In this case we deploy from a separate machine. That way, we don't need to install the [development dependencies](#devdeps) on the raspi.
 1. Follow the [manual installation instructions](#manual) until step 7.
 1. Instead of step 8 install only the [minimal dependencies](#deps): `sudo apt-get install mariadb-server apache2 php php-mysql php-curl python3-mysqldb python3-yaml`.
-1. Continue to follow the manual installation until step 10.
+1. Follow the manual installation steps 9 and 10.
 1. Now we clean up unused package files: `sudo apt-get clean`. With Raspberry Pi OS Lite Bullseye (2022-03-10) there was 1.7GiB used on the root partition of my raspi. The gzipped image will be considerably smaller (~600 MiB).
 1. On your development machine install the [development dependencies](#devdeps). On a debian machine: `sudo apt-get install grunt npm git jekyll`.
 1. Steps 11 - 13 are done on your development machine.
