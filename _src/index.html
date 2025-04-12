@@ -27,14 +27,14 @@ title: Temperature overview
  
     <div class="container">
       {% for category in site.categories %}{% unless category[0] == 'archive' or category[0] == "jekyll" or category[0] == "update" or category[0] contains "year" %}
-      <div class="row bottom-buffer" style="border-bottom: 1px solid #ddd">
-        <div class="col-md-12">
-          <h2><a href="{{ site.baseurl }}/{{ category[0] }}/index.html">{{ category[0] }}</a></h2>
-          <ul>{% assign i = 0 %}{% for sensor in site.data.config.all_sensors %}{% if sensor.category == category[0] %}{% unless sensor.enabled == "false" %}{% assign i = i | plus:1 %}
-            <li><a href="{% assign counter = 0 %}{% for post in site.posts %}{% unless post.categories contains "archive" %}{% if post.table == sensor.table %}{% if counter == 0 %}{% assign counter = 1 %}{{site.baseurl}}{{post.url}}{% endif %}{% endif %}{% endunless %}{% endfor %}">{{ sensor.name }}</a></li>{% endunless %}{% endif %}{% endfor %}
+      <div class="panel panel-default" style="border-bottom: 1px solid #ddd">
+        <div class="panel-heading">
+          <h2><a href="{{ site.baseurl }}/{{ category[0] }}/index.html"><i class="fa-solid fa-table"></i> {{ category[0] }}</a></h2>
+        </div><!-- /.panel-heading -->
+          <ul class="list-group lead">{% assign i = 0 %}{% for sensor in site.data.config.all_sensors %}{% if sensor.category == category[0] %}{% unless sensor.enabled == "false" %}{% assign i = i | plus:1 %}
+            <li class="list-group-item"><h3><a href="{% assign counter = 0 %}{% for post in site.posts %}{% unless post.categories contains "archive" %}{% if post.table == sensor.table %}{% if counter == 0 %}{% assign counter = 1 %}{{site.baseurl}}{{post.url}}{% endif %}{% endif %}{% endunless %}{% endfor %}"><i class="fa-solid fa-temperature-half"></i> {{ sensor.name }} <i class="fa-solid fa-chart-line"></i></a></h3></li>{% endunless %}{% endif %}{% endfor %}
           </ul>
-        </div><!-- /.col-md-12 -->
-      </div><!-- /.row -->
+      </div><!-- /.panel -->
     {% endunless %}{% endfor %}
     </div><!-- /.container -->
 

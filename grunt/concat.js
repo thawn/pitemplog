@@ -22,6 +22,8 @@ module.exports = {
       'node_modules/bootstrap/dist/css/bootstrap.css',
       'node_modules/bootstrap-datepicker/dist/css/bootstrap-datepicker3.standalone.css',
       'node_modules/amcharts3/amcharts/plugins/export/export.css',
+      'node_modules/@fortawesome/fontawesome-free/css/fontawesome.css',
+      'node_modules/@fortawesome/fontawesome-free/css/solid.css',
       'assets/css/custom.css'
     ],
     dest: 'build/assets/css/bootstrap_datepicker_custom.css'
