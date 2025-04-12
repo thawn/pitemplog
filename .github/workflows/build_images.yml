@@ -78,6 +78,7 @@ jobs:
           EOF
           } &&
           chmod +x pitemplog-USB/package-pitemplog-USB/00-run-chroot.sh &&
+          {
           cat > pitemplog-USB/prerun.sh <<-EOF
           #!/bin/bash -e
           if [ ! -d "\${ROOTFS_DIR}" ]; then
