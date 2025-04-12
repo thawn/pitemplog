@@ -43,6 +43,8 @@ jobs:
           ls -la files/build/_bin
           ls -la files/build/_sbin
           cp -r files/build/* "${ROOTFS_DIR}/usr/local/share/templog/"
+          chmod +x "${ROOTFS_DIR}/usr/local/share/templog/_bin/*.sh"
+          chmod +x "${ROOTFS_DIR}/usr/local/share/templog/_sbin/*.sh"
           ls -la "${ROOTFS_DIR}/usr/local/share/templog/"
           ls -la "${ROOTFS_DIR}/usr/local/share/templog/_bin"
           ls -la "${ROOTFS_DIR}/usr/local/share/templog/_sbin"
