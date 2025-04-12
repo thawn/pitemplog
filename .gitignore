@@ -34,3 +34,7 @@ dist/
 htdocs_debug/ 
 *.pyc
 testing/qemu/
+
+# IDE and Editor files
+.settings/
+.vscode/
