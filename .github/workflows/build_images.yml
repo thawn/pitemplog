@@ -37,7 +37,7 @@ jobs:
           {
           cat > pitemplog/package-pitemplog/02-run.sh <<-EOF
           #!/bin/bash
-          ls -la "${ROOTFS_DIR}
+          ls -la "${ROOTFS_DIR}"
           mkdir -p "${ROOTFS_DIR}/usr/local/share/templog"
           ls -la files/build
           ls -la files/build/_bin
