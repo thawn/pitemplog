@@ -11,14 +11,17 @@ jobs:
         uses: actions/checkout@v4
         with:
             path: pitemplog/package-pitemplog/files
-      - name: install
+
+      - name: install pitemplog
         run: |
           apt-get install -y grunt npm git jekyll
           cd pitemplog/package-pitemplog/files
           npm install
           grunt
           chmod a+x build/_bin/install.sh
-      - run: |
+
+      - name: set up pi-gen steps
+        run: |
           mkdir -p clean-stage &&
           {
           cat > clean-stage/prerun.sh <<-EOF
@@ -89,7 +92,6 @@ jobs:
           EOF
           }
 
-
       - uses: usimd/pi-gen-action@v1
         id: build
         with:
@@ -106,7 +108,7 @@ jobs:
           export-last-stage-only: true
           verbose-output: true
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: pitemplog-image
           path: ${{ steps.build.outputs.image-path }}
