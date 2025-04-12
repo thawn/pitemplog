@@ -1,0 +1,112 @@
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+jobs:
+  pi-gen-templog:
+    runs-on: ubuntu-latest
+    steps:
+      # Create a stage 'pitemplog' instructing to add Nodesource repo and install nodejs as dependency
+      - name: checkout repo
+        uses: actions/checkout@v4
+        with:
+            path: pitemplog/package-pitemplog/files
+      - name: install
+        run: |
+          apt-get install -y grunt npm git jekyll
+          cd pitemplog/package-pitemplog/files
+          npm install
+          grunt
+          chmod a+x build/_bin/install.sh
+      - run: |
+          mkdir -p clean-stage &&
+          {
+          cat > clean-stage/prerun.sh <<-EOF
+          #!/bin/bash
+          rm -f ${{ github.workspace }}/${{ inputs.custom-pi-gen-dir }}/stage2/EXPORT*
+          EOF
+          } &&
+          chmod +x clean-stage/prerun.sh &&      
+          mkdir -p pitemplog/package-pitemplog &&
+          echo "mariadb-server apache2 php php-mysql php-curl python3-mysqldb python3-yaml" > pitemplog/package-pitemplog/00-packages &&
+          echo "jekyll" >> pitemplog/package-pitemplog/01-packages-nr &&
+          {
+          cat > pitemplog/package-pitemplog/02-run.sh <<-EOF
+          #!/bin/bash
+          mkdir -p "${ROOTFS_DIR}/usr/local/share/templog"
+          cp -a files/build/* "${ROOTFS_DIR}/usr/local/share/templog/
+          EOF
+          } &&
+          chmod +x pitemplog/package-pitemplog/02-run.sh &&
+          {
+          cat > pitemplog/package-pitemplog/03-run-chroot.sh <<-EOF
+          #!/bin/bash
+          /usr/local/share/templog/_bin/install.sh
+          mysql < /usr/local/share/templog/_bin/create_database.sql
+          update-rc.d setup_timesyncd defaults
+          EOF
+          } &&
+          chmod +x pitemplog/package-pitemplog/03-run-chroot.sh &&
+          {
+          cat > pitemplog/prerun.sh <<-EOF
+          #!/bin/bash -e
+          if [ ! -d "\${ROOTFS_DIR}" ]; then
+            copy_previous
+          fi
+          EOF
+          } &&
+          chmod +x pitemplog/prerun.sh &&
+          {
+          cat > pitemplog/EXPORT_IMAGE <<-EOF
+          IMG_SUFFIX="-nousb"
+          if [ "${USE_QEMU}" = "1" ]; then
+              export IMG_SUFFIX="${IMG_SUFFIX}-qemu"
+          fi
+          EOF
+          } &&
+          mkdir -p pitemplog-USB/package-pitemplog-USB/ &&
+          {
+          cat > pitemplog-USB/package-pitemplog-USB/00-run-chroot.sh <<-EOF
+          #!/bin/bash
+          /usr/local/share/templog/_sbin/setup_usb_storage.sh
+          EOF
+          } &&
+          chmod +x pitemplog-USB/package-pitemplog-USB/00-run-chroot.sh &&
+          cat > pitemplog-USB/prerun.sh <<-EOF
+          #!/bin/bash -e
+          if [ ! -d "\${ROOTFS_DIR}" ]; then
+            copy_previous
+          fi
+          EOF
+          } &&
+          chmod +x pitemplog-USB/prerun.sh &&
+          {
+          cat > pitemplog-USB/EXPORT_IMAGE <<-EOF
+          IMG_SUFFIX=""
+          if [ "${USE_QEMU}" = "1" ]; then
+              export IMG_SUFFIX="${IMG_SUFFIX}-qemu"
+          fi
+          EOF
+          }
+
+
+      - uses: usimd/pi-gen-action@v1
+        id: build
+        with:
+          image-name: raspi-templog
+          stage-list: clean-stage stage0 stage1 stage2 ./pitemplog ./pitemplog-USB
+          password: 'raspberry'
+          hostname: pitemplog
+          pi-gen-release: pitemplog
+          timezone: Europe/Berlin
+          compression: gz
+          compression-level: 6
+          username: pi
+          disable-first-boot-user-rename: 1
+          export-last-stage-only: true
+          verbose-output: true
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: pitemplog-image
+          path: ${{ steps.build.outputs.image-path }}
