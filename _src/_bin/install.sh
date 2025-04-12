@@ -25,7 +25,7 @@ ln -s /etc/apache2/sites-available/templog.conf /etc/apache2/sites-enabled/0000-
 if ! [ -e /usr/local/bin/jekyll ]; then
   ln -s /usr/bin/jekyll /usr/local/bin/jekyll
 fi
-ln -s "${target_dir}"_bin/pitemplog.py '/usr/local/lib/python3.9/dist-packages/'
+ln -s "${target_dir}"_bin/pitemplog.py "$(python3 -m site | grep usr/local/lib | cut -d',' -f 1 | xargs)"
 chown -R www-data:www-data /var/www/html
 su - www-data -s /bin/bash -c "/usr/bin/python3 \"${target_dir}\"_data/create_pages.py"
 su - www-data -s /bin/bash -c "/usr/local/bin/jekyll build --source \"${target_dir}\""
