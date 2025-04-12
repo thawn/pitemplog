@@ -14,7 +14,8 @@ jobs:
 
       - name: install pitemplog
         run: |
-          apt-get install -y grunt npm git jekyll
+          apt-get install -y grunt npm git
+          apt-get install -y --no-install-recommends jekyll
           cd pitemplog/package-pitemplog/files
           npm install
           grunt
@@ -47,6 +48,8 @@ jobs:
           /usr/local/share/templog/_bin/install.sh
           mysql < /usr/local/share/templog/_bin/create_database.sql
           update-rc.d setup_timesyncd defaults
+          raspi-config nonint do_memory_split 16
+          raspi-config nonint do_onewire 1
           EOF
           } &&
           chmod +x pitemplog/package-pitemplog/03-run-chroot.sh &&
