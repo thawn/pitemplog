@@ -14,8 +14,8 @@ jobs:
 
       - name: install pitemplog
         run: |
-          apt-get install -y grunt npm git
-          apt-get install -y --no-install-recommends jekyll
+          sudo apt-get install -y grunt npm git
+          sudo apt-get install -y --no-install-recommends jekyll
           cd pitemplog/package-pitemplog/files
           npm install
           grunt
