@@ -38,7 +38,7 @@ jobs:
           cat > pitemplog/package-pitemplog/02-run.sh <<-EOF
           #!/bin/bash
           mkdir -p "${ROOTFS_DIR}/usr/local/share/templog"
-          cp -a files/build/* "${ROOTFS_DIR}/usr/local/share/templog/
+          cp -a files/build/* "${ROOTFS_DIR}/usr/local/share/templog/"
           EOF
           } &&
           chmod +x pitemplog/package-pitemplog/02-run.sh &&
