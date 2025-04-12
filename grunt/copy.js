@@ -49,7 +49,28 @@ module.exports = {
         expand: true,
         cwd: 'node_modules/bootstrap/fonts/',
         src: ['*.*'],
-        dest: 'build/assets/fonts/'}
+        dest: 'build/assets/fonts/'
+      }
+    ]
+  },
+  fontawesomefonts: {
+    files: [
+      {
+        expand: true,
+        cwd: 'node_modules/@fortawesome/fontawesome-free/webfonts/',
+        src: ['fa-solid-900.*'],
+        dest: 'build/assets/webfonts/'
+      }
+    ]
+  },
+  fontawesomecss: {
+    files: [
+      {
+        expand: true,
+        cwd: 'node_modules/@fortawesome/fontawesome-free/css/',
+        src: ['fontawesome.css', 'solid.css'],
+        dest: 'build/assets/css/'
+      }
     ]
   },
   bootstrapdist: {

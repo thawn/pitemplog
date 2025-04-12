@@ -10,6 +10,8 @@ module.exports = function(grunt) {
       'copy:jquerydist',
       'copy:bootstrapdist',
       'copy:bootstrapdatepicker',
+      'copy:fontawesomefonts',
+      'copy:fontawesomecss',
       'exec:build'
     ]
   );
@@ -21,6 +23,7 @@ module.exports = function(grunt) {
       'copy:assetsdist',
       'copy:amchartsimg',
       'copy:bootstrapfonts',
+      'copy:fontawesomefonts',
       'copy:conf',
       'concat',
       'uglify',
