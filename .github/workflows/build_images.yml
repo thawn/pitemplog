@@ -16,10 +16,12 @@ jobs:
         run: |
           sudo apt-get install -y grunt npm git
           sudo apt-get install -y --no-install-recommends jekyll
+          current_dir=$(pwd)
           cd pitemplog/package-pitemplog/files
           npm install
           grunt
           chmod a+x build/_bin/install.sh
+          cd "${current_dir}"
 
       - name: set up pi-gen steps
         run: |
@@ -27,7 +29,7 @@ jobs:
           {
           cat > clean-stage/prerun.sh <<-EOF
           #!/bin/bash
-          rm -f ${{ github.workspace }}/${{ inputs.custom-pi-gen-dir }}/stage2/EXPORT*
+          rm -f ${{ github.workspace }}/pi-gen/stage2/EXPORT*
           EOF
           } &&
           chmod +x clean-stage/prerun.sh &&      
@@ -37,7 +39,8 @@ jobs:
           {
           cat > pitemplog/package-pitemplog/02-run.sh <<-EOF
           #!/bin/bash
-          ls -la "${ROOTFS_DIR}"
+          echo "ROOTFS_DIR: ${ROOTFS_DIR}"
+          echo "current_dir: $(pwd)"
           mkdir -p "${ROOTFS_DIR}/usr/local/share/templog"
           ls -la files/build
           ls -la files/build/_bin
@@ -55,6 +58,15 @@ jobs:
           {
           cat > pitemplog/package-pitemplog/03-run-chroot.sh <<-EOF
           #!/bin/bash
+          ls -la /usr/local/
+          ls -la /usr/local/share/
+          ls -la /usr/local/share/templog
+          ls -la /usr/local/share/templog/_bin
+          chmod a+x /usr/local/share/templog/_bin/*.sh
+          chmod a+x /usr/local/share/templog/_bin/*.py
+          chmod u+x /usr/local/share/templog/_sbin/*.sh
+          ls -la /usr/local/share/templog/_bin
+          ls -la /usr/local/share/templog/_sbin
           /usr/local/share/templog/_bin/install.sh
           mysql < /usr/local/share/templog/_bin/create_database.sql
           update-rc.d setup_timesyncd defaults
@@ -114,6 +126,7 @@ jobs:
           password: 'raspberry'
           hostname: pitemplog
           pi-gen-release: pitemplog
+          pi-gen-dir: pi-gen
           timezone: Europe/Berlin
           compression: gz
           compression-level: 6
