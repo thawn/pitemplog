@@ -1,6 +1,7 @@
 #!/bin/bash
 target_dir=${INSTALL_DIR:-/usr/local/share/templog/}
 templog_user=${PT_USER:-pi}
+echo "arguments: $*"
 echo "Local sensors: $LOCAL_SENSORS"
 echo "Installing into: $target_dir"
 mkdir -p "$target_dir"
