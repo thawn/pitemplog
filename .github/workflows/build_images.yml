@@ -6,7 +6,6 @@ jobs:
   pi-gen-templog:
     runs-on: ubuntu-latest
     steps:
-      # Create a stage 'pitemplog' instructing to add Nodesource repo and install nodejs as dependency
 
       - uses: usimd/pi-gen-action@v1
         id: build
