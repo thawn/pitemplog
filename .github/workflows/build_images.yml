@@ -81,6 +81,11 @@ jobs:
           if [ ! -d "${ROOTFS_DIR}" ]; then
             copy_previous
           fi
+          echo "ROOTFS_DIR: ${ROOTFS_DIR}"
+          echo "PREV_ROOTFS_DIR: ${PREV_ROOTFS_DIR}"
+          echo "STAGE_WORK_DIR: $STAGE_WORK_DIR"
+          echo "WORK_DIR: ${WORK_DIR}"
+          echo "STAGE: ${STAGE}"
           EOF
           } &&
           chmod +x pitemplog/prerun.sh &&
