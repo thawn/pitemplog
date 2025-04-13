@@ -78,7 +78,7 @@ jobs:
           {
           cat > pitemplog/prerun.sh <<-EOF
           #!/bin/bash -e
-          if [ ! -d "\${ROOTFS_DIR}" ]; then
+          if [ ! -d "${ROOTFS_DIR}" ]; then
             copy_previous
           fi
           EOF
@@ -103,7 +103,7 @@ jobs:
           {
           cat > pitemplog-USB/prerun.sh <<-EOF
           #!/bin/bash -e
-          if [ ! -d "\${ROOTFS_DIR}" ]; then
+          if [ ! -d "${ROOTFS_DIR}" ]; then
             copy_previous
           fi
           EOF
@@ -117,6 +117,8 @@ jobs:
           fi
           EOF
           }
+
+      - run: tree
 
       - uses: usimd/pi-gen-action@v1
         id: build
