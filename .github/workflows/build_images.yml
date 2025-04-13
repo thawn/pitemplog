@@ -1,7 +1,7 @@
 on:
   push:
-    tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
+    branches:
+      - thawn/issue1
 jobs:
   pi-gen-templog:
     runs-on: ubuntu-latest
@@ -10,14 +10,14 @@ jobs:
       - name: checkout repo
         uses: actions/checkout@v4
         with:
-            path: ${{ github.workspace }}/pi-gen/pitemplog/package-pitemplog/files
+            path: pitemplog/package-pitemplog/files
 
       - name: install pitemplog
         run: |
           sudo apt-get install -y grunt npm git
           sudo apt-get install -y --no-install-recommends jekyll
           current_dir=$(pwd)
-          cd ${{ github.workspace }}/pi-gen/pitemplog/package-pitemplog/files
+          cd pitemplog/package-pitemplog/files
           npm install
           grunt
           chmod a+x build/_bin/install.sh
@@ -25,22 +25,25 @@ jobs:
 
       - name: set up pi-gen steps
         run: |
-          mkdir -p ${{ github.workspace }}/pi-gen/clean-stage &&
+          mkdir -p clean-stage &&
           {
-          cat > ${{ github.workspace }}/pi-gen/clean-stage/prerun.sh <<-EOF
+          cat > clean-stage/prerun.sh <<-EOF
           #!/bin/bash
           rm -f ${{ github.workspace }}/pi-gen/stage2/EXPORT*
           EOF
           } &&
-          chmod +x ${{ github.workspace }}/pi-gen/clean-stage/prerun.sh &&      
-          mkdir -p ${{ github.workspace }}/pi-gen/pitemplog/package-pitemplog &&
-          echo "mariadb-server apache2 php php-mysql php-curl python3-mysqldb python3-yaml" > ${{ github.workspace }}/pi-gen/pitemplog/package-pitemplog/00-packages &&
-          echo "jekyll" >> ${{ github.workspace }}/pi-gen/pitemplog/package-pitemplog/01-packages-nr &&
+          chmod +x clean-stage/prerun.sh &&      
+          mkdir -p pitemplog/package-pitemplog &&
+          echo "mariadb-server apache2 php php-mysql php-curl python3-mysqldb python3-yaml" > pitemplog/package-pitemplog/00-packages &&
+          echo "jekyll" >> pitemplog/package-pitemplog/01-packages-nr &&
           {
-          cat > ${{ github.workspace }}/pi-gen/pitemplog/package-pitemplog/02-run.sh <<-EOF
+          cat > pitemplog/package-pitemplog/02-run.sh <<-EOF
           #!/bin/bash
           echo "ROOTFS_DIR: ${ROOTFS_DIR}"
           echo "current_dir: $(pwd)"
+          ls -la /pi-gen/
+          ls -la /pi-gen/work/
+          ls -la /pi-gen/work/rootfs/
           mkdir -p "${ROOTFS_DIR}/usr/local/share/templog"
           ls -la files/build
           ls -la files/build/_bin
@@ -54,9 +57,9 @@ jobs:
           ls -la "${ROOTFS_DIR}/usr/local/share/templog/_sbin"
           EOF
           } &&
-          chmod +x ${{ github.workspace }}/pi-gen/pitemplog/package-pitemplog/02-run.sh &&
+          chmod +x pitemplog/package-pitemplog/02-run.sh &&
           {
-          cat > ${{ github.workspace }}/pi-gen/pitemplog/package-pitemplog/03-run-chroot.sh <<-EOF
+          cat > pitemplog/package-pitemplog/03-run-chroot.sh <<-EOF
           #!/bin/bash
           ls -la /usr/local/
           ls -la /usr/local/share/
@@ -74,9 +77,9 @@ jobs:
           raspi-config nonint do_onewire 1
           EOF
           } &&
-          chmod +x ${{ github.workspace }}/pi-gen/pitemplog/package-pitemplog/03-run-chroot.sh &&
+          chmod +x pitemplog/package-pitemplog/03-run-chroot.sh &&
           {
-          cat > ${{ github.workspace }}/pi-gen/pitemplog/prerun.sh <<-EOF
+          cat > pitemplog/prerun.sh <<-EOF
           #!/bin/bash -e
           if [ ! -d "${ROOTFS_DIR}" ]; then
             copy_previous
@@ -88,34 +91,34 @@ jobs:
           echo "STAGE: ${STAGE}"
           EOF
           } &&
-          chmod +x ${{ github.workspace }}/pi-gen/pitemplog/prerun.sh &&
+          chmod +x pitemplog/prerun.sh &&
           {
-          cat > ${{ github.workspace }}/pi-gen/pitemplog/EXPORT_IMAGE <<-EOF
+          cat > pitemplog/EXPORT_IMAGE <<-EOF
           IMG_SUFFIX="-nousb"
           if [ "${USE_QEMU}" = "1" ]; then
               export IMG_SUFFIX="${IMG_SUFFIX}-qemu"
           fi
           EOF
           } &&
-          mkdir -p ${{ github.workspace }}/pi-gen/pitemplog-USB/package-pitemplog-USB/ &&
+          mkdir -p pitemplog-USB/package-pitemplog-USB/ &&
           {
-          cat > ${{ github.workspace }}/pi-gen/pitemplog-USB/package-pitemplog-USB/00-run-chroot.sh <<-EOF
+          cat > pitemplog-USB/package-pitemplog-USB/00-run-chroot.sh <<-EOF
           #!/bin/bash
           /usr/local/share/templog/_sbin/setup_usb_storage.sh
           EOF
           } &&
-          chmod +x ${{ github.workspace }}/pi-gen/pitemplog-USB/package-pitemplog-USB/00-run-chroot.sh &&
+          chmod +x pitemplog-USB/package-pitemplog-USB/00-run-chroot.sh &&
           {
-          cat > ${{ github.workspace }}/pi-gen/pitemplog-USB/prerun.sh <<-EOF
+          cat > pitemplog-USB/prerun.sh <<-EOF
           #!/bin/bash -e
           if [ ! -d "${ROOTFS_DIR}" ]; then
             copy_previous
           fi
           EOF
           } &&
-          chmod +x ${{ github.workspace }}/pi-gen/pitemplog-USB/prerun.sh &&
+          chmod +x pitemplog-USB/prerun.sh &&
           {
-          cat > ${{ github.workspace }}/pi-gen/pitemplog-USB/EXPORT_IMAGE <<-EOF
+          cat > pitemplog-USB/EXPORT_IMAGE <<-EOF
           IMG_SUFFIX=""
           if [ "${USE_QEMU}" = "1" ]; then
               export IMG_SUFFIX="${IMG_SUFFIX}-qemu"
@@ -129,7 +132,7 @@ jobs:
         id: build
         with:
           image-name: raspi-templog
-          stage-list: ${{ github.workspace }}/pi-gen/clean-stage stage0 stage1 stage2 ${{ github.workspace }}/pi-gen/pitemplog ${{ github.workspace }}/pi-gen/pitemplog-USB
+          stage-list: clean-stage stage0 stage1 stage2 pitemplog pitemplog-USB
           password: 'raspberry'
           hostname: pitemplog
           pi-gen-release: pitemplog
