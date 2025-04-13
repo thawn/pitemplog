@@ -43,8 +43,12 @@ jobs:
           echo "current_dir: $(pwd)"
           ls -la /pi-gen/
           ls -la /pi-gen/work/
-          ls -la /pi-gen/work/rootfs/
+          ls -la /pi-gen/work/raspi-templog/
           mkdir -p "${ROOTFS_DIR}/usr/local/share/templog"
+          ls -la
+          ls -la ..
+          ls -la ../..
+          ls -la ../../..
           ls -la files/build
           ls -la files/build/_bin
           ls -la files/build/_sbin
