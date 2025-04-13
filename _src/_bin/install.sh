@@ -49,6 +49,11 @@ if [ "${LOCAL_SENSORS:-yes}" == "no" ]; then
 else
   cat /tmp/crontab_env "${target_dir}"_bin/crontab | crontab -u ${templog_user} -
 fi
+# if the first argument is --no-restart-apache, we are done now
+if [ "$1" == "--no-restart-apache" ]; then
+  echo "Image installation complete. Exiting now."
+  exit 0
+fi
 echo "Installation successful. (re)starting apache now."
 if [ ! -f /.dockerenv ]; then
   #make sure necessary environment variables are set
