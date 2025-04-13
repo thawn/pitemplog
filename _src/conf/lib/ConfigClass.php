@@ -245,7 +245,7 @@ class ConfigClass {
 			if (isset( $conf['sensor'] )) {
 				foreach ( $required_fields as $field ) {
 					if (! isset( $conf[$field] )) {
-						$this->response->remote_sensor_errors[$conf['sensor']][$field] = sprintf( 'Missing configuration parametner: Set the field "%s" in your configuration data.', $field );
+						$this->response->remote_sensor_error[$conf['sensor']][$field] = sprintf( 'Missing configuration parametner: Set the field "%s" in your configuration data.', $field );
 						$fields_ok = FALSE;
 					}
 				}
@@ -287,7 +287,7 @@ class ConfigClass {
 		$this->response->logger( 'Received push data:', $data );
 		try {
 			foreach ( $data['sensor'] as $key => $sensor ) {
-				if ($this->remote_sensors[strval( $sensor )]->push == 'true' && $this->remote_sensors[strval( $sensor )]->apikey === $data['apikey']) {
+				if (isset( $this->remote_sensors[strval( $sensor )] ) && $this->remote_sensors[strval( $sensor )]->push == 'true' && $this->remote_sensors[strval( $sensor )]->apikey === $data['apikey']) {
 					$sql = sprintf( 'INSERT INTO `%s`(time,temp) VALUES (?,?)', $this->remote_sensors[strval( $sensor )]->table );
 					$sth = $this->database->prepare( $sql );
 					$sth->execute( [ 
@@ -296,7 +296,7 @@ class ConfigClass {
 					] );
 					$sth = NULL;
 				} else {
-					if ($this->remote_sensors[strval( $sensor )]->push == 'true') {
+					if (isset( $this->remote_sensors[strval( $sensor )] ) && $this->remote_sensors[strval( $sensor )]->push == 'true') {
 						$this->response->remote_sensor_error[strval( $sensor )]["apikey"] = sprintf( 'Wrong apikey: "%s"', $data['apikey'] );
 					} else {
 						$this->response->remote_sensor_error[strval( $sensor )]["push"] = 'Failed to push data into a sensor that is not configured as push sensor.';
@@ -316,7 +316,7 @@ class ConfigClass {
 	 */
 	public function add_new_push_sensor(array $data) {
 		if ($data["sensor"]) {
-			if (! $this->remote_sensors[strval( $data["sensor"] )]) {
+			if (! isset( $this->remote_sensors[strval( $data["sensor"] )] )) {
 				$sensor = array (
 						strval( $data["sensor"] ) => $data
 				);
@@ -425,7 +425,7 @@ class ConfigClass {
 	public function is_table_used(string $table, string $target_sensor) {
 		$used = FALSE;
 		if ($table) {
-			$this->response->logger( sprintf( 'Checking whether table %s is already used by a sensor other than %s.', $table, $target_sensor ), $conf, 3 );
+			$this->response->logger( sprintf( 'Checking whether table %s is already used by a sensor other than %s.', $table, $target_sensor ), FALSE, 3 );
 			foreach ( array_merge( $this->remote_sensors, $this->local_sensors ) as $sensor ) {
 				if ($sensor->sensor !== $target_sensor && $table === $sensor->table) {
 					$used = TRUE;
@@ -474,12 +474,13 @@ class ConfigClass {
 	 */
 	protected function delete_element(string $id, string $kind) {
 		$deleted = FALSE;
-		$this->response->logger( sprintf( 'Attempting to delete %s: %s', $kind, $id ), $this->{$kind}[$id] );
-		if ($this->{$kind}[$id]) {
+		$this->response->logger( sprintf( 'Attempting to delete %s: %s', $kind, $id ), FALSE );
+		if (isset( $this->{$kind}[$id] )) {
+			$this->response->logger( sprintf( 'Deleting %s: %s', $kind, $id ), $this->{$kind}[$id] );
 			unset( $this->{$kind}[$id] );
 			$this->populate_all_sensors();
 			$this->write_config( TRUE );
-			if ($response->config_changed) {
+			if ($this->response->config_changed) {
 				$this->response->logger( 'Deleted: ' . $id, FALSE );
 			}
 			$deleted = TRUE;

@@ -112,7 +112,7 @@ class DBHandler extends AutoAssignProp {
 		return $this->dbh->rollBack();
 	}
 	protected function filter_default(string $val, string $field, string $regexp = "/^[a-zA-Z_]{4,20}$/", string $message = '') {
-		$val = filter_var( $val, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_BACKTICK );
+		$val = filter_var( $val, FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_BACKTICK );
 		if (! filter_var( $val, FILTER_VALIDATE_REGEXP, [
 				'options' => [
 						'regexp' => $regexp

@@ -42,13 +42,13 @@ class RemoteSensor extends LocalSensor {
 		$this->exttable = $this->filter_default( $val, 'exttable', "/^[a-zA-Z][a-zA-Z0-9_]{3,19}$/", 'must start with a letter, be 4-20 characters long and contain only letters, numbers and underscore.' );
 	}
 	public function set_extuser(string $val) {
-		$this->extuser = filter_var( $val, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_BACKTICK );
+		$this->extuser = filter_var( $val, FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_BACKTICK );
 	}
 	public function set_extpw(string $val) {
-		$this->extpw = filter_var( $val, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_BACKTICK );
+		$this->extpw = filter_var( $val, FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_BACKTICK );
 	}
 	public function set_extparser(string $val) {
-		$this->extparser = filter_var( $val, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_BACKTICK );
+		$this->extparser = filter_var( $val, FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_BACKTICK );
 		if (! empty( $this->extparser ) && $this->extparser != 'none' && array_search( $this->extparser, $this->parsers ) === false) {
 			$this->response->abort( 'There is an error in your configuration: The file for the parser: ' . $parsed . ' does not exist. These are the parsers that I know:', $this->parsers );
 		}

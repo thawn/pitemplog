@@ -534,7 +534,7 @@ class TestConfAPI(APIBaseClass):
     def test_receive_push_config_missing_parameter(self):
         result = self._post_api('receive_push_config', self.pi.local_sensors)
         self._assert_success(result)
-        self.assertIn(self.working_sensor, result["remote_sensor_errors"], 'no error returned')
+        self.assertIn(self.working_sensor, result["remote_sensor_error"], 'no error returned')
 
     def test_receive_push_config_table_collision(self):
         unused, config = self._set_up_receive_push()
@@ -676,7 +676,7 @@ class TestDataAPI(APIBaseClass):
                 if result["status"] == "success":
                     self.assertNotIn("newsensor", result["remote_sensors"],
                                      'data.php had "newsensor" in its remote_sensor response even though incomplete data was submitted')
-                    self.assertIn(field, result["remote_sensor_errors"]["newsensor"],
+                    self.assertIn(field, result["remote_sensor_error"]["newsensor"],
                                   'data.php had "newsensor" in its remote_sensor response even though incomplete data was submitted')
                     new_conf = pitemplog.PiTempLogConf()
                     self.assertNotIn("newsensor", new_conf.remote_sensors,
@@ -773,10 +773,19 @@ def db_tear_down(self):
 
 
 def execute_source_file(filename):
-    try:
-        from imp import load_source
-    except ImportError:
-        from importlib.util import spec_from_file_location as load_source
+    import importlib.util
+    import importlib.machinery
+
+    def load_source(modname, filename):
+        loader = importlib.machinery.SourceFileLoader(modname, filename)
+        spec = importlib.util.spec_from_file_location(modname, filename, loader=loader)
+        module = importlib.util.module_from_spec(spec)
+        # The module is always executed and not cached in sys.modules.
+        # Uncomment the following line to cache the module.
+        # sys.modules[module.__name__] = module
+        loader.exec_module(module)
+        return module
+    
     templog_src = load_source('templog_src', filename)
     templog_src.main()
 

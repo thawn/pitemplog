@@ -43,16 +43,6 @@ def empty_folder(folder):
     except OSError:
         pass
 
-def delete_category_path(conf, basepath):
-    if conf["category"] == "":
-        pitemplog.log.error("No category specified in config.json. Refusing to delete empty category.")
-        return
-    category_path = os.path.join(basepath, conf["category"])
-    if os.path.exists(category_path):
-        pitemplog.log.info("Deleting: " + category_path)
-        shutil.rmtree(category_path, True)
-
-
 def delete_posts(conf, basepath):
     current_page_path = os.path.join(basepath, conf["category"], '_posts/')
     empty_folder(current_page_path)
@@ -83,7 +73,7 @@ def main():
     if (os.path.exists(www_config_path)):
         if not(filecmp.cmp(config_path, www_config_path)):
             oldconfig = pitemplog.PiTempLogConf(config_path)
-            oldconfig.each_sensor(delete_category_path, basepath)
+            oldconfig.each_sensor(pitemplog.delete_category_path, basepath)
             pitemplog.log.info("copying updated configuration " + www_config_path + " to local configuration: " + config_path)
             shutil.copyfile(www_config_path, config_path)
             local_config_path = os.path.abspath(os.path.join(
