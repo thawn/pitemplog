@@ -129,7 +129,8 @@ jobs:
         id: build
         with:
           image-name: raspi-templog
-          stage-list: ${{ github.workspace }}/pi-gen/clean-stage stage0 stage1 stage2 ${{ github.workspace }}/pi-gen/pitemplog ${{ github.workspace }}/pi-gen/pitemplog-USB
+          stage-list: stage0 stage1 stage2 stage3
+          pi-gen-repository: thawn/pi-gen
           password: 'raspberry'
           hostname: pitemplog
           pi-gen-release: pitemplog
