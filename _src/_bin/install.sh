@@ -49,20 +49,24 @@ if [ "${LOCAL_SENSORS:-yes}" == "no" ]; then
 else
   cat /tmp/crontab_env "${target_dir}"_bin/crontab | crontab -u ${templog_user} -
 fi
+if [ ! -f /.dockerenv ]; then
+  #if we are not in a docker container, make sure necessary environment variables are set
+  sed -e 's/^/export /' /tmp/crontab_env > /etc/profile.d/pitemplog.sh
+fi
 # if the first argument is --no-restart-apache, we are done now
 if [ "$1" == "--no-restart-apache" ]; then
+  # image generation may happen in a docker container, make sure necessary environment variables are set anyways
+  sed -e 's/^/export /' /tmp/crontab_env > /etc/profile.d/pitemplog.sh
   echo "Image installation complete. Exiting now."
   exit 0
 fi
 echo "Installation successful. (re)starting apache now."
 if [ ! -f /.dockerenv ]; then
-  #make sure necessary environment variables are set
-  sed -e 's/^/export /' /tmp/crontab_env > /etc/profile.d/pitemplog.sh
   #if we are not in a docker container, we restart the apache service
   service apache2 restart
 else
-  #In a docker container, apache runs as foreground process and is passed any arguments passed to the container
   service cron start
+  #In a docker container, apache runs as foreground process and is passed any arguments passed to the container
   if [ "${1#-}" != "$1" ]; then
 	set -- apache2-foreground "$@"
   fi
