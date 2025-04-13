@@ -40,7 +40,7 @@ class LocalSensor extends AutoAssignProp {
 		$this->update_config( $data );
 	}
 	public function set_sensor(string $val) {
-		$this->sensor = filter_var( $val, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_BACKTICK );
+		$this->sensor = filter_var( $val, FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_BACKTICK );
 	}
 	public function set_calibration(string $val) {
 		$this->calibration = filter_var( $val, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION | FILTER_FLAG_ALLOW_THOUSAND | FILTER_FLAG_ALLOW_SCIENTIFIC );
@@ -61,7 +61,7 @@ class LocalSensor extends AutoAssignProp {
 		$this->enabled = $val === 'false' ? 'false' : 'true';
 	}
 	public function set_comment(string $val) {
-		$this->comment = filter_var( $val, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_BACKTICK );
+		$this->comment = filter_var( $val, FILTER_SANITIZE_SPECIAL_CHARS, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_BACKTICK );
 	}
 	public function set_tabletest(string $val) {
 		$this->tabletest = $val === 'OK' ? 'OK' : '';
@@ -137,7 +137,7 @@ class LocalSensor extends AutoAssignProp {
 			}
 		}
 		$this->response->logger( 'New sensor config is:', $this, 3 );
-		$this->response->sensor_config[$this->sensor] = $this;
+		$this->response->local_sensors[$this->sensor] = $this;
 		if (! $this->has_error()) {
 			$this->confirmed = '';
 		}

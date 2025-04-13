@@ -1,18 +1,9 @@
 #!/usr/bin/env python3
 import os
-import shutil
 import yaml
 #from pprint import pprint
 
 import pitemplog
-
-def delete_category_path(conf, basepath):
-    category_path = os.path.join(basepath, conf["category"])
-    if os.path.exists(category_path):
-        shutil.rmtree(category_path, True)
-        pitemplog.log.info("Deleting: " + category_path)
-            
-
 
 def main():
     basepath = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir))
@@ -24,7 +15,7 @@ def main():
 
     if (os.path.exists(www_config_path)):
         config = pitemplog.PiTempLogConf(www_config_path)
-        config.each_sensor(delete_category_path, basepath)
+        config.each_sensor(pitemplog.delete_category_path, basepath)
 
 
 if __name__ == "__main__":

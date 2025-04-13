@@ -98,7 +98,7 @@ function get_external($response, $config, $command) {
 function get_sensor_temperature($response, $data) {
 	$temperature = 'Error';
 	$data['sensor'] = $data['temperature'];
-	if (! $data['url']) {
+	if (! isset( $data['url'] )) {
 		$data['url'] = 'http://localhost/data.php';
 	}
 	$sensordata = get_external( $response, $data, 'temperature' );
@@ -127,7 +127,7 @@ function save_everything($response, $conf, $data) {
 	}
 	if ($data['push_servers']) {
 		foreach ( $data['push_servers'] as $server ) {
-			if ($conf->push_servers[$server["url"]]) {
+			if (isset( $conf->push_servers[$server["url"]] )) {
 				$conf->save_push_server( $server );
 			} else {
 				$conf->push_config( $server );
@@ -196,7 +196,7 @@ if (isset( $_GET['action'] )) {
 			$conf->push_config( $_POST );
 			break;
 		case 'save_push_server' :
-			if ($conf->push_servers[$_POST["url"]]) {
+			if (isset( $conf->push_servers[$_POST["url"]] )) {
 				$conf->save_push_server( $_POST );
 			} else {
 				$conf->push_config( $_POST );
@@ -204,7 +204,7 @@ if (isset( $_GET['action'] )) {
 			break;
 		case 'delete_push_server' :
 			if ($conf->delete_push_server( $_POST['url'] )) {
-				$response->push_server = $_POST['url'];
+				$response->push_servers = [$_POST['url']];
 			}
 			break;
 		case 'receive_push_config' :

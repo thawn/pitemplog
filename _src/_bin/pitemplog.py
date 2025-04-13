@@ -456,6 +456,18 @@ def get_sensor_temperature(sensor):
 def get_sensor_page_filename(table):
     return "{date}-{table}-temperatures.html".format(date=datetime.date.today().isoformat(), table=table)
 
+def delete_category_path(conf, basepath):
+    if conf["category"] == "":
+        pitemplog.log.error("No category specified in config.json. Refusing to delete empty category.")
+        return
+    category_path = os.path.join(basepath, conf["category"])
+    if os.path.exists(category_path):
+        pitemplog.log.info("Deleting: " + category_path)
+        shutil.rmtree(category_path, True)
+
+
+
+
 log = logging.getLogger(__name__)
 c_handler = logging.StreamHandler()
 debug = int(float(os.environ.get('PITEMPLOG_DEBUG', '0')))

@@ -15,6 +15,7 @@ class ResponseClass {
 	public $local_sensor_error = [ ];
 	public $remote_sensors = [ ];
 	public $remote_sensor_error = [ ];
+	public $external_config = [ ];
 	public $push_servers = [];
 	public $push_server_errors = [];
 	public $config_changed = FALSE;
