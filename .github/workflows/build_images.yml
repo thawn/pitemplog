@@ -12,7 +12,7 @@ jobs:
         id: build
         with:
           image-name: raspi-templog
-          stage-list: stage0 stage1 stage2 stage3
+          stage-list: stage0 stage1 stage2
           pi-gen-repository: thawn/pi-gen
           password: 'raspberry'
           hostname: pitemplog
