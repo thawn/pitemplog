@@ -41,24 +41,13 @@ jobs:
           #!/bin/bash
           echo "ROOTFS_DIR: ${ROOTFS_DIR}"
           echo "current_dir: $(pwd)"
-          ls -la /pi-gen/
-          ls -la /pi-gen/work/
-          ls -la /pi-gen/work/raspi-templog/
+          tree /pi-gen/
           mkdir -p "${ROOTFS_DIR}/usr/local/share/templog"
-          ls -la
-          ls -la ..
-          ls -la ../..
-          ls -la ../../..
-          ls -la files/build
-          ls -la files/build/_bin
-          ls -la files/build/_sbin
+          tree ../../..
           cp -r files/build/* "${ROOTFS_DIR}/usr/local/share/templog/"
           chmod a+x "${ROOTFS_DIR}/usr/local/share/templog/_bin/*.sh"
           chmod a+x "${ROOTFS_DIR}/usr/local/share/templog/_bin/*.py"
           chmod u+x "${ROOTFS_DIR}/usr/local/share/templog/_sbin/*.sh"
-          ls -la "${ROOTFS_DIR}/usr/local/share/templog/"
-          ls -la "${ROOTFS_DIR}/usr/local/share/templog/_bin"
-          ls -la "${ROOTFS_DIR}/usr/local/share/templog/_sbin"
           EOF
           } &&
           chmod +x pitemplog/package-pitemplog/02-run.sh &&
@@ -148,6 +137,7 @@ jobs:
           disable-first-boot-user-rename: 1
           export-last-stage-only: true
           verbose-output: true
+          extra-host-dependencies: 'tree'
 
       - uses: actions/upload-artifact@v4
         with:
