@@ -52,7 +52,7 @@ class LocalSensor extends AutoAssignProp {
 		$this->table = $this->filter_default( $val, 'table', "/^[a-zA-Z][a-zA-Z0-9_]{3,19}$/", 'The table name must start with a letter, be 4-20 characters long and contain only letters, numbers and underscore.' );
 	}
 	public function set_category(string $val) {
-		filtered = $this->filter_default( $val, 'category' );
+		$filtered = $this->filter_default( $val, 'category' );
 		// remove leading slash if present
 		if (substr( $filtered, 0, 1 ) === '/') {
 			$filtered = substr( $filtered, 1 );

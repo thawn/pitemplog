@@ -762,6 +762,25 @@ class TestDataAPI(APIBaseClass):
                          'api did not respond with the correct error message')
         self.assertEqual(latest_timestamp('newtable', self.pi.dbh), None, 'api wrote pushed data despite wrong api key')
 
+    def test_receive_push_temperatures_category_starts_with_slash(self):
+        reset_conf_database(config_file=None, sql_file="lib/db_local_sensors.sql")
+        config_slash_category = self.test_config.copy()
+        config_slash_category["newsensor"]["category"] = "/slash"
+        result = self._post_api("receive_push_config", config_slash_category)
+        self._assert_success(result)
+        self.assertEqual(
+            result["remote_sensors"]["newsensor"]["category"],
+            config_slash_category["newsensor"]["category"][1:],
+            "api did not remove the leading slash from the category",
+        )
+        new_conf = pitemplog.PiTempLogConf()
+        self.assertIn("newsensor", new_conf.remote_sensors, "newsensor did not appear in updated configuration")
+        self.assertEqual(
+            new_conf.remote_sensors["newsensor"]["category"],
+            config_slash_category["newsensor"]["category"][1:],
+            "api did not save the category without the leading slash",
+        )
+
     def _gettemp(self, sensor):
         return float(self._get_api('gettemp=' + sensor))
 
