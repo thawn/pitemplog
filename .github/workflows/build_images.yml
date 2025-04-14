@@ -1,0 +1,31 @@
+on:
+  push:
+    branches:
+      - own-pi-gen-repo
+jobs:
+  pi-gen-templog:
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: usimd/pi-gen-action@v1
+        id: build
+        with:
+          image-name: raspi-templog
+          stage-list: stage0 stage1 stage2 stage3
+          pi-gen-repository: thawn/pi-gen
+          password: 'raspberry'
+          hostname: pitemplog
+          pi-gen-release: pitemplog
+          pi-gen-dir: pi-gen
+          timezone: Europe/Berlin
+          compression: gz
+          compression-level: 6
+          username: pi
+          disable-first-boot-user-rename: 1
+          export-last-stage-only: true
+          verbose-output: true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pitemplog-image
+          path: ${{ steps.build.outputs.image-path }}
