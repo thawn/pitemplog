@@ -12,6 +12,7 @@ import pitemplog
 import MySQLdb
 import time
 import os
+import shutil
 import stat
 import glob
 import json
@@ -46,6 +47,48 @@ class TestTableLocking(unittest.TestCase):
             self.assertTrue(bool(st.st_mode & stat.S_IWOTH), 'lock file is not world writable')
         self.assertFalse(lock.is_locked(), 'could not remove lock executable')
 
+
+class TestPiTempLogDeleteCategoryPath(unittest.TestCase):
+    def setUp(self):
+        self.basepath = '/tmp/basepath/'
+        self.config = { 'category': 'test_category' }
+        self.category_path = os.path.join(self.basepath, self.config['category'])
+        os.makedirs(self.basepath)
+
+    def tearDown(self):
+        cleanup_tmp()
+
+    def test_delete_category_path_success(self):
+        os.makedirs(self.category_path)
+        pitemplog.delete_category_path(self.config, self.basepath)
+        self.assertFalse(os.path.exists(self.category_path), "category was not deleted")
+        self.assertTrue(os.path.exists(self.basepath), 'basepath was deleted')
+
+    def test_delete_category_path_empty(self):
+        pitemplog.delete_category_path(self.config, self.basepath)
+        self.assertTrue(os.path.exists(self.basepath), "basepath was deleted")
+
+    def test_delete_category_path_not_empty(self):
+        os.makedirs(self.category_path)
+        with open(os.path.join(self.category_path, 'test.txt'), 'w') as f:
+            f.write('test')
+        pitemplog.delete_category_path(self.config, self.basepath)
+        self.assertFalse(os.path.exists(self.category_path), "category was not deleted")
+        self.assertTrue(os.path.exists(self.basepath), "basepath was deleted")
+
+    @patch('pitemplog.log.error')
+    def test_delete_category_path_empty_category(self, mock_log):
+        self.config['category'] = ''
+        pitemplog.delete_category_path(self.config, self.basepath)
+        mock_log.assert_called_once_with("Refusing to delete basepath: " + self.basepath)
+        self.assertTrue(os.path.exists(self.basepath), "basepath was deleted")
+
+    @patch('pitemplog.log.error')
+    def test_delete_category_path_category_slash(self, mock_log):
+        self.config['category'] = '/'
+        pitemplog.delete_category_path(self.config, self.basepath)
+        mock_log.assert_called_once_with("Refusing to delete outside basepath: /")
+        self.assertTrue(os.path.exists(self.basepath), "basepath was deleted")
 
 class TestPiTempLogConfEach(unittest.TestCase):
     @classmethod
@@ -800,6 +843,8 @@ def cleanup_tmp():
         os.remove(file)
     for file in glob.glob("/tmp/*_last"):
         os.remove(file)
+    if os.path.exists('/tmp/basepath'):
+        shutil.rmtree('/tmp/basepath')
 
 
 def recursive_urlencode(d):

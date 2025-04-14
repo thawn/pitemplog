@@ -6,6 +6,7 @@ import time
 import datetime
 import re
 import logging
+import shutil
 from pprint import pformat
 
 
@@ -456,16 +457,18 @@ def get_sensor_temperature(sensor):
 def get_sensor_page_filename(table):
     return "{date}-{table}-temperatures.html".format(date=datetime.date.today().isoformat(), table=table)
 
+
 def delete_category_path(conf, basepath):
-    if conf["category"] == "":
-        pitemplog.log.error("No category specified in config.json. Refusing to delete empty category.")
-        return
     category_path = os.path.join(basepath, conf["category"])
+    if os.path.abspath(category_path) == os.path.abspath(basepath):
+        log.error("Refusing to delete basepath: " + category_path)
+        return
+    if not category_path.startswith(basepath):
+        log.error("Refusing to delete outside basepath: " + category_path)
+        return
     if os.path.exists(category_path):
-        pitemplog.log.info("Deleting: " + category_path)
+        log.info("Deleting: " + category_path)
         shutil.rmtree(category_path, True)
-
-
 
 
 log = logging.getLogger(__name__)
