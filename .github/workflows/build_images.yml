@@ -1,7 +1,7 @@
 on:
   push:
-    branches:
-      - own-pi-gen-repo
+    tags:
+      - 'v*'
 jobs:
   pi-gen-templog:
     runs-on: ubuntu-latest
