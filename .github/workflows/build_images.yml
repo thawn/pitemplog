@@ -25,8 +25,8 @@ jobs:
           compression-level: 6
           username: pi
           disable-first-boot-user-rename: 1
-          export-last-stage-only: true
-          verbose-output: true
+          export-last-stage-only: false
+          verbose-output: false
 
       - uses: actions/upload-artifact@v4
         with:
