@@ -18,6 +18,9 @@ jobs:
           pi-gen-release: pitemplog
           pi-gen-dir: pi-gen
           timezone: Europe/Berlin
+          keyboard-keymap: us
+          keyboard-layout: English (US)
+          locale: en_US.UTF-8
           compression: gz
           compression-level: 6
           username: pi
