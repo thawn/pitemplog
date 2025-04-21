@@ -1,9 +1,9 @@
 #!/bin/sh
 ### BEGIN INIT INFO
 # Provides:          setup_templog_db_once
-# Required-Start:
+# Required-Start: mysqld
 # Required-Stop:
-# Should-Start: setup_usb
+# Should-Start:
 # Default-Start: 3
 # Default-Stop:
 # Short-Description: Setup templog database on first boot.
