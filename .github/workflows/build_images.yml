@@ -26,9 +26,15 @@ jobs:
           username: pi
           disable-first-boot-user-rename: 1
           export-last-stage-only: false
-          verbose-output: false
+          verbose-output: true
+          enable-noobs: false
 
       - uses: actions/upload-artifact@v4
         with:
           name: pitemplog-image
-          path: ${{ steps.build.outputs.image-path }}
+          path: ${{ steps.build.inputs.pi-gen-dir }}/deploy/image_[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-raspi-templog-nousb.img.gz
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pitemplog-image-nousb
+          path: ${{ steps.build.inputs.pi-gen-dir }}/deploy/image_[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-raspi-templog.img.gz
