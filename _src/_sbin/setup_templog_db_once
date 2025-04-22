@@ -3,7 +3,7 @@
 # Provides:          setup_templog_db_once
 # Required-Start: mysqld
 # Required-Stop:
-# Should-Start:
+# Should-Start: setup_usb
 # Default-Start: 3
 # Default-Stop:
 # Short-Description: Setup templog database on first boot.
