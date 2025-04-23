@@ -7,7 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - uses: usimd/pi-gen-action@v1
+      - name: Build images
+        uses: usimd/pi-gen-action@v1
         id: build
         with:
           image-name: raspi-templog
@@ -29,12 +30,7 @@ jobs:
           verbose-output: true
           enable-noobs: false
 
-      - uses: actions/upload-artifact@v4
+      - name: Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: pitemplog-image
-          path: ${{ github.workspace }}/pi-gen/deploy/image_[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-raspi-templog.img.gz
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: pitemplog-image-nousb
-          path: ${{ github.workspace }}/pi-gen/deploy/image_[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-raspi-templog-nousb.img.gz
+          files: ${{ github.workspace }}/pi-gen/deploy/*
