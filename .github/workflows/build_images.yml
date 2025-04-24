@@ -43,4 +43,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: pi-gen log and info files
-          path: ${{ github.workspace }}/pi-gen/deploy/*[!.img.gz]
+          path: |
+            ${{ github.workspace }}/pi-gen/deploy/*.info
+            ${{ github.workspace }}/pi-gen/deploy/*.log
