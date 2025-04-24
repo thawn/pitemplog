@@ -38,3 +38,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: ${{ github.workspace }}/pi-gen/deploy/*.img.gz
+
+      - name: Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pi-gen log and info files
+          path: ${{ github.workspace }}/pi-gen/deploy/!(*.img.gz)
