@@ -60,15 +60,12 @@ if [ "${LOCAL_SENSORS:-yes}" == "no" ]; then
 else
   cat /tmp/crontab_env "${target_dir}"_bin/crontab | crontab -u ${templog_user} -
 fi
-if [ ! -f /.dockerenv ]; then
-  #if we are not in a docker container, make sure necessary environment variables are set
-  echo "setting up environment variables for docker container"
-  sed -e 's/^/export /' /tmp/crontab_env > /etc/profile.d/pitemplog.sh
-fi
+echo "setting up environment variables for docker container"
+sed -e 's/^/export /' /tmp/crontab_env > /etc/profile.d/pitemplog.sh
+# add the environment variables to apache envvars so that php can access them
+cat /etc/profile.d/pitemplog.sh >> /etc/apache2/envvars
 # if the first argument is --no-restart-apache, we are done now
 if [ "$1" == "--no-restart-apache" ]; then
-  # image generation may happen in a docker container, make sure necessary environment variables are set anyways
-  sed -e 's/^/export /' /tmp/crontab_env > /etc/profile.d/pitemplog.sh
   echo "Image installation complete. Exiting now."
   exit 0
 fi
