@@ -1,11 +1,6 @@
 #!/bin/bash
 target_dir=${PITEMPLOG_DIR:-/usr/local/share/templog/}
 templog_user=${PT_USER:-pi}
-{
-  echo "PITEMPLOG_DIR=${target_dir}"
-  echo "PT_USER=${templog_user}" 
-} > /etc/default/pitemplog
-echo ". /etc/default/pitemplog" >> /etc/environment
 echo "Local sensors: $LOCAL_SENSORS"
 echo "Installing into: $target_dir"
 mkdir -p "$target_dir"
@@ -44,11 +39,15 @@ ln -s "${target_dir}"_bin/pitemplog_backup.sh /usr/local/bin/
 ln -s "${target_dir}"_bin/pitemplog_restore.sh /usr/local/bin/
 ln -s "${target_dir}"_bin/pitemplog.conf /etc/
 ln -s "${target_dir}"_sbin/pitemplog_partition_database.sh /usr/local/sbin/
-echo "configuring environment variables for database access"
-echo "DB_HOST=${DB_HOST:-localhost}" > /tmp/crontab_env
-echo "DB_DB=${DB_DB:-temperatures}" >> /tmp/crontab_env
-echo "DB_USER=${DB_USER:-temp}" >> /tmp/crontab_env
-echo "DB_PW=${DB_PW:-temp}" >> /tmp/crontab_env
+echo "configuring environment variables for cron jobs"
+{
+  echo "PITEMPLOG_DIR=${target_dir}"
+  echo "PT_USER=${templog_user}" 
+  echo "DB_HOST=${DB_HOST:-localhost}"
+  echo "DB_DB=${DB_DB:-temperatures}"
+  echo "DB_USER=${DB_USER:-temp}"
+  echo "DB_PW=${DB_PW:-temp}"
+} > /tmp/crontab_env
 cp /tmp/crontab_env /etc/systemd/system/partition_db.env
 echo "installing systemd timers and services"
 cp "${target_dir}"_sbin/*.timer /etc/systemd/system/
