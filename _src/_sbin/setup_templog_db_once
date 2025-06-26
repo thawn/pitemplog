@@ -22,7 +22,7 @@ fi
 
 case "$1" in
   start)
-    log_daemon_msg "Starting setup_templog_once" &&
+    log_daemon_msg "Starting setup_templog_db_once" &&
     mysql < "${PITEMPLOG_DIR}"/_bin/create_database.sql &&
     update-rc.d setup_templog_db_once remove &&
     rm /etc/init.d/setup_templog_db_once &&
