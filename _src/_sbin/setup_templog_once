@@ -11,10 +11,18 @@
 
 . /lib/lsb/init-functions
 
+# shellcheck source=env
+[ -f /etc/default/pitemplog ] && . /etc/default/pitemplog
+
+if [ -z "$PITEMPLOG_DIR" ] ;  then
+  echo "PITEMPLOG_DIR is not set, please set it in /etc/default/pitemplog" >&2
+  exit 1
+fi
+
 case "$1" in
   start)
     log_daemon_msg "Starting setup_templog_once" &&
-    /usr/local/share/templog/_bin/install.sh &&
+    "$PITEMPLOG_DIR"/_bin/install.sh &&
     update-rc.d setup_templog_once remove &&
     rm /etc/init.d/setup_templog_once &&
     log_end_msg $?
