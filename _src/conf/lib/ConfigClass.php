@@ -76,6 +76,7 @@ class ConfigClass {
 			$this->config_file = $config_file;
 		$this->sensordir = $_ENV['SENSOR_DIR'] ?: '/sys/bus/w1/devices/';
 		$this->pitemplog_dir = $_ENV['PITEMPLOG_DIR'] ?: '/usr/local/share/templog/';
+		$this->response->logger( 'PITEMPLOG_DIR: ' . $this->pitemplog_dir, FALSE, 3 );
 		if (file_exists( $this->config_file )) {
 			$conf = json_decode( file_get_contents( $this->config_file ), true );
 			$this->response->logger( 'Raw configuration from the config file', $conf, 3 );
@@ -547,7 +548,7 @@ class ConfigClass {
 		$sensors = [ ];
 		if (file_exists( $this->sensordir )) {
 			$dirs = scandir( $this->sensordir );
-			$this->response->logger( 'Sensor directories in' . $this->sensordir . ':', $dirs, 3 );
+			$this->response->logger( 'Sensor directories in ' . $this->sensordir . ':', $dirs, 3 );
 			foreach ( $dirs as $sensor ) {
 				if ($sensor != '.' && $sensor != '..' && $sensor != 'w1_bus_master1' && ! isset( $this->local_sensors[$sensor] )) {
 					$this->local_sensors[$sensor] = new LocalSensor( $this->response, $this->database, [ 
