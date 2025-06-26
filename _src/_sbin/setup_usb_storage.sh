@@ -49,7 +49,7 @@ case "\$1" in
       chmod 0700 /mnt/usb1/mysql
       mv "${PITEMPLOG_DIR%%/}" /mnt/usb1/templog
       chown -R ${PT_USER}:${PT_USER} /mnt/usb1/templog
-      sed -i "s|^PITEMPLOG_DIR=.*|PITEMPLOG_DIR=/mnt/usb1/templog|" /etc/default/pitemplog
+      sed -i "s|^PITEMPLOG_DIR=.*|PITEMPLOG_DIR=/mnt/usb1/templog/|" /etc/default/pitemplog
       #remove the old symlinks
       rm -f "$(python3 -m site | grep usr/local/lib | cut -d',' -f 1 | xargs)/pitemplog.py"
       rm -f /usr/local/bin/partition_database.py
@@ -61,12 +61,12 @@ case "\$1" in
       rm -f /etc/pitemplog.conf
       rm -f /usr/local/sbin/pitemplog_partition_database.sh
       #create new symlinks
-      ln -s /mnt/usb1/templog_bin/pitemplog.py "$(python3 -m site | grep usr/local/lib | cut -d',' -f 1 | xargs)"
-      ln -s /mnt/usb1/templog_bin/*.py /usr/local/bin/
-      ln -s /mnt/usb1/templog_bin/pitemplog_backup.sh /usr/local/bin/
-      ln -s /mnt/usb1/templog_bin/pitemplog_restore.sh /usr/local/bin/
-      ln -s /mnt/usb1/templog_sbin/pitemplog_partition_database.sh /usr/local/sbin/
-      ln -s /mnt/usb1/templog_sbin/pitemplog.conf /etc/
+      ln -s /mnt/usb1/templog/_bin/pitemplog.py "$(python3 -m site | grep usr/local/lib | cut -d',' -f 1 | xargs)"
+      ln -s /mnt/usb1/templog/_bin/*.py /usr/local/bin/
+      ln -s /mnt/usb1/templog/_bin/pitemplog_backup.sh /usr/local/bin/
+      ln -s /mnt/usb1/templog/_bin/pitemplog_restore.sh /usr/local/bin/
+      ln -s /mnt/usb1/templog/_sbin/pitemplog_partition_database.sh /usr/local/sbin/
+      ln -s /mnt/usb1/templog/_sbin/pitemplog.conf /etc/
       mv /var/log /mnt/usb1/var/
       ln -s /mnt/usb1/var/log /var/log
       cp /mnt/usb1/templog/_sbin/fstab /etc/
