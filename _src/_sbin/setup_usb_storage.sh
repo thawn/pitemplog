@@ -48,7 +48,6 @@ case "\$1" in
       chown -R mysql:mysql /mnt/usb1/mysql
       chmod 0700 /mnt/usb1/mysql
       mv "${PITEMPLOG_DIR%%/}" /mnt/usb1/templog
-      chown -R ${PT_USER}:${PT_USER} /mnt/usb1/templog
       sed -i "s|^export PITEMPLOG_DIR=.*|export PITEMPLOG_DIR=/mnt/usb1/templog/|" /etc/profile.d/pitemplog.sh
       sed -i "s|^PITEMPLOG_DIR=.*|PITEMPLOG_DIR=/mnt/usb1/templog/|" /etc/systemd/system/partition_db.env
       crontab -u ${PT_USER} -l | sed -i "s|^PITEMPLOG_DIR=.*|PITEMPLOG_DIR=/mnt/usb1/templog/|" crontab -u ${PT_USER} -
