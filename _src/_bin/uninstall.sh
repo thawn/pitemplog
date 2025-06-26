@@ -1,9 +1,9 @@
 #!/bin/bash
 www_dir=/var/www/html
-[ -f /etc/default/pitemplog ] && . /etc/default/pitemplog
+[ -f /etc/profile.d/pitemplog.sh ] && . /etc/profile.d/pitemplog.sh
 
 if [ -z "$VAR" ] ;  then
-  echo "VAR is not set, please set it in /etc/default/pitemplog" >&2
+  echo "VAR is not set, please set it in /etc/profile.d/pitemplog.sh" >&2
   exit 1
 fi
 sudo crontab -r

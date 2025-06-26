@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # shellcheck source=env
-[ -f /etc/default/pitemplog ] && . /etc/default/pitemplog
+[ -f /etc/profile.d/pitemplog.sh ] && . /etc/profile.d/pitemplog.sh
 
 if [ -z "$PITEMPLOG_DIR" ] ;  then
-  echo "PITEMPLOG_DIR is not set, please set it in /etc/default/pitemplog" >&2
+  echo "PITEMPLOG_DIR is not set, please set it in /etc/profile.d/pitemplog.sh" >&2
   exit 1
 fi
 
@@ -24,10 +24,10 @@ cat <<EOF > /etc/init.d/setup_usb &&
 . /lib/lsb/init-functions
 
 # shellcheck source=env
-[ -f /etc/default/pitemplog ] && . /etc/default/pitemplog
+[ -f /etc/profile.d/pitemplog.sh ] && . /etc/profile.d/pitemplog.sh
 
 if [ -z "\$PITEMPLOG_DIR" ] ;  then
-  echo "PITEMPLOG_DIR is not set, please set it in /etc/default/pitemplog" >&2
+  echo "PITEMPLOG_DIR is not set, please set it in /etc/profile.d/pitemplog.sh" >&2
   exit 1
 fi
 
@@ -49,7 +49,8 @@ case "\$1" in
       chmod 0700 /mnt/usb1/mysql
       mv "${PITEMPLOG_DIR%%/}" /mnt/usb1/templog
       chown -R ${PT_USER}:${PT_USER} /mnt/usb1/templog
-      sed -i "s|^PITEMPLOG_DIR=.*|PITEMPLOG_DIR=/mnt/usb1/templog/|" /etc/default/pitemplog
+      sed -i "s|^PITEMPLOG_DIR=.*|PITEMPLOG_DIR=/mnt/usb1/templog/|" /etc/profile.d/pitemplog.sh
+      sed -i "s|^PITEMPLOG_DIR=.*|PITEMPLOG_DIR=/mnt/usb1/templog/|" /etc/systemd/system/partition_db.env
       #remove the old symlinks
       rm -f "$(python3 -m site | grep usr/local/lib | cut -d',' -f 1 | xargs)/pitemplog.py"
       rm -f /usr/local/bin/partition_database.py

@@ -12,10 +12,10 @@
 . /lib/lsb/init-functions
 
 # shellcheck source=env
-[ -f /etc/default/pitemplog ] && . /etc/default/pitemplog
+[ -f /etc/profile.d/pitemplog.sh ] && . /etc/profile.d/pitemplog.sh
 
 if [ -z "$PITEMPLOG_DIR" ] ;  then
-  echo "PITEMPLOG_DIR is not set, please set it in /etc/default/pitemplog" >&2
+  echo "PITEMPLOG_DIR is not set, please set it in /etc/profile.d/pitemplog.sh" >&2
   exit 1
 fi
 
