@@ -12,13 +12,13 @@ RUN set -x \
   && useradd -mUs /bin/bash pi \
   && service cron start
 
-ARG INSTALL_DIR_ARG=/usr/local/share/templog/
-ENV LOCAL_SENSORS=no INSTALL_DIR=$INSTALL_DIR_ARG
+ARG PITEMPLOG_DIR_ARG=/usr/local/share/templog/
+ENV LOCAL_SENSORS=no PITEMPLOG_DIR=$PITEMPLOG_DIR_ARG
 ENV DB_HOST=mariadb DB_DB=temperatures DB_USER=temp DB_PW=temp
-COPY build $INSTALL_DIR
-RUN chmod a+x "${INSTALL_DIR_ARG}/_bin/install.sh" \
-  && ln -s "${INSTALL_DIR_ARG}/_bin/install.sh" /usr/local/bin/pitemplog_entrypoint
-VOLUME ["$INSTALL_DIR"]
+COPY build $PITEMPLOG_DIR
+RUN chmod a+x "${PITEMPLOG_DIR_ARG}/_bin/install.sh" \
+  && ln -s "${PITEMPLOG_DIR_ARG}/_bin/install.sh" /usr/local/bin/pitemplog_entrypoint
+VOLUME ["$PITEMPLOG_DIR"]
 WORKDIR /home/pi
 
 ENTRYPOINT ["pitemplog_entrypoint"]

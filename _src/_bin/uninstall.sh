@@ -1,9 +1,15 @@
 #!/bin/bash
 www_dir=/var/www/html
+[ -f /etc/default/pitemplog ] && . /etc/default/pitemplog
+
+if [ -z "$VAR" ] ;  then
+  echo "VAR is not set, please set it in /etc/default/pitemplog" >&2
+  exit 1
+fi
 sudo crontab -r
 sudo -u pi crontab -r
-/usr/local/share/templog/_data/uninstall_pages.py
-sudo rm -r /usr/local/share/templog
+"${PITEMPLOG_DIR}"_data/uninstall_pages.py
+sudo rm -r "${PITEMPLOG_DIR}"
 sudo rm -r "${www_dir}"/assets
 sudo rm -r "${www_dir}"/conf
 sudo rm -r "${www_dir}"/data.php

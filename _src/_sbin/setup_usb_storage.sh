@@ -1,5 +1,14 @@
 #!/bin/bash
-read -p "This will overwrite all data on /dev/sda1 during the next boot! Press Enter to continue; press ctrl+c to cancel"
+
+# shellcheck source=env
+[ -f /etc/default/pitemplog ] && . /etc/default/pitemplog
+
+if [ -z "$PITEMPLOG_DIR" ] ;  then
+  echo "PITEMPLOG_DIR is not set, please set it in /etc/default/pitemplog" >&2
+  exit 1
+fi
+
+read -rp "This will overwrite all data on /dev/sda1 during the next boot! Press Enter to continue; press ctrl+c to cancel"
 cat <<EOF > /etc/init.d/setup_usb &&
 #!/bin/sh
 ### BEGIN INIT INFO
@@ -32,14 +41,14 @@ case "\$1" in
       chmod 0700 /mnt/usb1/mysql
       mv /var/log /mnt/usb1/var/
       ln -s /mnt/usb1/var/log /var/log
-      cp /usr/local/share/templog/_sbin/fstab /etc/
+      cp "${PITEMPLOG_DIR}"/_sbin/fstab /etc/
       chown root:root /etc/fstab
       chmod 0644 /etc/fstab
-      cp /usr/local/share/templog/_sbin/datadir.cnf /etc/mysql/mariadb.conf.d/
+      cp "${PITEMPLOG_DIR}"/_sbin/datadir.cnf /etc/mysql/mariadb.conf.d/
       chown root:root /etc/mysql/mariadb.conf.d/datadir.cnf
       chmod 0644 /etc/mysql/mariadb.conf.d/datadir.cnf
       dphys-swapfile uninstall
-      cp /usr/local/share/templog/_sbin/dphys-swapfile /etc/
+      cp "${PITEMPLOG_DIR}"/_sbin/dphys-swapfile /etc/
       chown root:root /etc/dphys-swapfile
       chmod 0644 /etc/dphys-swapfile
       dphys-swapfile install

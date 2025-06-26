@@ -1,0 +1,3 @@
+# pitemplog installattion path
+PITEMPLOG_DIR=/usr/local/share/templog/
+PT_USER=pi

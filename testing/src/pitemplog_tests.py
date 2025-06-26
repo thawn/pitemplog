@@ -329,11 +329,11 @@ class APIBaseClass(unittest.TestCase):
         cleanup_tmp()
         reset_conf_database(config_file='lib/config_local_sensors.json', sql_file=None)
         self.pi = pitemplog.PiTempLogConf()
-        execute_source_file('/usr/local/share/templog/_data/uninstall_pages.py')
+        execute_source_file(os.environ.get("PITEMPLOG_DIR") + "_data/uninstall_pages.py")
 
     def tearDown(self):
         db_tear_down(self)
-        execute_source_file('/usr/local/share/templog/_data/uninstall_pages.py')
+        execute_source_file(os.environ.get("PITEMPLOG_DIR") + "_data/uninstall_pages.py")
 
     def _get_api(self, get_vars):
         url = self.url + '?' + get_vars
@@ -652,8 +652,15 @@ class TestConfAPI(APIBaseClass):
 
     def _assert_page_created(self, sensor_data):
         import datetime
-        self.assertTrue(os.path.isfile('/usr/local/share/templog/{category}/_posts/{filename}'.format(
-            category=sensor_data["category"], filename=pitemplog.get_sensor_page_filename(sensor_data["table"]))), 'source html page not found')
+        self.assertTrue(
+            os.path.isfile(
+                os.environ.get("PITEMPLOG_DIR")
+                + "{category}/_posts/{filename}".format(
+                    category=sensor_data["category"], filename=pitemplog.get_sensor_page_filename(sensor_data["table"])
+                )
+            ),
+            "source html page not found",
+        )
         self.assertTrue(os.path.isfile('/var/www/html/{category}/{date}/{table}-temperatures.html'.format(
             category=sensor_data["category"], date=datetime.date.today().strftime('%Y/%m/%d'), table=sensor_data["table"]).lower()), 'final html page not found')
 
@@ -822,7 +829,7 @@ def reset_conf_database(config_file='lib/config.json', sql_file='lib/create_data
     if config_file:
         from shutil import copyfile
         copyfile(config_file, '/var/www/html/conf/config.json')
-        copyfile(config_file, '/usr/local/share/templog/_data/config.json')
+        copyfile(config_file, os.environ.get("PITEMPLOG_DIR") + "_data/config.json")
     if sql_file:
         apply_sql_file(sql_file)
 

@@ -1,6 +1,11 @@
 #!/bin/bash
-target_dir=${INSTALL_DIR:-/usr/local/share/templog/}
+target_dir=${PITEMPLOG_DIR:-/usr/local/share/templog/}
 templog_user=${PT_USER:-pi}
+{
+  echo "PITEMPLOG_DIR=${target_dir}"
+  echo "PT_USER=${templog_user}" 
+} > /etc/default/pitemplog
+echo ". /etc/default/pitemplog" >> /etc/environment
 echo "Local sensors: $LOCAL_SENSORS"
 echo "Installing into: $target_dir"
 mkdir -p "$target_dir"
