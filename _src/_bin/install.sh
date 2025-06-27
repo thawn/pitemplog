@@ -64,6 +64,8 @@ echo "setting up environment variables for docker container"
 sed -e 's/^/export /' /tmp/crontab_env > /etc/profile.d/pitemplog.sh
 # add the environment variables to apache envvars so that php can access them
 cat /etc/profile.d/pitemplog.sh >> /etc/apache2/envvars
+# enable $_ENV in php
+echo 'variables_order = "EGPCS"' > /etc/php/8.2/apache2/conf.d/90-pitemplog.ini
 # if the first argument is --no-restart-apache, we are done now
 if [ "$1" == "--no-restart-apache" ]; then
   echo "Image installation complete. Exiting now."
