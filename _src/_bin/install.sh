@@ -28,7 +28,7 @@ if ! [ -e /usr/local/bin/jekyll ]; then
   ln -s /usr/bin/jekyll /usr/local/bin/jekyll
 fi
 cp /lib/systemd/system/apache2.service /etc/systemd/system/apache2.service
-sed -i '9i EnvironmentFile=-/etc/systemd/system/partition_db.env' /etc/systemd/system/apache2.service
+sed -i '9i EnvironmentFile=-/etc/systemd/system/pitemplog.env' /etc/systemd/system/apache2.service
 systemctl daemon-reload
 systemctl disable apache2.service
 systemctl enable apache2.service
@@ -55,7 +55,7 @@ echo "configuring environment variables for cron jobs"
   echo "DB_USER=${DB_USER:-temp}"
   echo "DB_PW=${DB_PW:-temp}"
 } > /tmp/crontab_env
-cp /tmp/crontab_env /etc/systemd/system/partition_db.env
+cp /tmp/crontab_env /etc/systemd/system/pitemplog.env
 echo "installing systemd timers and services"
 cp "${target_dir}"_sbin/*.timer /etc/systemd/system/
 cp "${target_dir}"_sbin/*.service /etc/systemd/system/

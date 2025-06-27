@@ -49,7 +49,7 @@ case "\$1" in
       chmod 0700 /mnt/usb1/mysql
       mv "${PITEMPLOG_DIR%%/}" /mnt/usb1/templog
       sed -i "s|^export PITEMPLOG_DIR=.*|export PITEMPLOG_DIR=/mnt/usb1/templog/|" /etc/profile.d/pitemplog.sh
-      sed -i "s|^PITEMPLOG_DIR=.*|PITEMPLOG_DIR=/mnt/usb1/templog/|" /etc/systemd/system/partition_db.env
+      sed -i "s|^PITEMPLOG_DIR=.*|PITEMPLOG_DIR=/mnt/usb1/templog/|" /etc/systemd/system/pitemplog.env
       crontab -u ${PT_USER} -l | sed -i "s|^PITEMPLOG_DIR=.*|PITEMPLOG_DIR=/mnt/usb1/templog/|" crontab -u ${PT_USER} -
       #remove the old symlinks
       rm -f "$(python3 -m site | grep usr/local/lib | cut -d',' -f 1 | xargs)/pitemplog.py"
