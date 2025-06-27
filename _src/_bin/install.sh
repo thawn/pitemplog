@@ -27,6 +27,13 @@ ln -s /etc/apache2/sites-available/templog.conf /etc/apache2/sites-enabled/0000-
 if ! [ -e /usr/local/bin/jekyll ]; then
   ln -s /usr/bin/jekyll /usr/local/bin/jekyll
 fi
+cp /lib/systemd/system/apache2.service /etc/systemd/system/apache2.service
+sed -i '9i EnvironmentFile=-/etc/systemd/system/partition_db.env' /etc/systemd/system/apache2.service
+systemctl daemon-reload
+systemctl disable apache2.service
+systemctl enable apache2.service
+# enable $_ENV in php
+echo 'variables_order = "EGPCS"' > /etc/php/8.2/apache2/conf.d/90-pitemplog.ini
 echo "installing pitemplog.py into $(python3 -m site | grep usr/local/lib | cut -d',' -f 1 | xargs)"
 ln -s "${target_dir}"_bin/pitemplog.py "$(python3 -m site | grep usr/local/lib | cut -d',' -f 1 | xargs)"
 echo "setting up html pages"
@@ -62,10 +69,6 @@ else
 fi
 echo "setting up environment variables for docker container"
 sed -e 's/^/export /' /tmp/crontab_env > /etc/profile.d/pitemplog.sh
-# add the environment variables to apache envvars so that php can access them
-cat /etc/profile.d/pitemplog.sh >> /etc/apache2/envvars
-# enable $_ENV in php
-echo 'variables_order = "EGPCS"' > /etc/php/8.2/apache2/conf.d/90-pitemplog.ini
 # if the first argument is --no-restart-apache, we are done now
 if [ "$1" == "--no-restart-apache" ]; then
   echo "Image installation complete. Exiting now."
