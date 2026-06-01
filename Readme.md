@@ -151,7 +151,7 @@ Jump directly to:
 1. Install required packages: `sudo apt-get install mariadb-server apache2 php php-mysql php-curl python3-mysqldb python3-yaml grunt npm git`
 1. In Debian, jekyll depends on xdg-utils which in turn recommends to install the x-server, which in our case is totally unnecessary. Therefore we install jekyll with the *--no-install-recommends* option: `sudo apt-get install jekyll --no-install-recommends`
 1. Delete the symlink to the default apache configuration: `sudo rm /etc/apache2/sites-enabled/000-default.conf`
-1. Clone the git repository: `git clone --depth=1 https://gitlab.com/Thawn/pitemplog.git`
+1. Clone the git repository: `git clone --depth=1 https://github.com/thawn/pitemplog.git`
 1. Enter the source directory: `cd temperatures`
 1. Install the required node modules: `npm install`
 1. Compile and install the temperature logger and web frontend: `grunt install`
