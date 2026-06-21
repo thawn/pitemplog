@@ -3,7 +3,8 @@ module.exports = function (grunt) {
   var hostname = grunt.option('host') || 'diez-templog-1';
   var basedir = grunt.option('basedir') || '';
   var imagefile = grunt.option('image') || '';
-  var installdir = basedir+'/usr/local/share/templog';
+  var installdir = grunt.option('installdir') || '/usr/local/share/templog';
+  var installdir = basedir + installdir;
 
   return {
     build: {
@@ -85,8 +86,20 @@ module.exports = function (grunt) {
     docker_compose_test_down: {
       cmd: 'docker-compose -f ./testing/docker-compose.yml down -v'
     },
+    docker_compose_test_folder: {
+      cmd: [
+        'chmod a+x build/_bin/install.sh',
+        'docker-compose -f ./testing/docker-compose-folder.yml up -d'
+      ].join('&&')
+    },
+    docker_compose_test_folder_down: {
+      cmd: 'docker-compose -f ./testing/docker-compose-folder.yml down -v'
+    },
     run_tests: {
-      cmd: 'sleep 10 && docker exec testing-pitemplog-1 python3 -m unittest pitemplog_tests.py -v'
+      cmd: [
+        'sleep 10',
+        'docker exec testing-pitemplog-1 python3 -m unittest pitemplog_tests.py -v'
+      ].join('&&')
     },
     uninstall: {
       cmd: [

@@ -47,6 +47,11 @@ class ConfigClass {
 	 *
 	 * @var string
 	 */
+	protected $pitemplog_dir = '/usr/local/share/templog/';
+	/**
+	 *
+	 * @var string
+	 */
 	protected $config_file = 'config.json';
 	/**
 	 *
@@ -70,6 +75,8 @@ class ConfigClass {
 		if ($config_file)
 			$this->config_file = $config_file;
 		$this->sensordir = $_ENV['SENSOR_DIR'] ?: '/sys/bus/w1/devices/';
+		$this->pitemplog_dir = $_ENV['PITEMPLOG_DIR'] ?: '/usr/local/share/templog/';
+		$this->response->logger( 'PITEMPLOG_DIR: ' . $this->pitemplog_dir, FALSE, 3 );
 		if (file_exists( $this->config_file )) {
 			$conf = json_decode( file_get_contents( $this->config_file ), true );
 			$this->response->logger( 'Raw configuration from the config file', $conf, 3 );
@@ -338,7 +345,7 @@ class ConfigClass {
 			file_put_contents( $this->config_file, json_encode( $this, JSON_UNESCAPED_SLASHES ), LOCK_EX );
 			$this->config_changed = FALSE;
 			$local_conf = escapeshellarg( $this->config_file );
-			$build_conf = escapeshellarg( '/usr/local/share/templog/_data/config.json' );
+			$build_conf = escapeshellarg( $this->pitemplog_dir . '_data/config.json' );
 			$diff = escapeshellcmd( '/usr/bin/diff -q ' . $build_conf . ' ' . $local_conf );
 			$diff_output = shell_exec( $diff );
 			$this->response->logger( 'Checking for difference between old and new configuration:', $diff_output, 3 );
@@ -369,12 +376,12 @@ class ConfigClass {
 	 */
 	public function create_pages() {
 		$this->response->logger( 'Attempting to create pages:', FALSE, 3 );
-		$create_pages = escapeshellcmd( '/usr/bin/python3 /usr/local/share/templog/_data/create_pages.py' );
+		$create_pages = escapeshellcmd( '/usr/bin/python3 ' . $this->pitemplog_dir . '_data/create_pages.py' );
 		$create_pages .= ' 2>&1';
 		$create_output = shell_exec( $create_pages );
 		$this->response->logger( 'Created pages:', $create_output, 1 );
 		$jekyll = escapeshellcmd( 'jekyll build' );
-		$cd = escapeshellcmd( 'cd /usr/local/share/templog/' );
+		$cd = escapeshellcmd( 'cd '. $this->pitemplog_dir);
 		$jekyllcmd = $cd . '&&' . $jekyll . ' 2>&1';
 		$jekyll_ouptut = shell_exec( $jekyllcmd );
 		$this->response->logger( 'Updated Site:', $jekyll_ouptut, 1 );
@@ -541,7 +548,7 @@ class ConfigClass {
 		$sensors = [ ];
 		if (file_exists( $this->sensordir )) {
 			$dirs = scandir( $this->sensordir );
-			$this->response->logger( 'Sensor directories in' . $this->sensordir . ':', $dirs, 3 );
+			$this->response->logger( 'Sensor directories in ' . $this->sensordir . ':', $dirs, 3 );
 			foreach ( $dirs as $sensor ) {
 				if ($sensor != '.' && $sensor != '..' && $sensor != 'w1_bus_master1' && ! isset( $this->local_sensors[$sensor] )) {
 					$this->local_sensors[$sensor] = new LocalSensor( $this->response, $this->database, [ 

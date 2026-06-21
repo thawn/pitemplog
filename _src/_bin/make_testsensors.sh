@@ -11,5 +11,5 @@ rm "${sensordir}"/w1_slave
 chown -R www-data /tmp/devices/
 echo "export SENSOR_DIR=$SENSOR_DIR" > /etc/profile.d/sensors.sh
 echo "SENSOR_DIR=$SENSOR_DIR" > /tmp/crontab_env
-cat "${INSTALL_DIR}_bin/crontab" >> /tmp/crontab_env
-mv /tmp/crontab_env "${INSTALL_DIR}_bin/crontab"
+cat "${PITEMPLOG_DIR}_bin/crontab" >> /tmp/crontab_env
+mv /tmp/crontab_env "${PITEMPLOG_DIR}_bin/crontab"

@@ -1,5 +1,14 @@
 #!/bin/bash
-read -p "This will overwrite all data on /dev/sda1 during the next boot! Press Enter to continue; press ctrl+c to cancel"
+
+# shellcheck source=env
+[ -f /etc/profile.d/pitemplog.sh ] && . /etc/profile.d/pitemplog.sh
+
+if [ -z "$PITEMPLOG_DIR" ] ;  then
+  echo "PITEMPLOG_DIR is not set, please set it in /etc/profile.d/pitemplog.sh" >&2
+  exit 1
+fi
+
+read -rp "This will overwrite all data on /dev/sda1 during the next boot! Press Enter to continue; press ctrl+c to cancel"
 cat <<EOF > /etc/init.d/setup_usb &&
 #!/bin/sh
 ### BEGIN INIT INFO
@@ -13,6 +22,14 @@ cat <<EOF > /etc/init.d/setup_usb &&
 ### END INIT INFO
 
 . /lib/lsb/init-functions
+
+# shellcheck source=env
+[ -f /etc/profile.d/pitemplog.sh ] && . /etc/profile.d/pitemplog.sh
+
+if [ -z "\$PITEMPLOG_DIR" ] ;  then
+  echo "PITEMPLOG_DIR is not set, please set it in /etc/profile.d/pitemplog.sh" >&2
+  exit 1
+fi
 
 case "\$1" in
   start)
@@ -30,16 +47,37 @@ case "\$1" in
       mv /var/lib/mysql /mnt/usb1/
       chown -R mysql:mysql /mnt/usb1/mysql
       chmod 0700 /mnt/usb1/mysql
+      mv "${PITEMPLOG_DIR%%/}" /mnt/usb1/templog
+      sed -i "s|^export PITEMPLOG_DIR=.*|export PITEMPLOG_DIR=/mnt/usb1/templog/|" /etc/profile.d/pitemplog.sh
+      sed -i "s|^PITEMPLOG_DIR=.*|PITEMPLOG_DIR=/mnt/usb1/templog/|" /etc/systemd/system/pitemplog.env
+      crontab -u ${PT_USER} -l | sed -i "s|^PITEMPLOG_DIR=.*|PITEMPLOG_DIR=/mnt/usb1/templog/|" crontab -u ${PT_USER} -
+      #remove the old symlinks
+      rm -f "$(python3 -m site | grep usr/local/lib | cut -d',' -f 1 | xargs)/pitemplog.py"
+      rm -f /usr/local/bin/partition_database.py
+      rm -f /usr/local/bin/reset_aggregates.py
+      rm -f /usr/local/bin/tempaggregate.py
+      rm -f /usr/local/bin/templog.py
+      rm -f /usr/local/bin/pitemplog_backup.sh
+      rm -f /usr/local/bin/pitemplog_restore.sh
+      rm -f /etc/pitemplog.conf
+      rm -f /usr/local/sbin/pitemplog_partition_database.sh
+      #create new symlinks
+      ln -s /mnt/usb1/templog/_bin/pitemplog.py "$(python3 -m site | grep usr/local/lib | cut -d',' -f 1 | xargs)"
+      ln -s /mnt/usb1/templog/_bin/*.py /usr/local/bin/
+      ln -s /mnt/usb1/templog/_bin/pitemplog_backup.sh /usr/local/bin/
+      ln -s /mnt/usb1/templog/_bin/pitemplog_restore.sh /usr/local/bin/
+      ln -s /mnt/usb1/templog/_sbin/pitemplog_partition_database.sh /usr/local/sbin/
+      ln -s /mnt/usb1/templog/_sbin/pitemplog.conf /etc/
       mv /var/log /mnt/usb1/var/
       ln -s /mnt/usb1/var/log /var/log
-      cp /usr/local/share/templog/_sbin/fstab /etc/
+      cp /mnt/usb1/templog/_sbin/fstab /etc/
       chown root:root /etc/fstab
       chmod 0644 /etc/fstab
-      cp /usr/local/share/templog/_sbin/datadir.cnf /etc/mysql/mariadb.conf.d/
+      cp /mnt/usb1/templog/_sbin/datadir.cnf /etc/mysql/mariadb.conf.d/
       chown root:root /etc/mysql/mariadb.conf.d/datadir.cnf
       chmod 0644 /etc/mysql/mariadb.conf.d/datadir.cnf
       dphys-swapfile uninstall
-      cp /usr/local/share/templog/_sbin/dphys-swapfile /etc/
+      cp /mnt/usb1/templog/_sbin/dphys-swapfile /etc/
       chown root:root /etc/dphys-swapfile
       chmod 0644 /etc/dphys-swapfile
       dphys-swapfile install

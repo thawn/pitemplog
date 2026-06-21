@@ -1,5 +1,5 @@
 #!/bin/bash
-target_dir=${INSTALL_DIR:-/usr/local/share/templog/}
+target_dir=${PITEMPLOG_DIR:-/usr/local/share/templog/}
 templog_user=${PT_USER:-pi}
 echo "Local sensors: $LOCAL_SENSORS"
 echo "Installing into: $target_dir"
@@ -27,6 +27,13 @@ ln -s /etc/apache2/sites-available/templog.conf /etc/apache2/sites-enabled/0000-
 if ! [ -e /usr/local/bin/jekyll ]; then
   ln -s /usr/bin/jekyll /usr/local/bin/jekyll
 fi
+cp /lib/systemd/system/apache2.service /etc/systemd/system/apache2.service
+sed -i '9i EnvironmentFile=-/etc/systemd/system/pitemplog.env' /etc/systemd/system/apache2.service
+systemctl daemon-reload
+systemctl disable apache2.service
+systemctl enable apache2.service
+# enable $_ENV in php
+echo 'variables_order = "EGPCS"' > /etc/php/8.2/apache2/conf.d/90-pitemplog.ini
 echo "installing pitemplog.py into $(python3 -m site | grep usr/local/lib | cut -d',' -f 1 | xargs)"
 ln -s "${target_dir}"_bin/pitemplog.py "$(python3 -m site | grep usr/local/lib | cut -d',' -f 1 | xargs)"
 echo "setting up html pages"
@@ -39,12 +46,16 @@ ln -s "${target_dir}"_bin/pitemplog_backup.sh /usr/local/bin/
 ln -s "${target_dir}"_bin/pitemplog_restore.sh /usr/local/bin/
 ln -s "${target_dir}"_bin/pitemplog.conf /etc/
 ln -s "${target_dir}"_sbin/pitemplog_partition_database.sh /usr/local/sbin/
-echo "configuring environment variables for database access"
-echo "DB_HOST=${DB_HOST:-localhost}" > /tmp/crontab_env
-echo "DB_DB=${DB_DB:-temperatures}" >> /tmp/crontab_env
-echo "DB_USER=${DB_USER:-temp}" >> /tmp/crontab_env
-echo "DB_PW=${DB_PW:-temp}" >> /tmp/crontab_env
-cp /tmp/crontab_env /etc/systemd/system/partition_db.env
+echo "configuring environment variables for cron jobs"
+{
+  echo "PITEMPLOG_DIR=${target_dir}"
+  echo "PT_USER=${templog_user}" 
+  echo "DB_HOST=${DB_HOST:-localhost}"
+  echo "DB_DB=${DB_DB:-temperatures}"
+  echo "DB_USER=${DB_USER:-temp}"
+  echo "DB_PW=${DB_PW:-temp}"
+} > /tmp/crontab_env
+cp /tmp/crontab_env /etc/systemd/system/pitemplog.env
 echo "installing systemd timers and services"
 cp "${target_dir}"_sbin/*.timer /etc/systemd/system/
 cp "${target_dir}"_sbin/*.service /etc/systemd/system/
@@ -56,15 +67,10 @@ if [ "${LOCAL_SENSORS:-yes}" == "no" ]; then
 else
   cat /tmp/crontab_env "${target_dir}"_bin/crontab | crontab -u ${templog_user} -
 fi
-if [ ! -f /.dockerenv ]; then
-  #if we are not in a docker container, make sure necessary environment variables are set
-  echo "setting up environment variables for docker container"
-  sed -e 's/^/export /' /tmp/crontab_env > /etc/profile.d/pitemplog.sh
-fi
+echo "setting up environment variables for docker container"
+sed -e 's/^/export /' /tmp/crontab_env > /etc/profile.d/pitemplog.sh
 # if the first argument is --no-restart-apache, we are done now
 if [ "$1" == "--no-restart-apache" ]; then
-  # image generation may happen in a docker container, make sure necessary environment variables are set anyways
-  sed -e 's/^/export /' /tmp/crontab_env > /etc/profile.d/pitemplog.sh
   echo "Image installation complete. Exiting now."
   exit 0
 fi
